@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: test_db
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - 8080:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
