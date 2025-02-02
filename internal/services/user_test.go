@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
 	"github.com/wisaitas/standard-golang/internal/mocks"
 	"github.com/wisaitas/standard-golang/internal/services"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestCreateUser(t *testing.T) {

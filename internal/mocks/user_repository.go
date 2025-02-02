@@ -44,3 +44,8 @@ func (m *MockUserRepository) Delete(item *models.User) error {
 	args := m.Called(item)
 	return args.Error(0)
 }
+
+func (m *MockUserRepository) GetBy(field string, value string, item *models.User) error {
+	args := m.Called(field, value, item)
+	return args.Error(0)
+}

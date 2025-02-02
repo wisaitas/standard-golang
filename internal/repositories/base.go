@@ -9,6 +9,7 @@ import (
 
 type BaseRepository[T any] interface {
 	GetAll(items *[]T, pagination *request.PaginationParam) error
+	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
 	Create(item *T) error
 	Updates(item *T) error
@@ -31,6 +32,10 @@ func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationPar
 		return r.db.Offset(*pagination.Page).Limit(*pagination.PageSize).Find(items).Error
 	}
 	return r.db.Find(items).Error
+}
+
+func (r *baseRepository[T]) GetBy(field string, value string, item *T) error {
+	return r.db.Where(field+" = ?", value).First(item).Error
 }
 
 func (r *baseRepository[T]) GetById(id uuid.UUID, item *T) error {

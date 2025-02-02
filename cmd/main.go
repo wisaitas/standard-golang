@@ -1,15 +1,11 @@
 package main
 
-import (
-	"github.com/wisaitas/standard-golang/internal/configs"
-)
-
-func init() {
-	configs.LoadEnv()
-}
+import "github.com/wisaitas/standard-golang/internal/initial"
 
 func main() {
-	app := configs.InitializeApp()
+	app := initial.InitializeApp()
+
+	app.SetupMiddlewares()
 
 	app.SetupRoutes()
 

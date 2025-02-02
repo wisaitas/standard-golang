@@ -1,4 +1,4 @@
-package configs
+package initial
 
 import (
 	"fmt"
@@ -7,7 +7,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/wisaitas/standard-golang/internal/configs"
 	"github.com/wisaitas/standard-golang/internal/handlers"
+	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
 	"github.com/wisaitas/standard-golang/internal/repositories"
 	"github.com/wisaitas/standard-golang/internal/routes"
 	"github.com/wisaitas/standard-golang/internal/services"
@@ -17,6 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func init() {
+	configs.LoadEnv()
+}
+
 type App struct {
 	App    *fiber.App
 	DB     *gorm.DB
@@ -25,28 +31,34 @@ type App struct {
 
 func InitializeApp() *App {
 	app := fiber.New()
-	db := ConnectDB()
+	db := configs.ConnectDB()
 
 	// Initialize repositories
 	userRepository := repositories.NewUserRepository(db)
 
 	// Initialize services
 	userService := services.NewUserService(userRepository)
+	authService := services.NewAuthService(userRepository)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
+	authHandler := handlers.NewAuthHandler(authService)
 
 	// Initialize validates
 	userValidate := validates.NewUserValidate()
+	authValidate := validates.NewAuthValidate()
 
 	// Initialize routes
-	userRoutes := routes.NewUserRoutes(app, userHandler, userValidate)
+	apiRoutes := app.Group("/api/v1")
+	userRoutes := routes.NewUserRoutes(apiRoutes, userHandler, userValidate)
+	authRoutes := routes.NewAuthRoutes(apiRoutes, authHandler, authValidate)
 
 	return &App{
 		App: app,
 		DB:  db,
 		routes: func() {
 			userRoutes.UserRoutes()
+			authRoutes.AuthRoutes()
 		},
 	}
 }
@@ -57,7 +69,7 @@ func (r *App) SetupRoutes() {
 
 func (r *App) Run() {
 	go func() {
-		if err := r.App.Listen(fmt.Sprintf(":%s", ENV.PORT)); err != nil {
+		if err := r.App.Listen(fmt.Sprintf(":%s", configs.ENV.PORT)); err != nil {
 			log.Fatalf("error starting server: %v\n", err)
 		}
 	}()
@@ -78,4 +90,13 @@ func (r *App) close() {
 	if err := sqlDB.Close(); err != nil {
 		log.Fatalf("error closing database: %v\n", err)
 	}
+}
+
+func (r *App) SetupMiddlewares() {
+	r.App.Use(
+		middlewareConfigs.Limiter(),
+		middlewareConfigs.CORS(),
+		middlewareConfigs.Healthz(),
+		middlewareConfigs.Logger(),
+	)
 }
