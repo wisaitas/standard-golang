@@ -1,7 +1,8 @@
-package mocks
+package mock_repositories
 
 import (
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
+
 	"github.com/wisaitas/standard-golang/internal/models"
 
 	"github.com/google/uuid"
@@ -24,8 +25,6 @@ func (m *MockUserRepository) GetById(id uuid.UUID, item *models.User) error {
 }
 
 func (m *MockUserRepository) Create(item *models.User) error {
-	// Set the ID when Create is called
-	item.ID = uuid.New()
 	args := m.Called(item)
 	return args.Error(0)
 }

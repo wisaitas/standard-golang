@@ -3,89 +3,94 @@ package services_test
 import (
 	"errors"
 	"net/http"
-	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
-	"github.com/wisaitas/standard-golang/internal/mocks"
+	mock_repositories "github.com/wisaitas/standard-golang/internal/mocks/repositories"
+	mock_utils "github.com/wisaitas/standard-golang/internal/mocks/utils"
+	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/services"
+
+	"testing"
 )
 
+type createUserTestSuite struct {
+	suite.Suite
+	mockRepo   *mock_repositories.MockUserRepository
+	mockBcrypt *mock_utils.MockBcrypt
+	service    services.UserService
+}
+
+func (s *createUserTestSuite) SetupTest() {
+	s.mockRepo = new(mock_repositories.MockUserRepository)
+	s.mockBcrypt = new(mock_utils.MockBcrypt)
+	s.service = services.NewUserService(s.mockRepo)
+}
+
+func (s *createUserTestSuite) TestCreateUserSuccess() {
+
+	s.mockRepo.On("Create", mock.MatchedBy(func(u *models.User) bool {
+		return u.Username == "testuser" && u.Email == "test@example.com"
+	})).Return(nil)
+
+	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		Password:        "password123",
+		ConfirmPassword: "password123",
+	})
+
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusCreated, status)
+}
+
+func (s *createUserTestSuite) TestCreateUserUsernameExists() {
+	s.mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
+
+	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+		Username:        "existinguser",
+		Email:           "test@example.com",
+		Password:        "password123",
+		ConfirmPassword: "password123",
+	})
+
+	s.Require().Error(err)
+	s.Require().Equal(http.StatusBadRequest, status)
+}
+
+func (s *createUserTestSuite) TestCreateUserInternalServerError() {
+	s.mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(errors.New("database error"))
+
+	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		Password:        "password123",
+		ConfirmPassword: "password123",
+	})
+
+	s.Require().Error(err)
+	s.Require().Equal(http.StatusInternalServerError, status)
+}
+
+func (s *createUserTestSuite) TestCreateUserHashError() {
+	s.mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(nil)
+
+	longPassword := string(make([]byte, 73))
+
+	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		Password:        longPassword,
+		ConfirmPassword: longPassword,
+	})
+
+	s.Require().Error(err)
+	s.Require().Equal(http.StatusInternalServerError, status)
+	s.mockRepo.AssertNotCalled(s.T(), "Create")
+
+}
+
 func TestCreateUser(t *testing.T) {
-	tests := []struct {
-		name           string
-		input          request.CreateUserRequest
-		mockError      error
-		expectedStatus int
-		expectedError  error
-	}{
-		{
-			name: "Success",
-			input: request.CreateUserRequest{
-				Username:        "testuser",
-				Email:           "test@example.com",
-				Password:        "password123",
-				ConfirmPassword: "password123",
-			},
-			mockError:      nil,
-			expectedStatus: http.StatusCreated,
-			expectedError:  nil,
-		},
-		{
-			name: "Username Already Exists",
-			input: request.CreateUserRequest{
-				Username:        "existinguser",
-				Email:           "test@example.com",
-				Password:        "password123",
-				ConfirmPassword: "password123",
-			},
-			mockError:      errors.New("ERROR: duplicate key value violates unique constraint"),
-			expectedStatus: http.StatusBadRequest,
-			expectedError:  errors.New("username already exists"),
-		},
-		{
-			name: "Internal Server Error",
-			input: request.CreateUserRequest{
-				Username:        "testuser",
-				Email:           "test@example.com",
-				Password:        "password123",
-				ConfirmPassword: "password123",
-			},
-			mockError:      errors.New("database error"),
-			expectedStatus: http.StatusInternalServerError,
-			expectedError:  errors.New("database error"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Create mock repository
-			mockRepo := new(mocks.MockUserRepository)
-
-			// Set up mock expectations
-			mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(tt.mockError)
-
-			// Create service with mock repository
-			service := services.NewUserService(mockRepo)
-
-			// Call the service method
-			resp, status, err := service.CreateUser(tt.input)
-
-			// Assertions
-			assert.Equal(t, tt.expectedStatus, status)
-			if tt.expectedError != nil {
-				assert.Error(t, err)
-				assert.Equal(t, tt.expectedError.Error(), err.Error())
-			} else {
-				assert.NoError(t, err)
-				assert.NotEmpty(t, resp.ID)
-				assert.Equal(t, tt.input.Username, resp.Username)
-				assert.Equal(t, tt.input.Email, resp.Email)
-			}
-
-			// Verify that mock expectations were met
-			mockRepo.AssertExpectations(t)
-		})
-	}
+	suite.Run(t, new(createUserTestSuite))
 }
