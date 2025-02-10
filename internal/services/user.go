@@ -1,14 +1,20 @@
 package services
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
 	"github.com/wisaitas/standard-golang/internal/dtos/response"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
+	"github.com/wisaitas/standard-golang/internal/utils"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,16 +26,36 @@ type UserService interface {
 
 type userService struct {
 	userRepository repositories.UserRepository
+	redis          utils.RedisClient
 }
 
-func NewUserService(userRepository repositories.UserRepository) UserService {
+func NewUserService(
+	userRepository repositories.UserRepository,
+	redis utils.RedisClient,
+) UserService {
 	return &userService{
 		userRepository: userRepository,
+		redis:          redis,
 	}
 }
 
 func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
+
+	cacheKey := fmt.Sprintf("users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)
+
+	cache, err := r.redis.Get(context.Background(), cacheKey)
+	if err != nil && err != redis.Nil {
+		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+	}
+
+	if cache != "" {
+		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
+			return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+		}
+
+		return resp, http.StatusOK, nil
+	}
 
 	if err := r.userRepository.GetAll(&users, &querys); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
@@ -38,6 +64,15 @@ func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.
 	for _, user := range users {
 		respGetUser := response.GetUsersResponse{}
 		resp = append(resp, respGetUser.ToResponse(user))
+	}
+
+	respJson, err := json.Marshal(resp)
+	if err != nil {
+		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+	}
+
+	if err := r.redis.Set(context.Background(), cacheKey, respJson, 3*time.Minute); err != nil {
+		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	return resp, http.StatusOK, nil

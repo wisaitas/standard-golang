@@ -80,3 +80,24 @@ func (r *AuthHandler) Logout(c *fiber.Ctx) error {
 		Message: "logout successfully",
 	})
 }
+
+func (r *AuthHandler) RefreshToken(c *fiber.Ctx) error {
+	userContext, ok := c.Locals("userContext").(models.UserContext)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			Message: "user context not found",
+		})
+	}
+
+	resp, statusCode, err := r.authService.RefreshToken(userContext)
+	if err != nil {
+		return c.Status(statusCode).JSON(response.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(statusCode).JSON(response.SuccessResponse{
+		Message: "refresh token successfully",
+		Data:    resp,
+	})
+}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/configs"
+	"github.com/wisaitas/standard-golang/internal/utils"
 
 	"github.com/wisaitas/standard-golang/internal/handlers"
 	"github.com/wisaitas/standard-golang/internal/middlewares"
@@ -38,12 +39,15 @@ func InitializeApp() *App {
 	db := configs.ConnectDB()
 	redis := configs.ConnectRedis()
 
+	// Initialize utils
+	redisClient := utils.NewRedisClient(redis)
+
 	// Initialize repositories
 	userRepository := repositories.NewUserRepository(db)
 
 	// Initialize services
-	userService := services.NewUserService(userRepository)
-	authService := services.NewAuthService(userRepository, redis)
+	userService := services.NewUserService(userRepository, redisClient)
+	authService := services.NewAuthService(userRepository, redisClient)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)

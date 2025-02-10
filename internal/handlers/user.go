@@ -12,7 +12,9 @@ type UserHandler struct {
 	userService services.UserService
 }
 
-func NewUserHandler(userService services.UserService) *UserHandler {
+func NewUserHandler(
+	userService services.UserService,
+) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}
@@ -32,6 +34,7 @@ func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
 			Message: err.Error(),
 		})
 	}
+
 	return c.Status(statusCode).JSON(response.SuccessResponse{
 		Message: "users fetched successfully",
 		Data:    users,
