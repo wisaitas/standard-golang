@@ -21,6 +21,7 @@ func (r *UserMiddleware) GetUsers(c *fiber.Ctx) error {
 		})
 	}
 
+	// model user not have role LOL XD
 	if userContext.Username != "test" {
 		return c.Status(fiber.StatusForbidden).JSON(response.ErrorResponse{
 			Message: "you are not authorized to access this resource",
