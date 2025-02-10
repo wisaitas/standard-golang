@@ -1,11 +1,14 @@
 package services
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
 	"github.com/wisaitas/standard-golang/internal/dtos/response"
 	"github.com/wisaitas/standard-golang/internal/models"
@@ -18,17 +21,21 @@ import (
 type AuthService interface {
 	Login(req request.LoginRequest) (resp response.LoginResponse, statusCode int, err error)
 	Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error)
+	Logout(userContext models.UserContext) (statusCode int, err error)
 }
 
 type authService struct {
 	userRepository repositories.UserRepository
+	redis          *redis.Client
 }
 
 func NewAuthService(
 	userRepository repositories.UserRepository,
+	redis *redis.Client,
 ) AuthService {
 	return &authService{
 		userRepository: userRepository,
+		redis:          redis,
 	}
 }
 
@@ -68,10 +75,15 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 		return resp, http.StatusInternalServerError, err
 	}
 
-	resp.AccessToken = accessToken
-	resp.RefreshToken = refreshToken
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)).Err(); err != nil {
+		return resp, http.StatusInternalServerError, err
+	}
 
-	return resp, statusCode, err
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)).Err(); err != nil {
+		return resp, http.StatusInternalServerError, err
+	}
+
+	return resp.ToResponse(accessToken, refreshToken), statusCode, err
 }
 
 func (r *authService) Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error) {
@@ -93,4 +105,16 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 	}
 
 	return resp.ToResponse(user), http.StatusCreated, err
+}
+
+func (r *authService) Logout(userContext models.UserContext) (statusCode int, err error) {
+	if err := r.redis.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.ID)).Err(); err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	if err := r.redis.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.ID)).Err(); err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }

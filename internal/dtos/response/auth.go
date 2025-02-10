@@ -7,6 +7,13 @@ type LoginResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+func (r *LoginResponse) ToResponse(accessToken, refreshToken string) LoginResponse {
+	r.AccessToken = accessToken
+	r.RefreshToken = refreshToken
+
+	return *r
+}
+
 type RegisterResponse struct {
 	BaseResponse
 	Username string `json:"username"`

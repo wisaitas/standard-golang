@@ -14,6 +14,8 @@ type Environment struct {
 	DB_NAME     string `env:"DB_NAME" envDefault:"postgres"`
 	DB_PORT     string `env:"DB_PORT" envDefault:"8080"`
 	JWT_SECRET  string `env:"JWT_SECRET" envDefault:"secret"`
+	REDIS_HOST  string `env:"REDIS_HOST" envDefault:"localhost"`
+	REDIS_PORT  string `env:"REDIS_PORT" envDefault:"8081"`
 }
 
 var ENV Environment

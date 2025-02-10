@@ -7,8 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/configs"
+
 	"github.com/wisaitas/standard-golang/internal/handlers"
+	"github.com/wisaitas/standard-golang/internal/middlewares"
 	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
 	"github.com/wisaitas/standard-golang/internal/repositories"
 	"github.com/wisaitas/standard-golang/internal/routes"
@@ -26,19 +29,21 @@ func init() {
 type App struct {
 	App    *fiber.App
 	DB     *gorm.DB
+	Redis  *redis.Client
 	routes func()
 }
 
 func InitializeApp() *App {
 	app := fiber.New()
 	db := configs.ConnectDB()
+	redis := configs.ConnectRedis()
 
 	// Initialize repositories
 	userRepository := repositories.NewUserRepository(db)
 
 	// Initialize services
 	userService := services.NewUserService(userRepository)
-	authService := services.NewAuthService(userRepository)
+	authService := services.NewAuthService(userRepository, redis)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
@@ -48,14 +53,19 @@ func InitializeApp() *App {
 	userValidate := validates.NewUserValidate()
 	authValidate := validates.NewAuthValidate()
 
+	// Initialize middlewares
+	authMiddleware := middlewares.NewAuthMiddleware(redis)
+	userMiddleware := middlewares.NewUserMiddleware()
+
 	// Initialize routes
 	apiRoutes := app.Group("/api/v1")
-	userRoutes := routes.NewUserRoutes(apiRoutes, userHandler, userValidate)
-	authRoutes := routes.NewAuthRoutes(apiRoutes, authHandler, authValidate)
+	userRoutes := routes.NewUserRoutes(apiRoutes, userHandler, userValidate, authMiddleware, userMiddleware)
+	authRoutes := routes.NewAuthRoutes(apiRoutes, authHandler, authValidate, authMiddleware)
 
 	return &App{
-		App: app,
-		DB:  db,
+		App:   app,
+		DB:    db,
+		Redis: redis,
 		routes: func() {
 			userRoutes.UserRoutes()
 			authRoutes.AuthRoutes()
