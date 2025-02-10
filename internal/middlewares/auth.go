@@ -49,6 +49,12 @@ func (r *AuthMiddleware) AuthToken(c *fiber.Ctx) error {
 
 	_, err = r.redis.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID))).Result()
 	if err != nil {
+		if err == redis.Nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+				Message: "token not found",
+			})
+		}
+
 		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
 			Message: err.Error(),
 		})

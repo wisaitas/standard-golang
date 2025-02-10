@@ -28,10 +28,19 @@ func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 }
 
 func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationParam) error {
+	query := r.db
+
 	if pagination.Page != nil && pagination.PageSize != nil {
-		return r.db.Offset(*pagination.Page).Limit(*pagination.PageSize).Find(items).Error
+		offset := *pagination.Page * *pagination.PageSize
+		query = query.Offset(offset).Limit(*pagination.PageSize)
 	}
-	return r.db.Find(items).Error
+
+	if pagination.Sort != nil && pagination.Order != nil {
+		orderClause := *pagination.Sort + " " + *pagination.Order
+		query = query.Order(orderClause)
+	}
+
+	return query.Find(items).Error
 }
 
 func (r *baseRepository[T]) GetBy(field string, value string, item *T) error {

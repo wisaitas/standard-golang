@@ -19,7 +19,23 @@ func NewUserHandler(userService services.UserService) *UserHandler {
 }
 
 func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
-	return c.SendString("get users")
+	querys, ok := c.Locals("querys").(request.PaginationParam)
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+			Message: "failed to get querys",
+		})
+	}
+
+	users, statusCode, err := r.userService.GetUsers(querys)
+	if err != nil {
+		return c.Status(statusCode).JSON(response.ErrorResponse{
+			Message: err.Error(),
+		})
+	}
+	return c.Status(statusCode).JSON(response.SuccessResponse{
+		Message: "users fetched successfully",
+		Data:    users,
+	})
 }
 
 func (r *UserHandler) CreateUser(c *fiber.Ctx) error {

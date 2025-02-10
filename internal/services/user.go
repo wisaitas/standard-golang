@@ -14,7 +14,7 @@ import (
 )
 
 type UserService interface {
-	GetUsers() ([]models.User, int, error)
+	GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error)
 	CreateUser(req request.CreateUserRequest) (resp response.CreateUserResponse, statusCode int, err error)
 }
 
@@ -28,8 +28,20 @@ func NewUserService(userRepository repositories.UserRepository) UserService {
 	}
 }
 
-func (r *userService) GetUsers() ([]models.User, int, error) {
-	return []models.User{}, 200, nil
+func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error) {
+	users := []models.User{}
+
+	if err := r.userRepository.GetAll(&users, &querys); err != nil {
+		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+	}
+
+	for _, user := range users {
+		respGetUser := response.GetUsersResponse{}
+		resp = append(resp, respGetUser.ToResponse(user))
+	}
+
+	return resp, http.StatusOK, nil
+
 }
 
 func (r *userService) CreateUser(req request.CreateUserRequest) (resp response.CreateUserResponse, statusCode int, err error) {

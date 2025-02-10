@@ -17,3 +17,19 @@ func (r *CreateUserResponse) ToResponse(user models.User) CreateUserResponse {
 
 	return *r
 }
+
+type GetUsersResponse struct {
+	BaseResponse
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (r *GetUsersResponse) ToResponse(users models.User) GetUsersResponse {
+	r.ID = users.ID
+	r.CreatedAt = users.CreatedAt
+	r.UpdatedAt = users.UpdatedAt
+	r.Username = users.Username
+	r.Email = users.Email
+
+	return *r
+}
