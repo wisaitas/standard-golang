@@ -104,6 +104,10 @@ func (r *App) close() {
 	if err := sqlDB.Close(); err != nil {
 		log.Fatalf("error closing database: %v\n", err)
 	}
+
+	if err := r.Redis.Close(); err != nil {
+		log.Fatalf("error closing redis: %v\n", err)
+	}
 }
 
 func (r *App) SetupMiddlewares() {
