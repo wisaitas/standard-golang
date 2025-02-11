@@ -14,7 +14,9 @@ type BaseRepository[T any] interface {
 	Create(item *T) error
 	CreateMany(items *[]T) error
 	Updates(item *T) error
+	UpdateMany(items *[]T) error
 	Save(item *T) error
+	SaveMany(items *[]T) error
 	Delete(item *T) error
 }
 
@@ -64,8 +66,16 @@ func (r *baseRepository[T]) Updates(item *T) error {
 	return r.db.Updates(item).Error
 }
 
+func (r *baseRepository[T]) UpdateMany(items *[]T) error {
+	return r.db.Updates(items).Error
+}
+
 func (r *baseRepository[T]) Save(item *T) error {
 	return r.db.Save(item).Error
+}
+
+func (r *baseRepository[T]) SaveMany(items *[]T) error {
+	return r.db.Save(items).Error
 }
 
 func (r *baseRepository[T]) Delete(item *T) error {

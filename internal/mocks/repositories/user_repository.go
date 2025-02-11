@@ -39,8 +39,18 @@ func (m *MockUserRepository) Updates(item *models.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) UpdateMany(items *[]models.User) error {
+	args := m.Called(items)
+	return args.Error(0)
+}
+
 func (m *MockUserRepository) Save(item *models.User) error {
 	args := m.Called(item)
+	return args.Error(0)
+}
+
+func (m *MockUserRepository) SaveMany(items *[]models.User) error {
+	args := m.Called(items)
 	return args.Error(0)
 }
 

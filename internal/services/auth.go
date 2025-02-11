@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -98,24 +97,6 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 	user.Password = string(hashedPassword)
 
 	if err = r.userRepository.Create(&user); err != nil {
-		if strings.Contains(err.Error(), "unique constraint") {
-			return resp, http.StatusBadRequest, errors.New("username already exists")
-		}
-
-		return resp, http.StatusInternalServerError, err
-	}
-
-	users := []models.User{}
-
-	for i := 0; i < 100; i++ {
-		users = append(users, models.User{
-			Username: user.Username + strconv.Itoa(i),
-			Email:    user.Email + strconv.Itoa(i),
-			Password: user.Password,
-		})
-	}
-
-	if err = r.userRepository.CreateMany(&users); err != nil {
 		if strings.Contains(err.Error(), "unique constraint") {
 			return resp, http.StatusBadRequest, errors.New("username already exists")
 		}
