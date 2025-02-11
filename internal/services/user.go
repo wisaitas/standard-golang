@@ -42,7 +42,7 @@ func NewUserService(
 func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
 
-	cacheKey := fmt.Sprintf("users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)
+	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)
 
 	cache, err := r.redis.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
@@ -71,7 +71,7 @@ func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
-	if err := r.redis.Set(context.Background(), cacheKey, respJson, 3*time.Minute); err != nil {
+	if err := r.redis.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 

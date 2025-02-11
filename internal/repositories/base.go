@@ -12,6 +12,7 @@ type BaseRepository[T any] interface {
 	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
 	Create(item *T) error
+	CreateMany(items *[]T) error
 	Updates(item *T) error
 	Save(item *T) error
 	Delete(item *T) error
@@ -53,6 +54,10 @@ func (r *baseRepository[T]) GetById(id uuid.UUID, item *T) error {
 
 func (r *baseRepository[T]) Create(item *T) error {
 	return r.db.Create(item).Error
+}
+
+func (r *baseRepository[T]) CreateMany(items *[]T) error {
+	return r.db.Create(items).Error
 }
 
 func (r *baseRepository[T]) Updates(item *T) error {

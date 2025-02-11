@@ -11,7 +11,7 @@ type BaseModel struct {
 	ID        uuid.UUID      `gorm:"primaryKey"`
 	CreatedAt time.Time      `gorm:"not null"`
 	UpdatedAt time.Time      `gorm:"not null"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	DeletedAt gorm.DeletedAt `gorm:"default:null"`
 }
 
 func (r *BaseModel) BeforeCreate(tx *gorm.DB) error {

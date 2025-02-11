@@ -29,6 +29,11 @@ func (m *MockUserRepository) Create(item *models.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) CreateMany(items *[]models.User) error {
+	args := m.Called(items)
+	return args.Error(0)
+}
+
 func (m *MockUserRepository) Updates(item *models.User) error {
 	args := m.Called(item)
 	return args.Error(0)
