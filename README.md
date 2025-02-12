@@ -52,3 +52,13 @@ This project follows clean architecture principles with clear separation of conc
 
 1. Clone the repository
 2. Install dependencies:
+
+```bash
+go mod tidy
+```
+
+3. Run the application:
+
+```bash
+docker compose up -d --build
+```
