@@ -171,7 +171,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/users",
+							"raw": "{{url}}/users?page=0&page_size=-1",
 							"host": [
 								"{{url}}"
 							],
@@ -181,13 +181,11 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "0",
-									"disabled": true
+									"value": "0"
 								},
 								{
 									"key": "page_size",
-									"value": "999",
-									"disabled": true
+									"value": "-1"
 								},
 								{
 									"key": "sort",
