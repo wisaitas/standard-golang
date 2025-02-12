@@ -41,7 +41,6 @@ func (r *AuthHandler) Login(c *fiber.Ctx) error {
 
 func (r *AuthHandler) Register(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(request.RegisterRequest)
-
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: "failed to get request",

@@ -14,7 +14,7 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) GetAll(items *[]models.User, pagination *request.PaginationParam) error {
+func (m *MockUserRepository) GetAll(items *[]models.User, pagination *request.PaginationQuery) error {
 	args := m.Called(items, pagination)
 	return args.Error(0)
 }

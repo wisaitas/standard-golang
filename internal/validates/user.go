@@ -30,9 +30,9 @@ func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 }
 
 func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
-	querys := request.PaginationParam{}
+	querys := request.PaginationQuery{}
 
-	if err := validateCommonRequestQuery(c, &querys); err != nil {
+	if err := validateCommonPaginationQuery(c, &querys); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
 		})

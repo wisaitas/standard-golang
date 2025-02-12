@@ -20,7 +20,7 @@ import (
 )
 
 type UserService interface {
-	GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error)
+	GetUsers(querys request.PaginationQuery) (resp []response.GetUsersResponse, statusCode int, err error)
 	CreateUser(req request.CreateUserRequest) (resp response.CreateUserResponse, statusCode int, err error)
 }
 
@@ -39,7 +39,7 @@ func NewUserService(
 	}
 }
 
-func (r *userService) GetUsers(querys request.PaginationParam) (resp []response.GetUsersResponse, statusCode int, err error) {
+func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
 
 	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)

@@ -21,7 +21,7 @@ func NewUserHandler(
 }
 
 func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
-	querys, ok := c.Locals("querys").(request.PaginationParam)
+	querys, ok := c.Locals("querys").(request.PaginationQuery)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: "failed to get querys",

@@ -8,7 +8,7 @@ import (
 )
 
 type BaseRepository[T any] interface {
-	GetAll(items *[]T, pagination *request.PaginationParam) error
+	GetAll(items *[]T, pagination *request.PaginationQuery) error
 	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
 	Create(item *T) error
@@ -30,7 +30,7 @@ func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 	}
 }
 
-func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationParam) error {
+func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationQuery) error {
 	query := r.db
 
 	if pagination.Page != nil && pagination.PageSize != nil {

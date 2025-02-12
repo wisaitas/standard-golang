@@ -20,7 +20,7 @@ func validateCommonRequestBody[T any](c *fiber.Ctx, req *T) error {
 	return nil
 }
 
-func validateCommonRequestQuery(c *fiber.Ctx, req *request.PaginationParam) error {
+func validateCommonPaginationQuery(c *fiber.Ctx, req *request.PaginationQuery) error {
 	if err := c.QueryParser(req); err != nil {
 		return err
 	}
