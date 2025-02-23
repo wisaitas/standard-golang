@@ -4,9 +4,11 @@ import (
 	"errors"
 	"mime/multipart"
 	"reflect"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/standard-golang/internal/configs"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
 )
 
@@ -43,6 +45,30 @@ func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T) error {
 					field.Set(reflect.ValueOf(files))
 				}
 			}
+		}
+	}
+
+	return nil
+}
+
+func validateImageFiles(files []*multipart.FileHeader) error {
+	maxFileSize := configs.ENV.MAX_FILE_SIZE
+
+	for _, file := range files {
+		if file.Size > 1024*1024*maxFileSize {
+			return errors.New("image file size must be less than " + strconv.FormatInt(maxFileSize, 10) + "MB")
+		}
+
+		if file.Size == 0 {
+			return errors.New("image file is required")
+		}
+
+		if file.Filename == "" {
+			return errors.New("image file name is required")
+		}
+
+		if file.Header.Get("content-type") != "image/jpeg" && file.Header.Get("content-type") != "image/png" && file.Header.Get("content-type") != "image/gif" {
+			return errors.New("image file must be a valid image")
 		}
 	}
 
