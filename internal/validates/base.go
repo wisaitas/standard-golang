@@ -39,10 +39,17 @@ func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T) error {
 
 		for i := 0; i < val.NumField(); i++ {
 			field := val.Field(i)
-			if field.Type() == reflect.TypeOf([]*multipart.FileHeader{}) {
+			if field.Type() == reflect.TypeOf((*multipart.FileHeader)(nil)) {
 				formTag := typ.Field(i).Tag.Get("form")
-				if files := form.File[formTag]; files != nil {
-					field.Set(reflect.ValueOf(files))
+
+				files := form.File[formTag]
+
+				if len(files) > 1 {
+					return errors.New("multiple files are not allowed")
+				}
+
+				if len(files) > 0 {
+					field.Set(reflect.ValueOf(files[0]))
 				}
 			}
 		}
