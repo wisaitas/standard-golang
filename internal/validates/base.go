@@ -2,19 +2,48 @@ package validates
 
 import (
 	"errors"
+	"mime/multipart"
+	"reflect"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
 )
 
-func validateCommonRequestBody[T any](c *fiber.Ctx, req *T) error {
+func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T) error {
 	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
 
 	if err := validator.New().Struct(req); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T) error {
+	if err := c.BodyParser(req); err != nil {
+		return err
+	}
+
+	if err := validator.New().Struct(req); err != nil {
+		return err
+	}
+
+	if form, err := c.MultipartForm(); err == nil {
+		val := reflect.ValueOf(req).Elem()
+		typ := val.Type()
+
+		for i := 0; i < val.NumField(); i++ {
+			field := val.Field(i)
+			if field.Type() == reflect.TypeOf([]*multipart.FileHeader{}) {
+				formTag := typ.Field(i).Tag.Get("form")
+				if files := form.File[formTag]; files != nil {
+					field.Set(reflect.ValueOf(files))
+				}
+			}
+		}
 	}
 
 	return nil

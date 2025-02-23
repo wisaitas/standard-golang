@@ -19,7 +19,7 @@ func NewUserValidate() *UserValidate {
 func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 	req := request.CreateUserRequest{}
 
-	if err := validateCommonRequestBody(c, &req); err != nil {
+	if err := validateCommonRequestJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
 		})

@@ -16,7 +16,7 @@ func NewAuthValidate() *AuthValidate {
 func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
 	req := request.LoginRequest{}
 
-	if err := validateCommonRequestBody(c, &req); err != nil {
+	if err := validateCommonRequestJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -29,7 +29,7 @@ func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
 func (r *AuthValidate) ValidateRegisterRequest(c *fiber.Ctx) error {
 	req := request.RegisterRequest{}
 
-	if err := validateCommonRequestBody(c, &req); err != nil {
+	if err := validateCommonRequestJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
 			Message: err.Error(),
 		})
