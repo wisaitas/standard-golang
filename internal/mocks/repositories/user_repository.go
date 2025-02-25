@@ -2,6 +2,8 @@ package mock_repositories
 
 import (
 	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/repositories"
+	"gorm.io/gorm"
 
 	"github.com/wisaitas/standard-golang/internal/models"
 
@@ -12,6 +14,11 @@ import (
 // MockUserRepository is a mock implementation of UserRepository
 type MockUserRepository struct {
 	mock.Mock
+}
+
+func (m *MockUserRepository) WithTx(tx *gorm.DB) repositories.BaseRepository[models.User] {
+	args := m.Called(tx)
+	return args.Get(0).(repositories.BaseRepository[models.User])
 }
 
 func (m *MockUserRepository) GetAll(items *[]models.User, pagination *request.PaginationQuery) error {

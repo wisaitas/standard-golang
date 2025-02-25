@@ -8,6 +8,7 @@ import (
 )
 
 type BaseRepository[T any] interface {
+	WithTx(tx *gorm.DB) BaseRepository[T]
 	GetAll(items *[]T, pagination *request.PaginationQuery) error
 	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
@@ -27,6 +28,12 @@ type baseRepository[T any] struct {
 func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 	return &baseRepository[T]{
 		db: db,
+	}
+}
+
+func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
+	return &baseRepository[T]{
+		db: tx,
 	}
 }
 
