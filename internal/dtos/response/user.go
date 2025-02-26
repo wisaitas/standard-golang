@@ -37,5 +37,9 @@ func (r *GetUsersResponse) ModelToResponse(users models.User) GetUsersResponse {
 		r.Addresses = append(r.Addresses, addressResponse.ModelToResponse(address))
 	}
 
+	if len(r.Addresses) == 0 {
+		r.Addresses = []AddressResponse{}
+	}
+
 	return *r
 }

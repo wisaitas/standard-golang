@@ -21,8 +21,8 @@ func (m *MockUserRepository) WithTx(tx *gorm.DB) repositories.BaseRepository[mod
 	return args.Get(0).(repositories.BaseRepository[models.User])
 }
 
-func (m *MockUserRepository) GetAll(items *[]models.User, pagination *request.PaginationQuery) error {
-	args := m.Called(items, pagination)
+func (m *MockUserRepository) GetAll(items *[]models.User, pagination *request.PaginationQuery, relations ...string) error {
+	args := m.Called(items, pagination, relations)
 	return args.Error(0)
 }
 
@@ -68,10 +68,5 @@ func (m *MockUserRepository) Delete(item *models.User) error {
 
 func (m *MockUserRepository) GetBy(field string, value string, item *models.User) error {
 	args := m.Called(field, value, item)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) GetUsersPreloadAddresses(users *[]models.User) error {
-	args := m.Called(users)
 	return args.Error(0)
 }

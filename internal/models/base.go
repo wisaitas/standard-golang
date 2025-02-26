@@ -21,3 +21,9 @@ func (r *BaseModel) BeforeCreate(tx *gorm.DB) error {
 
 	return nil
 }
+
+func (r *BaseModel) BeforeUpdate(tx *gorm.DB) error {
+	r.UpdatedAt = time.Now()
+
+	return nil
+}

@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Address struct {
@@ -17,10 +16,4 @@ type Address struct {
 	Province    *Province
 	District    *District
 	SubDistrict *SubDistrict
-}
-
-func (a *Address) BeforeCreate(tx *gorm.DB) error {
-	a.ID = uuid.New()
-
-	return nil
 }

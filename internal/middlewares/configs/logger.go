@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -12,18 +13,21 @@ import (
 func Logger() fiber.Handler {
 	return logger.New(
 		logger.Config{
-			Format: "${ua} - [${ip}:${port}] - ${status} - ${method} - ${path}\n",
+			Format: fmt.Sprintf("[%s ${time}]--[${ua}]--[${ip}:${port}]--[${status}]--[${method}]--[${path}]\n", time.Now().Format("2006-01-02")),
 			Done: func(c *fiber.Ctx, logString []byte) {
-				if string(c.Request().Header.ContentType()) == "application/json" {
-					fmt.Printf("request : %s\n", string(c.Request().Body()))
-				}
+				if c.Response().StatusCode() != 200 && c.Response().StatusCode() != 201 && c.Response().StatusCode() != 204 {
+					if string(c.Request().Header.ContentType()) == "application/json" {
+						requestBody := string(c.Request().Body())
+						compactRequest := new(bytes.Buffer)
+						if err := json.Compact(compactRequest, []byte(requestBody)); err == nil {
+							fmt.Printf("request:\n%s\n", compactRequest.String())
+						} else {
+							fmt.Printf("request:\n%s\n", requestBody)
+						}
+					}
 
-				if string(c.Response().Header.ContentType()) == "application/json" {
-					var prettyJSON bytes.Buffer
-					if err := json.Indent(&prettyJSON, c.Response().Body(), "", "    "); err == nil {
-						fmt.Printf("response\n %s\n", prettyJSON.String())
-					} else {
-						fmt.Printf("response\n %s\n", string(c.Response().Body()))
+					if string(c.Response().Header.ContentType()) == "application/json" {
+						fmt.Printf("response:\n%s\n", string(c.Response().Body()))
 					}
 				}
 			},

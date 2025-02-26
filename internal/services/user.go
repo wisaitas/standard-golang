@@ -57,7 +57,7 @@ func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.userRepository.GetUsersPreloadAddresses(&users); err != nil {
+	if err := r.userRepository.GetAll(&users, &querys); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 

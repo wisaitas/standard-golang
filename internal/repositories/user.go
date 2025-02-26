@@ -8,7 +8,6 @@ import (
 
 type UserRepository interface {
 	BaseRepository[models.User]
-	GetUsersPreloadAddresses(users *[]models.User) error
 }
 
 type userRepository struct {
@@ -21,8 +20,4 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 		BaseRepository: NewBaseRepository[models.User](db),
 		db:             db,
 	}
-}
-
-func (r *userRepository) GetUsersPreloadAddresses(users *[]models.User) error {
-	return r.db.Preload("Addresses").Find(&users).Error
 }
