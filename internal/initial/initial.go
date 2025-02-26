@@ -108,6 +108,8 @@ func (r *App) close() {
 	if err := r.Redis.Close(); err != nil {
 		log.Fatalf("error closing redis: %v\n", err)
 	}
+
+	log.Println("gracefully shutdown")
 }
 
 func (r *App) SetupMiddlewares() {

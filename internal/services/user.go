@@ -57,13 +57,13 @@ func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.userRepository.GetAll(&users, &querys); err != nil {
+	if err := r.userRepository.GetUsersPreloadAddresses(&users); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	for _, user := range users {
 		respGetUser := response.GetUsersResponse{}
-		resp = append(resp, respGetUser.ToResponse(user))
+		resp = append(resp, respGetUser.ModelToResponse(user))
 	}
 
 	respJson, err := json.Marshal(resp)

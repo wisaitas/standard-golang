@@ -10,6 +10,8 @@ type User struct {
 	Username string `gorm:"not null;unique"`
 	Email    string `gorm:"not null;unique"`
 	Password string `gorm:"not null"`
+
+	Addresses []Address `gorm:"foreignKey:UserID"`
 }
 
 func (r *User) BeforeCreate(tx *gorm.DB) error {

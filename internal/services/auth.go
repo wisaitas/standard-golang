@@ -87,7 +87,7 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 }
 
 func (r *authService) Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error) {
-	user := req.ToModel()
+	user := req.ReqToModel()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {

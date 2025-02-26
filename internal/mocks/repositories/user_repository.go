@@ -70,3 +70,8 @@ func (m *MockUserRepository) GetBy(field string, value string, item *models.User
 	args := m.Called(field, value, item)
 	return args.Error(0)
 }
+
+func (m *MockUserRepository) GetUsersPreloadAddresses(users *[]models.User) error {
+	args := m.Called(users)
+	return args.Error(0)
+}
