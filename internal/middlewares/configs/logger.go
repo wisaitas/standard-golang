@@ -20,14 +20,14 @@ func Logger() fiber.Handler {
 						requestBody := string(c.Request().Body())
 						compactRequest := new(bytes.Buffer)
 						if err := json.Compact(compactRequest, []byte(requestBody)); err == nil {
-							fmt.Printf("request:\n%s\n", compactRequest.String())
+							fmt.Printf("request: %s\n", compactRequest.String())
 						} else {
-							fmt.Printf("request:\n%s\n", requestBody)
+							fmt.Printf("request: %s\n", requestBody)
 						}
 					}
 
 					if string(c.Response().Header.ContentType()) == "application/json" {
-						fmt.Printf("response:\n%s\n", string(c.Response().Body()))
+						fmt.Printf("response: %s\n", string(c.Response().Body()))
 					}
 				}
 			},

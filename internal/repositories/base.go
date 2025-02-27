@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -9,7 +9,7 @@ import (
 
 type BaseRepository[T any] interface {
 	WithTx(tx *gorm.DB) BaseRepository[T]
-	GetAll(items *[]T, pagination *request.PaginationQuery, relations ...string) error
+	GetAll(items *[]T, pagination *queries.PaginationQuery, relations ...string) error
 	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
 	Create(item *T) error
@@ -37,7 +37,7 @@ func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
 	}
 }
 
-func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationQuery, relations ...string) error {
+func (r *baseRepository[T]) GetAll(items *[]T, pagination *queries.PaginationQuery, relations ...string) error {
 	query := r.db
 
 	if pagination.Page != nil && pagination.PageSize != nil {

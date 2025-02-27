@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 )
 
@@ -16,14 +16,14 @@ func NewUserMiddleware() *UserMiddleware {
 func (r *UserMiddleware) GetUsers(c *fiber.Ctx) error {
 	userContext, ok := c.Locals("userContext").(models.UserContext)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
 			Message: "user context not found",
 		})
 	}
 
 	// model user not have role LOL XD
 	if userContext.Username != "test" {
-		return c.Status(fiber.StatusForbidden).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusForbidden).JSON(responses.ErrorResponse{
 			Message: "you are not authorized to access this resource",
 		})
 	}

@@ -1,4 +1,4 @@
-package request
+package requests
 
 import "github.com/wisaitas/standard-golang/internal/models"
 

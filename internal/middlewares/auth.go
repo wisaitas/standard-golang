@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/configs"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 )
 
@@ -27,7 +27,7 @@ func NewAuthMiddleware(redis *redis.Client) *AuthMiddleware {
 func (r *AuthMiddleware) AuthToken(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
 			Message: "invalid token type",
 		})
 	}
@@ -42,7 +42,7 @@ func (r *AuthMiddleware) AuthToken(c *fiber.Ctx) error {
 		return []byte(configs.ENV.JWT_SECRET), nil
 	})
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
@@ -50,12 +50,12 @@ func (r *AuthMiddleware) AuthToken(c *fiber.Ctx) error {
 	_, err = r.redis.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID))).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+			return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
 				Message: "token not found",
 			})
 		}
 
-		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}

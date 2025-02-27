@@ -1,4 +1,4 @@
-package request
+package queries
 
 type PaginationQuery struct {
 	Page     *int    `query:"page"`

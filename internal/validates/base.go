@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/configs"
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 )
 
 func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T) error {
@@ -82,16 +82,16 @@ func validateImageFiles(files []*multipart.FileHeader) error {
 	return nil
 }
 
-func validateCommonPaginationQuery(c *fiber.Ctx, req *request.PaginationQuery) error {
-	if err := c.QueryParser(req); err != nil {
+func validateCommonPaginationQuery(c *fiber.Ctx, query *queries.PaginationQuery) error {
+	if err := c.QueryParser(query); err != nil {
 		return err
 	}
 
-	if err := validatePageAndPageSize(req.Page, req.PageSize); err != nil {
+	if err := validatePageAndPageSize(query.Page, query.PageSize); err != nil {
 		return err
 	}
 
-	if err := validateSortAndOrder(req.Sort, req.Order); err != nil {
+	if err := validateSortAndOrder(query.Sort, query.Order); err != nil {
 		return err
 	}
 
