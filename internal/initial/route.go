@@ -10,7 +10,7 @@ type Routes struct {
 	AuthRoutes *routes.AuthRoutes
 }
 
-func InitializeRoutes(
+func initializeRoutes(
 	apiRoutes fiber.Router,
 	handlers *Handlers,
 	validates *Validates,

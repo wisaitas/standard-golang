@@ -27,18 +27,18 @@ type App struct {
 func InitializeApp() *App {
 	app := fiber.New()
 
-	configs := InitializeConfigs()
+	configs := initializeConfigs()
 
 	redisUtils := utils.NewRedisClient(configs.Redis)
 
-	repositories := InitializeRepositories(configs.DB)
-	services := InitializeServices(repositories, redisUtils)
-	handlers := InitializeHandlers(services)
-	validates := InitializeValidates()
-	middlewares := InitializeMiddlewares(redisUtils)
+	repositories := initializeRepositories(configs.DB)
+	services := initializeServices(repositories, redisUtils)
+	handlers := initializeHandlers(services)
+	validates := initializeValidates()
+	middlewares := initializeMiddlewares(redisUtils)
 
 	apiRoutes := app.Group("/api/v1")
-	appRoutes := InitializeRoutes(apiRoutes, handlers, validates, middlewares)
+	appRoutes := initializeRoutes(apiRoutes, handlers, validates, middlewares)
 
 	return &App{
 		App:     app,

@@ -4,7 +4,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/handlers"
 )
 
-func InitializeHandlers(services *Services) *Handlers {
+func initializeHandlers(services *Services) *Handlers {
 	return &Handlers{
 		UserHandler: *handlers.NewUserHandler(services.UserService),
 		AuthHandler: *handlers.NewAuthHandler(services.AuthService),

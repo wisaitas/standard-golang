@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitializeRepositories(db *gorm.DB) *Repositories {
+func initializeRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
 		UserRepository: repositories.NewUserRepository(db),
 	}

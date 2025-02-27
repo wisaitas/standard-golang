@@ -4,7 +4,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/validates"
 )
 
-func InitializeValidates() *Validates {
+func initializeValidates() *Validates {
 	return &Validates{
 		UserValidate: *validates.NewUserValidate(),
 		AuthValidate: *validates.NewAuthValidate(),

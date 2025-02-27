@@ -5,7 +5,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/utils"
 )
 
-func InitializeMiddlewares(redis utils.RedisClient) *Middlewares {
+func initializeMiddlewares(redis utils.RedisClient) *Middlewares {
 	return &Middlewares{
 		AuthMiddleware: *middlewares.NewAuthMiddleware(redis),
 		UserMiddleware: *middlewares.NewUserMiddleware(),

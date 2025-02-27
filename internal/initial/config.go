@@ -11,7 +11,7 @@ type Configs struct {
 	Redis *redis.Client
 }
 
-func InitializeConfigs() *Configs {
+func initializeConfigs() *Configs {
 	configs.LoadEnv()
 
 	db := configs.ConnectDB()

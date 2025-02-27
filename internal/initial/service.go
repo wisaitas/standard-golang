@@ -5,7 +5,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/utils"
 )
 
-func InitializeServices(repos *Repositories, redisClient utils.RedisClient) *Services {
+func initializeServices(repos *Repositories, redisClient utils.RedisClient) *Services {
 	return &Services{
 		UserService: services.NewUserService(repos.UserRepository, redisClient),
 		AuthService: services.NewAuthService(repos.UserRepository, redisClient),
