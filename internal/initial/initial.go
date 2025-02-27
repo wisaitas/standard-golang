@@ -7,20 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/configs"
+	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
 	"github.com/wisaitas/standard-golang/internal/utils"
 
-	"github.com/wisaitas/standard-golang/internal/handlers"
-	"github.com/wisaitas/standard-golang/internal/middlewares"
-	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
-	"github.com/wisaitas/standard-golang/internal/repositories"
-	"github.com/wisaitas/standard-golang/internal/routes"
-	"github.com/wisaitas/standard-golang/internal/services"
-	"github.com/wisaitas/standard-golang/internal/validates"
-
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 func init() {
@@ -28,51 +19,32 @@ func init() {
 }
 
 type App struct {
-	App    *fiber.App
-	DB     *gorm.DB
-	Redis  *redis.Client
-	routes func()
+	App     *fiber.App
+	Configs *Configs
+	routes  func()
 }
 
 func InitializeApp() *App {
 	app := fiber.New()
-	db := configs.ConnectDB()
-	redis := configs.ConnectRedis()
 
-	// Initialize utils
-	redisClient := utils.NewRedisClient(redis)
+	configs := InitializeConfigs()
 
-	// Initialize repositories
-	userRepository := repositories.NewUserRepository(db)
+	redisUtils := utils.NewRedisClient(configs.Redis)
 
-	// Initialize services
-	userService := services.NewUserService(userRepository, redisClient)
-	authService := services.NewAuthService(userRepository, redisClient)
+	repositories := InitializeRepositories(configs.DB)
+	services := InitializeServices(repositories, redisUtils)
+	handlers := InitializeHandlers(services)
+	validates := InitializeValidates()
+	middlewares := InitializeMiddlewares(redisUtils)
 
-	// Initialize handlers
-	userHandler := handlers.NewUserHandler(userService)
-	authHandler := handlers.NewAuthHandler(authService)
-
-	// Initialize validates
-	userValidate := validates.NewUserValidate()
-	authValidate := validates.NewAuthValidate()
-
-	// Initialize middlewares
-	authMiddleware := middlewares.NewAuthMiddleware(redis)
-	userMiddleware := middlewares.NewUserMiddleware()
-
-	// Initialize routes
 	apiRoutes := app.Group("/api/v1")
-	userRoutes := routes.NewUserRoutes(apiRoutes, userHandler, userValidate, authMiddleware, userMiddleware)
-	authRoutes := routes.NewAuthRoutes(apiRoutes, authHandler, authValidate, authMiddleware)
+	appRoutes := InitializeRoutes(apiRoutes, handlers, validates, middlewares)
 
 	return &App{
-		App:   app,
-		DB:    db,
-		Redis: redis,
+		App:     app,
+		Configs: configs,
 		routes: func() {
-			userRoutes.UserRoutes()
-			authRoutes.AuthRoutes()
+			appRoutes.SetupRoutes()
 		},
 	}
 }
@@ -96,7 +68,7 @@ func (r *App) Run() {
 }
 
 func (r *App) close() {
-	sqlDB, err := r.DB.DB()
+	sqlDB, err := r.Configs.DB.DB()
 	if err != nil {
 		log.Fatalf("error getting database: %v\n", err)
 	}
@@ -105,7 +77,7 @@ func (r *App) close() {
 		log.Fatalf("error closing database: %v\n", err)
 	}
 
-	if err := r.Redis.Close(); err != nil {
+	if err := r.Configs.Redis.Close(); err != nil {
 		log.Fatalf("error closing redis: %v\n", err)
 	}
 
@@ -114,6 +86,7 @@ func (r *App) close() {
 
 func (r *App) SetupMiddlewares() {
 	r.App.Use(
+		middlewareConfigs.Recovery(),
 		middlewareConfigs.Limiter(),
 		middlewareConfigs.CORS(),
 		middlewareConfigs.Healthz(),

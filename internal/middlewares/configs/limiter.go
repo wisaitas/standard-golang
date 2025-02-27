@@ -1,4 +1,4 @@
-package configs
+package middleware_configs
 
 import (
 	"time"

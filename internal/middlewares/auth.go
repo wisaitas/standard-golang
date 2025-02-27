@@ -12,13 +12,14 @@ import (
 	"github.com/wisaitas/standard-golang/internal/configs"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/internal/utils"
 )
 
 type AuthMiddleware struct {
-	redis *redis.Client
+	redis utils.RedisClient
 }
 
-func NewAuthMiddleware(redis *redis.Client) *AuthMiddleware {
+func NewAuthMiddleware(redis utils.RedisClient) *AuthMiddleware {
 	return &AuthMiddleware{
 		redis: redis,
 	}
@@ -47,7 +48,7 @@ func (r *AuthMiddleware) AuthToken(c *fiber.Ctx) error {
 		})
 	}
 
-	_, err = r.redis.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID))).Result()
+	_, err = r.redis.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID)))
 	if err != nil {
 		if err == redis.Nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
