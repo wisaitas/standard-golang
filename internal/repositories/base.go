@@ -1,14 +1,15 @@
 package repositories
 
 import (
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type BaseRepository[T any] interface {
-	GetAll(items *[]T, pagination *request.PaginationQuery) error
+	WithTx(tx *gorm.DB) BaseRepository[T]
+	GetAll(items *[]T, pagination *queries.PaginationQuery, relations ...string) error
 	GetBy(field string, value string, item *T) error
 	GetById(id uuid.UUID, item *T) error
 	Create(item *T) error
@@ -30,7 +31,13 @@ func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 	}
 }
 
-func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationQuery) error {
+func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
+	return &baseRepository[T]{
+		db: tx,
+	}
+}
+
+func (r *baseRepository[T]) GetAll(items *[]T, pagination *queries.PaginationQuery, relations ...string) error {
 	query := r.db
 
 	if pagination.Page != nil && pagination.PageSize != nil {
@@ -41,6 +48,10 @@ func (r *baseRepository[T]) GetAll(items *[]T, pagination *request.PaginationQue
 	if pagination.Sort != nil && pagination.Order != nil {
 		orderClause := *pagination.Sort + " " + *pagination.Order
 		query = query.Order(orderClause)
+	}
+
+	for _, relation := range relations {
+		query = query.Preload(relation)
 	}
 
 	return query.Find(items).Error

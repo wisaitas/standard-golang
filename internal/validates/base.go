@@ -2,13 +2,17 @@ package validates
 
 import (
 	"errors"
+	"mime/multipart"
+	"reflect"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/configs"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 )
 
-func validateCommonRequestBody[T any](c *fiber.Ctx, req *T) error {
+func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T) error {
 	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
@@ -20,16 +24,74 @@ func validateCommonRequestBody[T any](c *fiber.Ctx, req *T) error {
 	return nil
 }
 
-func validateCommonPaginationQuery(c *fiber.Ctx, req *request.PaginationQuery) error {
-	if err := c.QueryParser(req); err != nil {
+func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T) error {
+	if err := c.BodyParser(req); err != nil {
 		return err
 	}
 
-	if err := validatePageAndPageSize(req.Page, req.PageSize); err != nil {
+	if err := validator.New().Struct(req); err != nil {
 		return err
 	}
 
-	if err := validateSortAndOrder(req.Sort, req.Order); err != nil {
+	if form, err := c.MultipartForm(); err == nil {
+		val := reflect.ValueOf(req).Elem()
+		typ := val.Type()
+
+		for i := 0; i < val.NumField(); i++ {
+			field := val.Field(i)
+			if field.Type() == reflect.TypeOf((*multipart.FileHeader)(nil)) {
+				formTag := typ.Field(i).Tag.Get("form")
+
+				files := form.File[formTag]
+
+				if len(files) > 1 {
+					return errors.New("multiple files are not allowed")
+				}
+
+				if len(files) > 0 {
+					field.Set(reflect.ValueOf(files[0]))
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func validateImageFiles(files []*multipart.FileHeader) error {
+	maxFileSize := configs.ENV.MAX_FILE_SIZE
+
+	for _, file := range files {
+		if file.Size > 1024*1024*maxFileSize {
+			return errors.New("image file size must be less than " + strconv.FormatInt(maxFileSize, 10) + "MB")
+		}
+
+		if file.Size == 0 {
+			return errors.New("image file is required")
+		}
+
+		if file.Filename == "" {
+			return errors.New("image file name is required")
+		}
+
+		if file.Header.Get("content-type") != "image/jpeg" && file.Header.Get("content-type") != "image/png" && file.Header.Get("content-type") != "image/gif" {
+			return errors.New("image file must be a valid image")
+		}
+	}
+
+	return nil
+}
+
+func validateCommonPaginationQuery(c *fiber.Ctx, query *queries.PaginationQuery) error {
+	if err := c.QueryParser(query); err != nil {
+		return err
+	}
+
+	if err := validatePageAndPageSize(query.Page, query.PageSize); err != nil {
+		return err
+	}
+
+	if err := validateSortAndOrder(query.Sort, query.Order); err != nil {
 		return err
 	}
 

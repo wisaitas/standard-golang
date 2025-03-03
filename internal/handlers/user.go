@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
+	"github.com/wisaitas/standard-golang/internal/dtos/requests"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/services"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,42 +22,42 @@ func NewUserHandler(
 }
 
 func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
-	querys, ok := c.Locals("querys").(request.PaginationQuery)
+	query, ok := c.Locals("query").(queries.PaginationQuery)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
-			Message: "failed to get querys",
+		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
+			Message: "failed to get queries",
 		})
 	}
 
-	users, statusCode, err := r.userService.GetUsers(querys)
+	users, statusCode, err := r.userService.GetUsers(query)
 	if err != nil {
-		return c.Status(statusCode).JSON(response.ErrorResponse{
+		return c.Status(statusCode).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
 
-	return c.Status(statusCode).JSON(response.SuccessResponse{
+	return c.Status(statusCode).JSON(responses.SuccessResponse{
 		Message: "users fetched successfully",
 		Data:    users,
 	})
 }
 
 func (r *UserHandler) CreateUser(c *fiber.Ctx) error {
-	req, ok := c.Locals("req").(request.CreateUserRequest)
+	req, ok := c.Locals("req").(requests.CreateUserRequest)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
 			Message: "failed to get request",
 		})
 	}
 
 	user, statusCode, err := r.userService.CreateUser(req)
 	if err != nil {
-		return c.Status(statusCode).JSON(response.ErrorResponse{
+		return c.Status(statusCode).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
 
-	return c.Status(statusCode).JSON(response.SuccessResponse{
+	return c.Status(statusCode).JSON(responses.SuccessResponse{
 		Message: "user created successfully",
 		Data:    user,
 	})

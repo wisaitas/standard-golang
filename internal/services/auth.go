@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/requests"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
 	"github.com/wisaitas/standard-golang/internal/utils"
@@ -18,10 +18,10 @@ import (
 )
 
 type AuthService interface {
-	Login(req request.LoginRequest) (resp response.LoginResponse, statusCode int, err error)
-	Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error)
+	Login(req requests.LoginRequest) (resp responses.LoginResponse, statusCode int, err error)
+	Register(req requests.RegisterRequest) (resp responses.RegisterResponse, statusCode int, err error)
 	Logout(userContext models.UserContext) (statusCode int, err error)
-	RefreshToken(userContext models.UserContext) (resp response.LoginResponse, statusCode int, err error)
+	RefreshToken(userContext models.UserContext) (resp responses.LoginResponse, statusCode int, err error)
 }
 
 type authService struct {
@@ -39,7 +39,7 @@ func NewAuthService(
 	}
 }
 
-func (r *authService) Login(req request.LoginRequest) (resp response.LoginResponse, statusCode int, err error) {
+func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResponse, statusCode int, err error) {
 	user := models.User{}
 	if err := r.userRepository.GetBy("username", req.Username, &user); err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -86,8 +86,8 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 	return resp.ToResponse(accessToken, refreshToken), statusCode, err
 }
 
-func (r *authService) Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error) {
-	user := req.ToModel()
+func (r *authService) Register(req requests.RegisterRequest) (resp responses.RegisterResponse, statusCode int, err error) {
+	user := req.ReqToModel()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -119,7 +119,7 @@ func (r *authService) Logout(userContext models.UserContext) (statusCode int, er
 	return http.StatusOK, nil
 }
 
-func (r *authService) RefreshToken(userContext models.UserContext) (resp response.LoginResponse, statusCode int, err error) {
+func (r *authService) RefreshToken(userContext models.UserContext) (resp responses.LoginResponse, statusCode int, err error) {
 	user := models.User{}
 	if err := r.userRepository.GetBy("username", userContext.Username, &user); err != nil {
 		return resp, http.StatusNotFound, err

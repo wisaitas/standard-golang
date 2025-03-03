@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
+	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	mock_repositories "github.com/wisaitas/standard-golang/internal/mocks/repositories"
 	mock_utils "github.com/wisaitas/standard-golang/internal/mocks/utils"
 	"github.com/wisaitas/standard-golang/internal/models"
@@ -36,7 +36,7 @@ func (s *createUserTestSuite) TestCreateUserSuccess() {
 		return u.Username == "testuser" && u.Email == "test@example.com"
 	})).Return(nil)
 
-	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+	_, status, err := s.service.CreateUser(requests.CreateUserRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
 		Password:        "password123",
@@ -50,7 +50,7 @@ func (s *createUserTestSuite) TestCreateUserSuccess() {
 func (s *createUserTestSuite) TestCreateUserUsernameExists() {
 	s.mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
 
-	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+	_, status, err := s.service.CreateUser(requests.CreateUserRequest{
 		Username:        "existinguser",
 		Email:           "test@example.com",
 		Password:        "password123",
@@ -64,7 +64,7 @@ func (s *createUserTestSuite) TestCreateUserUsernameExists() {
 func (s *createUserTestSuite) TestCreateUserInternalServerError() {
 	s.mockRepo.On("Create", mock.AnythingOfType("*models.User")).Return(errors.New("database error"))
 
-	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+	_, status, err := s.service.CreateUser(requests.CreateUserRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
 		Password:        "password123",
@@ -80,7 +80,7 @@ func (s *createUserTestSuite) TestCreateUserHashError() {
 
 	longPassword := string(make([]byte, 73))
 
-	_, status, err := s.service.CreateUser(request.CreateUserRequest{
+	_, status, err := s.service.CreateUser(requests.CreateUserRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
 		Password:        longPassword,

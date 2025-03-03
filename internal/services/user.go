@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/queries"
+	"github.com/wisaitas/standard-golang/internal/dtos/requests"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
 	"github.com/wisaitas/standard-golang/internal/utils"
@@ -20,8 +21,8 @@ import (
 )
 
 type UserService interface {
-	GetUsers(querys request.PaginationQuery) (resp []response.GetUsersResponse, statusCode int, err error)
-	CreateUser(req request.CreateUserRequest) (resp response.CreateUserResponse, statusCode int, err error)
+	GetUsers(queries queries.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error)
+	CreateUser(req requests.CreateUserRequest) (resp responses.CreateUserResponse, statusCode int, err error)
 }
 
 type userService struct {
@@ -39,47 +40,47 @@ func NewUserService(
 	}
 }
 
-func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.GetUsersResponse, statusCode int, err error) {
+func (r *userService) GetUsers(query queries.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
 
-	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)
+	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", query.Page, query.PageSize, query.Sort, query.Order)
 
 	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
-		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	if cache != "" {
 		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
-			return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+			return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
 		}
 
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.userRepository.GetAll(&users, &querys); err != nil {
-		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+	if err := r.userRepository.GetAll(&users, &query); err != nil {
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	for _, user := range users {
-		respGetUser := response.GetUsersResponse{}
-		resp = append(resp, respGetUser.ToResponse(user))
+		respGetUser := responses.GetUsersResponse{}
+		resp = append(resp, respGetUser.ModelToResponse(user))
 	}
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
-		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
 	return resp, http.StatusOK, nil
 
 }
 
-func (r *userService) CreateUser(req request.CreateUserRequest) (resp response.CreateUserResponse, statusCode int, err error) {
+func (r *userService) CreateUser(req requests.CreateUserRequest) (resp responses.CreateUserResponse, statusCode int, err error) {
 	user := req.ToModel()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

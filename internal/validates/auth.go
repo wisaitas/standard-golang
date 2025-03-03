@@ -2,8 +2,8 @@ package validates
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/dtos/request"
-	"github.com/wisaitas/standard-golang/internal/dtos/response"
+	"github.com/wisaitas/standard-golang/internal/dtos/requests"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 )
 
 type AuthValidate struct {
@@ -14,10 +14,10 @@ func NewAuthValidate() *AuthValidate {
 }
 
 func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
-	req := request.LoginRequest{}
+	req := requests.LoginRequest{}
 
-	if err := validateCommonRequestBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+	if err := validateCommonRequestJSONBody(c, &req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
@@ -27,10 +27,10 @@ func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
 }
 
 func (r *AuthValidate) ValidateRegisterRequest(c *fiber.Ctx) error {
-	req := request.RegisterRequest{}
+	req := requests.RegisterRequest{}
 
-	if err := validateCommonRequestBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(response.ErrorResponse{
+	if err := validateCommonRequestJSONBody(c, &req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
 			Message: err.Error(),
 		})
 	}
