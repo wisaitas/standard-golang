@@ -4,16 +4,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/dtos/response"
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/internal/utils"
 )
 
 type UserMiddleware struct {
+	redisUtil utils.RedisClient
 }
 
-func NewUserMiddleware() *UserMiddleware {
-	return &UserMiddleware{}
+func NewUserMiddleware(redisUtil utils.RedisClient) *UserMiddleware {
+	return &UserMiddleware{
+		redisUtil: redisUtil,
+	}
 }
 
 func (r *UserMiddleware) GetUsers(c *fiber.Ctx) error {
+	if err := authToken(c, r.redisUtil); err != nil {
+		return err
+	}
+
 	userContext, ok := c.Locals("userContext").(models.UserContext)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(response.ErrorResponse{

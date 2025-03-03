@@ -26,16 +26,16 @@ type UserService interface {
 
 type userService struct {
 	userRepository repositories.UserRepository
-	redis          utils.RedisClient
+	redisUtil      utils.RedisClient
 }
 
 func NewUserService(
 	userRepository repositories.UserRepository,
-	redis utils.RedisClient,
+	redisUtil utils.RedisClient,
 ) UserService {
 	return &userService{
 		userRepository: userRepository,
-		redis:          redis,
+		redisUtil:      redisUtil,
 	}
 }
 
@@ -44,7 +44,7 @@ func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.
 
 	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", querys.Page, querys.PageSize, querys.Sort, querys.Order)
 
-	cache, err := r.redis.Get(context.Background(), cacheKey)
+	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
@@ -71,7 +71,7 @@ func (r *userService) GetUsers(querys request.PaginationQuery) (resp []response.
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 
-	if err := r.redis.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
+	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, err
 	}
 

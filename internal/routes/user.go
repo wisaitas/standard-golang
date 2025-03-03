@@ -34,6 +34,6 @@ func NewUserRoutes(
 
 func (r *UserRoutes) UserRoutes() {
 	users := r.app.Group("/users")
-	users.Get("/", r.authMiddleware.AuthToken, r.userMiddleware.GetUsers, r.userValidate.ValidateGetUsersRequest, r.userHandler.GetUsers)
+	users.Get("/", r.userMiddleware.GetUsers, r.userValidate.ValidateGetUsersRequest, r.userHandler.GetUsers)
 	users.Post("/", r.userValidate.ValidateCreateUserRequest, r.userHandler.CreateUser)
 }

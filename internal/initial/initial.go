@@ -58,8 +58,8 @@ func InitializeApp() *App {
 	authValidate := validates.NewAuthValidate()
 
 	// Initialize middlewares
-	authMiddleware := middlewares.NewAuthMiddleware(redis)
-	userMiddleware := middlewares.NewUserMiddleware()
+	authMiddleware := middlewares.NewAuthMiddleware(redisClient)
+	userMiddleware := middlewares.NewUserMiddleware(redisClient)
 
 	// Initialize routes
 	apiRoutes := app.Group("/api/v1")
