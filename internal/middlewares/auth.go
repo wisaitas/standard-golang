@@ -20,7 +20,6 @@ func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(c.Locals("userContext"))
 	return c.Next()
 
 }

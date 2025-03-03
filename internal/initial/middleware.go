@@ -8,7 +8,7 @@ import (
 func initializeMiddlewares(redis utils.RedisClient) *Middlewares {
 	return &Middlewares{
 		AuthMiddleware: *middlewares.NewAuthMiddleware(redis),
-		UserMiddleware: *middlewares.NewUserMiddleware(),
+		UserMiddleware: *middlewares.NewUserMiddleware(redis),
 	}
 }
 

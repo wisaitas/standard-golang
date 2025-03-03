@@ -45,5 +45,4 @@ func authToken(c *fiber.Ctx, redisUtil utils.RedisClient) error {
 
 	c.Locals("userContext", userContext)
 	return nil
-
 }
