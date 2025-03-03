@@ -1,4 +1,4 @@
-package services_test
+package user_test
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	mock_repositories "github.com/wisaitas/standard-golang/internal/mocks/repositories"
 	mock_utils "github.com/wisaitas/standard-golang/internal/mocks/utils"
 	"github.com/wisaitas/standard-golang/internal/models"
-	"github.com/wisaitas/standard-golang/internal/services"
+	"github.com/wisaitas/standard-golang/internal/services/user"
 
 	"testing"
 )
@@ -20,14 +20,14 @@ type createUserTestSuite struct {
 	mockRepo   *mock_repositories.MockUserRepository
 	mockBcrypt *mock_utils.MockBcrypt
 	mockRedis  *mock_utils.MockRedis
-	service    services.UserService
+	service    user.Create
 }
 
 func (s *createUserTestSuite) SetupTest() {
 	s.mockRepo = new(mock_repositories.MockUserRepository)
 	s.mockBcrypt = new(mock_utils.MockBcrypt)
 	s.mockRedis = new(mock_utils.MockRedis)
-	s.service = services.NewUserService(s.mockRepo, s.mockRedis)
+	s.service = user.NewCreate(s.mockRepo, s.mockRedis)
 }
 
 func (s *createUserTestSuite) TestCreateUserSuccess() {

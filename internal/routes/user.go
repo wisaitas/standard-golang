@@ -34,6 +34,10 @@ func NewUserRoutes(
 
 func (r *UserRoutes) UserRoutes() {
 	users := r.app.Group("/users")
+
+	// Method GET
 	users.Get("/", r.userMiddleware.GetUsers, r.userValidate.ValidateGetUsersRequest, r.userHandler.GetUsers)
+
+	// Method POST
 	users.Post("/", r.userValidate.ValidateCreateUserRequest, r.userHandler.CreateUser)
 }

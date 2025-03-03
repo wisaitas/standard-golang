@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/utils"
 )
 
@@ -17,7 +18,9 @@ func NewAuthMiddleware(redisUtil utils.RedisClient) *AuthMiddleware {
 
 func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 	if err := authToken(c, r.redisUtil); err != nil {
-		return err
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	return c.Next()
@@ -26,7 +29,9 @@ func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 
 func (r *AuthMiddleware) RefreshToken(c *fiber.Ctx) error {
 	if err := authToken(c, r.redisUtil); err != nil {
-		return err
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	return c.Next()

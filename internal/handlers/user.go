@@ -4,17 +4,17 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
-	"github.com/wisaitas/standard-golang/internal/services"
+	"github.com/wisaitas/standard-golang/internal/services/user"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type UserHandler struct {
-	userService services.UserService
+	userService user.UserService
 }
 
 func NewUserHandler(
-	userService services.UserService,
+	userService user.UserService,
 ) *UserHandler {
 	return &UserHandler{
 		userService: userService,

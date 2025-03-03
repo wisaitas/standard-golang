@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"test\",\r\n    \"email\": \"t@t.com\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\"\r\n}",
+							"raw": "{\r\n    \"username\": \"test\",\r\n    \"email\": \"t@t.com\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\",\r\n    \"addresses\": [\r\n        {\r\n            \"province_id\": 1,\r\n            \"district_id\": 1012,\r\n            \"sub_district_id\": 101203,\r\n            \"address\": \"ช่องนนทรี\"\r\n        },\r\n        {\r\n            \"province_id\": 1,\r\n            \"district_id\": 1011,\r\n            \"sub_district_id\": 101104,\r\n            \"address\": \"ลำปลาทิว\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -171,7 +171,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/users?page=0&page_size=-1",
+							"raw": "{{url}}/users?page=0&page_size=10",
 							"host": [
 								"{{url}}"
 							],
@@ -185,7 +185,7 @@
 								},
 								{
 									"key": "page_size",
-									"value": "-1"
+									"value": "10"
 								},
 								{
 									"key": "sort",

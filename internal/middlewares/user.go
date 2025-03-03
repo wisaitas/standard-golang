@@ -19,7 +19,9 @@ func NewUserMiddleware(redisUtil utils.RedisClient) *UserMiddleware {
 
 func (r *UserMiddleware) GetUsers(c *fiber.Ctx) error {
 	if err := authToken(c, r.redisUtil); err != nil {
-		return err
+		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 
 	userContext, ok := c.Locals("userContext").(models.UserContext)

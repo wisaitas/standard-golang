@@ -5,14 +5,14 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
-	"github.com/wisaitas/standard-golang/internal/services"
+	authService "github.com/wisaitas/standard-golang/internal/services/auth"
 )
 
 type AuthHandler struct {
-	authService services.AuthService
+	authService authService.AuthService
 }
 
-func NewAuthHandler(authService services.AuthService) *AuthHandler {
+func NewAuthHandler(authService authService.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}
