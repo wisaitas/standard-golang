@@ -82,16 +82,27 @@ func validateImageFiles(files []*multipart.FileHeader) error {
 	return nil
 }
 
-func validateCommonPaginationQuery(c *fiber.Ctx, query *queries.PaginationQuery) error {
-	if err := c.QueryParser(query); err != nil {
+func validateCommonPaginationQuery[T any](c *fiber.Ctx, req *T) error {
+	if err := c.QueryParser(req); err != nil {
 		return err
 	}
 
-	if err := validatePageAndPageSize(query.Page, query.PageSize); err != nil {
-		return err
+	val := reflect.ValueOf(req).Elem()
+	paginationField := val.FieldByName("PaginationQuery")
+
+	if paginationField.IsValid() {
+		pagination := paginationField.Addr().Interface().(*queries.PaginationQuery)
+
+		if err := validatePageAndPageSize(pagination.Page, pagination.PageSize); err != nil {
+			return err
+		}
+
+		if err := validateSortAndOrder(pagination.Sort, pagination.Order); err != nil {
+			return err
+		}
 	}
 
-	if err := validateSortAndOrder(query.Sort, query.Order); err != nil {
+	if err := validator.New().Struct(req); err != nil {
 		return err
 	}
 

@@ -8,7 +8,7 @@ type CreateUserResponse struct {
 	Email    string `json:"email"`
 }
 
-func (r *CreateUserResponse) ToResponse(user models.User) CreateUserResponse {
+func (r *CreateUserResponse) ModelToResponse(user models.User) CreateUserResponse {
 	r.ID = user.ID
 	r.CreatedAt = user.CreatedAt
 	r.UpdatedAt = user.UpdatedAt

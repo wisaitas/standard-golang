@@ -49,5 +49,5 @@ func (r *create) CreateUser(req requests.CreateUserRequest) (resp responses.Crea
 		return resp, http.StatusInternalServerError, err
 	}
 
-	return resp.ToResponse(user), http.StatusCreated, nil
+	return resp.ModelToResponse(user), http.StatusCreated, nil
 }

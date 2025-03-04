@@ -16,14 +16,14 @@ services:
   #     redis:
   #       condition: service_healthy
   db:
-    image: postgres:17
+    build:
+      context: .
+      dockerfile: deployment/docker-images/postgres.Dockerfile
     container_name: standard-db
     ports:
       - 8080:5432
-    environment:
-      POSTGRES_PASSWORD: root
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 30s
@@ -35,7 +35,7 @@ services:
     ports:
       - 8081:6379
     volumes:
-      - redis_data:/data
+      - redis-data:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping"]
       interval: 30s
@@ -43,6 +43,6 @@ services:
       retries: 5
 
 volumes:
-  db_data:
-  redis_data:
+  db-data:
+  redis-data:
 

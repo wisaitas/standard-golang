@@ -4,14 +4,20 @@ import (
 	"github.com/wisaitas/standard-golang/internal/validates"
 )
 
-func initializeValidates() *Validates {
-	return &Validates{
-		UserValidate: *validates.NewUserValidate(),
-		AuthValidate: *validates.NewAuthValidate(),
-	}
+type Validates struct {
+	UserValidate        validates.UserValidate
+	AuthValidate        validates.AuthValidate
+	ProvinceValidate    validates.ProvinceValidate
+	DistrictValidate    validates.DistrictValidate
+	SubDistrictValidate validates.SubDistrictValidate
 }
 
-type Validates struct {
-	UserValidate validates.UserValidate
-	AuthValidate validates.AuthValidate
+func initializeValidates() *Validates {
+	return &Validates{
+		UserValidate:        *validates.NewUserValidate(),
+		AuthValidate:        *validates.NewAuthValidate(),
+		ProvinceValidate:    *validates.NewProvinceValidate(),
+		DistrictValidate:    *validates.NewDistrictValidate(),
+		SubDistrictValidate: *validates.NewSubDistrictValidate(),
+	}
 }

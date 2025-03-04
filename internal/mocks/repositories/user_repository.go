@@ -7,7 +7,6 @@ import (
 
 	"github.com/wisaitas/standard-golang/internal/models"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -21,13 +20,13 @@ func (m *MockUserRepository) WithTx(tx *gorm.DB) repositories.BaseRepository[mod
 	return args.Get(0).(repositories.BaseRepository[models.User])
 }
 
-func (m *MockUserRepository) GetAll(items *[]models.User, pagination *queries.PaginationQuery, relations ...string) error {
-	args := m.Called(items, pagination, relations)
+func (m *MockUserRepository) GetAll(items *[]models.User, pagination *queries.PaginationQuery, condition interface{}, relations ...string) error {
+	args := m.Called(items, pagination, condition, relations)
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) GetById(id uuid.UUID, item *models.User) error {
-	args := m.Called(id, item)
+func (m *MockUserRepository) GetBy(condition interface{}, item *models.User, relations ...string) error {
+	args := m.Called(condition, item, relations)
 	return args.Error(0)
 }
 
@@ -63,10 +62,5 @@ func (m *MockUserRepository) SaveMany(items *[]models.User) error {
 
 func (m *MockUserRepository) Delete(item *models.User) error {
 	args := m.Called(item)
-	return args.Error(0)
-}
-
-func (m *MockUserRepository) GetBy(field string, value string, item *models.User) error {
-	args := m.Called(field, value, item)
 	return args.Error(0)
 }

@@ -8,22 +8,8 @@ import (
 )
 
 type BaseModel struct {
-	ID        uuid.UUID      `gorm:"primaryKey"`
-	CreatedAt time.Time      `gorm:"not null"`
-	UpdatedAt time.Time      `gorm:"not null"`
-	DeletedAt gorm.DeletedAt `gorm:"default:null"`
-}
-
-func (r *BaseModel) BeforeCreate(tx *gorm.DB) error {
-	r.ID = uuid.New()
-	r.CreatedAt = time.Now()
-	r.UpdatedAt = time.Now()
-
-	return nil
-}
-
-func (r *BaseModel) BeforeUpdate(tx *gorm.DB) error {
-	r.UpdatedAt = time.Now()
-
-	return nil
+	ID        uuid.UUID       `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
+	CreatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
+	UpdatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
+	DeletedAt *gorm.DeletedAt `gorm:"type:timestamp;default:null"`
 }
