@@ -1,6 +1,10 @@
 package requests
 
-import "github.com/wisaitas/standard-golang/internal/models"
+import (
+	"time"
+
+	"github.com/wisaitas/standard-golang/internal/models"
+)
 
 type LoginRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=255"`
@@ -8,11 +12,14 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Username        string                   `json:"username" validate:"required,min=3,max=255"`
-	Email           string                   `json:"email" validate:"required,email"`
-	Password        string                   `json:"password" validate:"required,min=8"`
-	ConfirmPassword string                   `json:"confirm_password" validate:"required,eqfield=Password"`
-	Addresses       []RegisterAddressRequest `json:"addresses" validate:"dive"`
+	Username        string           `json:"username" validate:"required,min=3,max=255"`
+	Email           string           `json:"email" validate:"required,email"`
+	FirstName       string           `json:"first_name" validate:"required,min=3,max=255"`
+	LastName        string           `json:"last_name" validate:"required,min=3,max=255"`
+	BirthDate       time.Time        `json:"birth_date" validate:"required"`
+	Password        string           `json:"password" validate:"required,min=8"`
+	ConfirmPassword string           `json:"confirm_password" validate:"required,eqfield=Password"`
+	Addresses       []AddressRequest `json:"addresses" validate:"dive"`
 }
 
 func (r *RegisterRequest) ReqToModel() models.User {
@@ -25,22 +32,9 @@ func (r *RegisterRequest) ReqToModel() models.User {
 		Username:  r.Username,
 		Email:     r.Email,
 		Password:  r.Password,
+		FirstName: r.FirstName,
+		LastName:  r.LastName,
+		BirthDate: r.BirthDate,
 		Addresses: addresses,
-	}
-}
-
-type RegisterAddressRequest struct {
-	ProvinceID    int     `json:"province_id" validate:"required"`
-	DistrictID    int     `json:"district_id" validate:"required"`
-	SubDistrictID int     `json:"sub_district_id" validate:"required"`
-	Address       *string `json:"address"`
-}
-
-func (r *RegisterAddressRequest) ReqToModel() models.Address {
-	return models.Address{
-		ProvinceID:    r.ProvinceID,
-		DistrictID:    r.DistrictID,
-		SubDistrictID: r.SubDistrictID,
-		Address:       r.Address,
 	}
 }

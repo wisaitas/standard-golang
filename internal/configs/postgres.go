@@ -49,6 +49,7 @@ func autoMigrate(db *gorm.DB) error {
 		&models.District{},
 		&models.SubDistrict{},
 		&models.Address{},
+		&models.UserHistory{},
 	); err != nil {
 		return fmt.Errorf("error migrating database: %w", err)
 	}

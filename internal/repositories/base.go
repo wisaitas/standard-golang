@@ -7,7 +7,6 @@ import (
 )
 
 type BaseRepository[T any] interface {
-	WithTx(tx *gorm.DB) BaseRepository[T]
 	GetAll(items *[]T, pagination *queries.PaginationQuery, condition interface{}, relations ...string) error
 	GetBy(condition interface{}, item *T, relations ...string) error
 	Create(item *T) error
@@ -17,6 +16,9 @@ type BaseRepository[T any] interface {
 	Save(item *T) error
 	SaveMany(items *[]T) error
 	Delete(item *T) error
+	BeginTx() *gorm.DB
+	CommitTx() error
+	RollbackTx() error
 }
 
 type baseRepository[T any] struct {
@@ -91,4 +93,16 @@ func (r *baseRepository[T]) SaveMany(items *[]T) error {
 
 func (r *baseRepository[T]) Delete(item *T) error {
 	return r.db.Delete(item).Error
+}
+
+func (r *baseRepository[T]) BeginTx() *gorm.DB {
+	return r.db.Begin()
+}
+
+func (r *baseRepository[T]) CommitTx() error {
+	return r.db.Commit().Error
+}
+
+func (r *baseRepository[T]) RollbackTx() error {
+	return r.db.Rollback().Error
 }

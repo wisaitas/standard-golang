@@ -40,4 +40,7 @@ func (r *UserRoutes) UserRoutes() {
 
 	// Method POST
 	users.Post("/", r.userValidate.ValidateCreateUserRequest, r.userHandler.CreateUser)
+
+	// Method PATCH
+	users.Patch("/:id", r.userValidate.ValidateUpdateUserRequest, r.userHandler.UpdateUser)
 }

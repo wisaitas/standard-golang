@@ -22,11 +22,11 @@ func initializeServices(repos *Repositories, redisClient utils.RedisClient) *Ser
 		UserService: userService.NewUserService(
 			userService.NewRead(repos.UserRepository, redisClient),
 			userService.NewCreate(repos.UserRepository, redisClient),
-			userService.NewUpdate(repos.UserRepository, redisClient),
+			userService.NewUpdate(repos.UserRepository, repos.UserHistoryRepository, redisClient),
 			userService.NewDelete(repos.UserRepository, redisClient),
 			userService.NewTransaction(repos.UserRepository, redisClient),
 		),
-		AuthService: authService.NewAuthService(repos.UserRepository, redisClient),
+		AuthService: authService.NewAuthService(repos.UserRepository, repos.UserHistoryRepository, redisClient),
 		ProvinceService: provinceService.NewProvinceService(
 			provinceService.NewRead(repos.ProvinceRepository, redisClient),
 		),

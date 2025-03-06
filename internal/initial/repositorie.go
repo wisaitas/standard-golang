@@ -8,6 +8,7 @@ import (
 
 type Repositories struct {
 	UserRepository        repositories.UserRepository
+	UserHistoryRepository repositories.UserHistoryRepository
 	ProvinceRepository    repositories.ProvinceRepository
 	DistrictRepository    repositories.DistrictRepository
 	SubDistrictRepository repositories.SubDistrictRepository
@@ -16,6 +17,7 @@ type Repositories struct {
 func initializeRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
 		UserRepository:        repositories.NewUserRepository(db, repositories.NewBaseRepository[models.User](db)),
+		UserHistoryRepository: repositories.NewUserHistoryRepository(db, repositories.NewBaseRepository[models.UserHistory](db)),
 		ProvinceRepository:    repositories.NewProvinceRepository(db, repositories.NewBaseRepository[models.Province](db)),
 		DistrictRepository:    repositories.NewDistrictRepository(db, repositories.NewBaseRepository[models.District](db)),
 		SubDistrictRepository: repositories.NewSubDistrictRepository(db, repositories.NewBaseRepository[models.SubDistrict](db)),

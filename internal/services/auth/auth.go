@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wisaitas/standard-golang/internal/constants"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
@@ -25,17 +26,20 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepository repositories.UserRepository
-	redis          utils.RedisClient
+	userRepository        repositories.UserRepository
+	userHistoryRepository repositories.UserHistoryRepository
+	redis                 utils.RedisClient
 }
 
 func NewAuthService(
 	userRepository repositories.UserRepository,
+	userHistoryRepository repositories.UserHistoryRepository,
 	redis utils.RedisClient,
 ) AuthService {
 	return &authService{
-		userRepository: userRepository,
-		redis:          redis,
+		userRepository:        userRepository,
+		userHistoryRepository: userHistoryRepository,
+		redis:                 redis,
 	}
 }
 
@@ -96,11 +100,34 @@ func (r *authService) Register(req requests.RegisterRequest) (resp responses.Reg
 
 	user.Password = string(hashedPassword)
 
-	if err = r.userRepository.Create(&user); err != nil {
+	tx := r.userRepository.BeginTx()
+
+	if err = tx.Create(&user).Error; err != nil {
 		if strings.Contains(err.Error(), "unique constraint") {
+			tx.Rollback()
 			return resp, http.StatusBadRequest, errors.New("username already exists")
 		}
 
+		tx.Rollback()
+		return resp, http.StatusInternalServerError, err
+	}
+
+	if err := tx.Create(
+		&models.UserHistory{
+			Action:    constants.ACTION.CREATE,
+			UserID:    user.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			BirthDate: user.BirthDate,
+			Version:   user.Version,
+		},
+	).Error; err != nil {
+		tx.Rollback()
+		return resp, http.StatusInternalServerError, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		return resp, http.StatusInternalServerError, err
 	}
 

@@ -33,6 +33,7 @@ func NewRead(
 		redisUtil:      redisUtil,
 	}
 }
+
 func (r *read) GetUsers(query queries.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
 

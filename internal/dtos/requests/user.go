@@ -1,6 +1,10 @@
 package requests
 
-import "github.com/wisaitas/standard-golang/internal/models"
+import (
+	"time"
+
+	"github.com/wisaitas/standard-golang/internal/models"
+)
 
 type CreateUserRequest struct {
 	Username        string `json:"username" validate:"required,min=3,max=255"`
@@ -15,4 +19,10 @@ func (r *CreateUserRequest) ToModel() models.User {
 		Email:    r.Email,
 		Password: r.Password,
 	}
+}
+
+type UpdateUserRequest struct {
+	FirstName *string    `json:"first_name" validate:"omitempty,min=3,max=255"`
+	LastName  *string    `json:"last_name" validate:"omitempty,min=3,max=255"`
+	BirthDate *time.Time `json:"birth_date" validate:"omitempty"`
 }
