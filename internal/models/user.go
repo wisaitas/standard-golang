@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type User struct {
@@ -14,12 +12,6 @@ type User struct {
 	BirthDate time.Time `gorm:"not null"`
 	Email     string    `gorm:"not null;unique"`
 	Password  string    `gorm:"not null"`
-	Version   int       `gorm:"not null;default:0"`
 
 	Addresses []Address `gorm:"foreignKey:UserID"`
-}
-
-func (r *User) BeforeUpdate(tx *gorm.DB) (err error) {
-	r.Version++
-	return
 }

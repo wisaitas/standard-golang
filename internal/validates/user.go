@@ -7,6 +7,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
+	"github.com/wisaitas/standard-golang/internal/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,7 +37,7 @@ func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
 
 	if err := validateCommonPaginationQuery(c, &query); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
+			Message: utils.Error(err).Error(),
 		})
 	}
 
@@ -51,13 +52,13 @@ func (r *UserValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
 
 	if err := validateCommonRequestParams(c, &params); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
+			Message: utils.Error(err).Error(),
 		})
 	}
 
 	if err := validateCommonRequestJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
+			Message: utils.Error(err).Error(),
 		})
 	}
 

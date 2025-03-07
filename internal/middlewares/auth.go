@@ -19,7 +19,7 @@ func NewAuthMiddleware(redisUtil utils.RedisClient) *AuthMiddleware {
 func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 	if err := authToken(c, r.redisUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
-			Message: err.Error(),
+			Message: utils.Error(err).Error(),
 		})
 	}
 
@@ -30,7 +30,7 @@ func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 func (r *AuthMiddleware) RefreshToken(c *fiber.Ctx) error {
 	if err := authToken(c, r.redisUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(responses.ErrorResponse{
-			Message: err.Error(),
+			Message: utils.Error(err).Error(),
 		})
 	}
 

@@ -18,7 +18,7 @@ import (
 func authToken(c *fiber.Ctx, redisUtil utils.RedisClient) error {
 	authHeader := c.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return errors.New("invalid token type")
+		return utils.Error(errors.New("invalid token type"))
 	}
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
@@ -31,16 +31,16 @@ func authToken(c *fiber.Ctx, redisUtil utils.RedisClient) error {
 		return []byte(configs.ENV.JWT_SECRET), nil
 	})
 	if err != nil {
-		return err
+		return utils.Error(err)
 	}
 
 	_, err = redisUtil.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID)))
 	if err != nil {
 		if err == redis.Nil {
-			return errors.New("session not found")
+			return utils.Error(errors.New("session not found"))
 		}
 
-		return err
+		return utils.Error(err)
 	}
 
 	c.Locals("userContext", userContext)

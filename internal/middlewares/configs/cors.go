@@ -1,4 +1,4 @@
-package middleware_configs
+package configs
 
 import (
 	"github.com/gofiber/fiber/v2"

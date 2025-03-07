@@ -1,4 +1,4 @@
-package middleware_configs
+package configs
 
 import (
 	"bytes"
@@ -24,10 +24,6 @@ func Logger() fiber.Handler {
 						} else {
 							fmt.Printf("request: %s\n", requestBody)
 						}
-					}
-
-					if string(c.Response().Header.ContentType()) == "application/json" {
-						fmt.Printf("response: %s\n", string(c.Response().Body()))
 					}
 				}
 			},

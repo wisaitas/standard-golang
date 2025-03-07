@@ -41,19 +41,19 @@ func (r *read) GetUsers(query queries.PaginationQuery) (resp []responses.GetUser
 
 	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
-		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if cache != "" {
 		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
-			return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
+			return []responses.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 		}
 
 		return resp, http.StatusOK, nil
 	}
 
 	if err := r.userRepository.GetAll(&users, &query, nil); err != nil {
-		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	for _, user := range users {
@@ -63,11 +63,11 @@ func (r *read) GetUsers(query queries.PaginationQuery) (resp []responses.GetUser
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
-		return []responses.GetUsersResponse{}, http.StatusInternalServerError, err
+		return []responses.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp, http.StatusOK, nil

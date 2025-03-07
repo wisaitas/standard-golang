@@ -41,19 +41,19 @@ func (r *read) GetProvinces(query queries.PaginationQuery) (resp []responses.Pro
 
 	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
-		return []responses.ProvinceResponse{}, http.StatusInternalServerError, err
+		return []responses.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if cache != "" {
 		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
-			return []responses.ProvinceResponse{}, http.StatusInternalServerError, err
+			return []responses.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 		}
 
 		return resp, http.StatusOK, nil
 	}
 
 	if err := r.provinceRepository.GetAll(&provinces, &query, nil); err != nil {
-		return []responses.ProvinceResponse{}, http.StatusInternalServerError, err
+		return []responses.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	for _, province := range provinces {
@@ -63,11 +63,11 @@ func (r *read) GetProvinces(query queries.PaginationQuery) (resp []responses.Pro
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		return []responses.ProvinceResponse{}, http.StatusInternalServerError, err
+		return []responses.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
-		return []responses.ProvinceResponse{}, http.StatusInternalServerError, err
+		return []responses.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp, http.StatusOK, nil

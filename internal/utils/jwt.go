@@ -16,7 +16,7 @@ func GenerateToken(data map[string]interface{}, exp int64) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(configs.ENV.JWT_SECRET))
 	if err != nil {
-		return "", err
+		return "", Error(err)
 	}
 
 	return tokenString, nil

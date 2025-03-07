@@ -38,23 +38,23 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 	user := models.User{}
 
 	if err := r.userRepository.GetBy(map[string]any{"id": param.ID}, &user, "Addresses"); err != nil {
-		return resp, 0, err
+		return resp, http.StatusNotFound, utils.Error(err)
 	}
 
 	tx := r.userRepository.BeginTx()
 
 	if err := tx.Create(
 		&models.UserHistory{
-			Action:    constants.ACTION.UPDATE,
-			UserID:    user.ID,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			BirthDate: user.BirthDate,
-			Version:   user.Version,
+			Action:      constants.ACTION.UPDATE,
+			UserID:      user.ID,
+			FirstName:   user.FirstName,
+			LastName:    user.LastName,
+			BirthDate:   user.BirthDate,
+			UserVersion: user.Version,
 		},
 	).Error; err != nil {
 		tx.Rollback()
-		return resp, 0, err
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if request.FirstName != nil {
@@ -71,12 +71,12 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 
 	if err := tx.Updates(&user).Error; err != nil {
 		tx.Rollback()
-		return resp, 0, err
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return resp, 0, err
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	respInfo := responses.UpdateUserResponse{}

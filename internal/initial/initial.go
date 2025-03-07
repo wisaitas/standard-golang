@@ -56,7 +56,7 @@ func (r *App) SetupRoutes() {
 func (r *App) Run() {
 	go func() {
 		if err := r.App.Listen(fmt.Sprintf(":%s", configs.ENV.PORT)); err != nil {
-			log.Fatalf("error starting server: %v\n", err)
+			log.Fatalf("error starting server: %v\n", utils.Error(err))
 		}
 	}()
 
@@ -70,15 +70,15 @@ func (r *App) Run() {
 func (r *App) close() {
 	sqlDB, err := r.Configs.DB.DB()
 	if err != nil {
-		log.Fatalf("error getting database: %v\n", err)
+		log.Fatalf("error getting database: %v\n", utils.Error(err))
 	}
 
 	if err := sqlDB.Close(); err != nil {
-		log.Fatalf("error closing database: %v\n", err)
+		log.Fatalf("error closing database: %v\n", utils.Error(err))
 	}
 
 	if err := r.Configs.Redis.Close(); err != nil {
-		log.Fatalf("error closing redis: %v\n", err)
+		log.Fatalf("error closing redis: %v\n", utils.Error(err))
 	}
 
 	log.Println("gracefully shutdown")
