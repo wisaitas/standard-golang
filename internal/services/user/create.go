@@ -8,7 +8,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/repositories"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,12 +18,12 @@ type Create interface {
 
 type create struct {
 	userRepository repositories.UserRepository
-	redisUtil      utils.RedisClient
+	redisUtil      pkg.RedisClient
 }
 
 func NewCreate(
 	userRepository repositories.UserRepository,
-	redisUtil utils.RedisClient,
+	redisUtil pkg.RedisClient,
 ) Create {
 	return &create{
 		userRepository: userRepository,

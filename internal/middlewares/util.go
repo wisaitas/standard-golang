@@ -12,13 +12,13 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/configs"
 	"github.com/wisaitas/standard-golang/internal/models"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
-func authToken(c *fiber.Ctx, redisUtil utils.RedisClient) error {
+func authToken(c *fiber.Ctx, redisUtil pkg.RedisClient) error {
 	authHeader := c.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return utils.Error(errors.New("invalid token type"))
+		return pkg.Error(errors.New("invalid token type"))
 	}
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
@@ -31,16 +31,16 @@ func authToken(c *fiber.Ctx, redisUtil utils.RedisClient) error {
 		return []byte(configs.ENV.JWT_SECRET), nil
 	})
 	if err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	_, err = redisUtil.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID)))
 	if err != nil {
 		if err == redis.Nil {
-			return utils.Error(errors.New("session not found"))
+			return pkg.Error(errors.New("session not found"))
 		}
 
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	c.Locals("userContext", userContext)

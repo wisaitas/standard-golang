@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"github.com/wisaitas/standard-golang/internal/dtos/params"
-	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
-	"github.com/wisaitas/standard-golang/internal/dtos/responses"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,7 +21,7 @@ func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 	req := requests.CreateUserRequest{}
 
 	if err := validateCommonRequestJSONBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
 		})
 	}
@@ -33,11 +31,11 @@ func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 }
 
 func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
-	query := queries.PaginationQuery{}
+	query := pkg.PaginationQuery{}
 
 	if err := validateCommonPaginationQuery(c, &query); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: utils.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
+			Message: pkg.Error(err).Error(),
 		})
 	}
 
@@ -51,14 +49,14 @@ func (r *UserValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
 	params := params.UserParams{}
 
 	if err := validateCommonRequestParams(c, &params); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: utils.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
+			Message: pkg.Error(err).Error(),
 		})
 	}
 
 	if err := validateCommonRequestJSONBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: utils.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
+			Message: pkg.Error(err).Error(),
 		})
 	}
 

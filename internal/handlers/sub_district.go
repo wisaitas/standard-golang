@@ -5,9 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/dtos/queries"
-	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	subDistrictService "github.com/wisaitas/standard-golang/internal/services/sub-district"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type SubDistrictHandler struct {
@@ -25,19 +24,19 @@ func NewSubDistrictHandler(
 func (r *SubDistrictHandler) GetSubDistricts(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(queries.SubDistrictQuery)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(responses.ErrorResponse{
-			Message: utils.Error(errors.New("failed to get queries")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
+			Message: pkg.Error(errors.New("failed to get queries")).Error(),
 		})
 	}
 
 	subDistricts, statusCode, err := r.subDistrictService.GetSubDistricts(query)
 	if err != nil {
-		return c.Status(statusCode).JSON(responses.ErrorResponse{
-			Message: utils.Error(err).Error(),
+		return c.Status(statusCode).JSON(pkg.ErrorResponse{
+			Message: pkg.Error(err).Error(),
 		})
 	}
 
-	return c.Status(statusCode).JSON(responses.SuccessResponse{
+	return c.Status(statusCode).JSON(pkg.SuccessResponse{
 		Message: "SubDistricts fetched successfully",
 		Data:    subDistricts,
 	})

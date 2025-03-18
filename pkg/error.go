@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ func Error(err error) error {
 	if err == nil {
 		return nil
 	}
+
 	pc, file, line, ok := runtime.Caller(1)
 	if !ok {
 		return err

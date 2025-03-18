@@ -1,13 +1,11 @@
-package repositories
+package pkg
 
 import (
-	"github.com/wisaitas/standard-golang/internal/dtos/queries"
-
 	"gorm.io/gorm"
 )
 
 type BaseRepository[T any] interface {
-	GetAll(items *[]T, pagination *queries.PaginationQuery, condition interface{}, relations ...string) error
+	GetAll(items *[]T, pagination *PaginationQuery, condition interface{}, relations ...string) error
 	GetBy(condition interface{}, item *T, relations ...string) error
 	Create(item *T) error
 	CreateMany(items *[]T) error
@@ -37,7 +35,7 @@ func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
 	}
 }
 
-func (r *baseRepository[T]) GetAll(items *[]T, pagination *queries.PaginationQuery, condition interface{}, relations ...string) error {
+func (r *baseRepository[T]) GetAll(items *[]T, pagination *PaginationQuery, condition interface{}, relations ...string) error {
 	query := r.db.Where(condition)
 
 	if pagination.Page != nil && pagination.PageSize != nil {

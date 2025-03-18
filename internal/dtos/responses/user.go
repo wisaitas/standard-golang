@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type CreateUserResponse struct {
-	BaseResponse
+	pkg.BaseResponse
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -23,7 +24,7 @@ func (r *CreateUserResponse) ModelToResponse(user models.User) CreateUserRespons
 }
 
 type GetUsersResponse struct {
-	BaseResponse
+	pkg.BaseResponse
 	Username  string            `json:"username"`
 	Email     string            `json:"email"`
 	FirstName string            `json:"first_name"`
@@ -55,7 +56,7 @@ func (r *GetUsersResponse) ModelToResponse(user models.User) GetUsersResponse {
 }
 
 type UpdateUserResponse struct {
-	BaseResponse
+	pkg.BaseResponse
 	Username  string            `json:"username"`
 	Email     string            `json:"email"`
 	FirstName string            `json:"first_name"`

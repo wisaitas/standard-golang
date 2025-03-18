@@ -2,7 +2,7 @@ package initial
 
 import (
 	"github.com/wisaitas/standard-golang/internal/middlewares"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Middlewares struct {
@@ -10,7 +10,7 @@ type Middlewares struct {
 	UserMiddleware middlewares.UserMiddleware
 }
 
-func initializeMiddlewares(redis utils.RedisClient) *Middlewares {
+func initializeMiddlewares(redis pkg.RedisClient) *Middlewares {
 	return &Middlewares{
 		AuthMiddleware: *middlewares.NewAuthMiddleware(redis),
 		UserMiddleware: *middlewares.NewUserMiddleware(redis),

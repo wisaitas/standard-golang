@@ -1,4 +1,4 @@
-package queries
+package pkg
 
 type PaginationQuery struct {
 	Page     *int    `query:"page"`

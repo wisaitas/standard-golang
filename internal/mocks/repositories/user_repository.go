@@ -1,10 +1,10 @@
 package mock_repositories
 
 import (
-	"github.com/wisaitas/standard-golang/internal/dtos/queries"
 	"gorm.io/gorm"
 
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/pkg"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -14,7 +14,7 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) GetAll(items *[]models.User, pagination *queries.PaginationQuery, condition interface{}, relations ...string) error {
+func (m *MockUserRepository) GetAll(items *[]models.User, pagination *pkg.PaginationQuery, condition interface{}, relations ...string) error {
 	args := m.Called(items, pagination, condition, relations)
 	return args.Error(0)
 }

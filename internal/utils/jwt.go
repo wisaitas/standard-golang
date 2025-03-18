@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/wisaitas/standard-golang/internal/configs"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 func GenerateToken(data map[string]interface{}, exp int64) (string, error) {
@@ -16,7 +17,7 @@ func GenerateToken(data map[string]interface{}, exp int64) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(configs.ENV.JWT_SECRET))
 	if err != nil {
-		return "", Error(err)
+		return "", pkg.Error(err)
 	}
 
 	return tokenString, nil

@@ -12,7 +12,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Read interface {
@@ -21,12 +21,12 @@ type Read interface {
 
 type read struct {
 	subDistrictRepository repositories.SubDistrictRepository
-	redisUtil             utils.RedisClient
+	redisUtil             pkg.RedisClient
 }
 
 func NewRead(
 	subDistrictRepository repositories.SubDistrictRepository,
-	redisUtil utils.RedisClient,
+	redisUtil pkg.RedisClient,
 ) Read {
 	return &read{
 		subDistrictRepository: subDistrictRepository,
@@ -41,19 +41,19 @@ func (r *read) GetSubDistricts(query queries.SubDistrictQuery) (resp []responses
 
 	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redis.Nil {
-		return nil, http.StatusInternalServerError, utils.Error(err)
+		return nil, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	if cache != "" {
 		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
-			return nil, http.StatusInternalServerError, utils.Error(err)
+			return nil, http.StatusInternalServerError, pkg.Error(err)
 		}
 
 		return resp, http.StatusOK, nil
 	}
 
 	if err := r.subDistrictRepository.GetAll(&subDistricts, &query.PaginationQuery, map[string]interface{}{"district_id": query.DistrictID}); err != nil {
-		return nil, http.StatusInternalServerError, utils.Error(err)
+		return nil, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	for _, subDistrict := range subDistricts {
@@ -63,11 +63,11 @@ func (r *read) GetSubDistricts(query queries.SubDistrictQuery) (resp []responses
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		return nil, http.StatusInternalServerError, utils.Error(err)
+		return nil, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
-		return nil, http.StatusInternalServerError, utils.Error(err)
+		return nil, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	return resp, http.StatusOK, nil

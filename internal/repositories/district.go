@@ -2,19 +2,20 @@ package repositories
 
 import (
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/pkg"
 	"gorm.io/gorm"
 )
 
 type DistrictRepository interface {
-	BaseRepository[models.District]
+	pkg.BaseRepository[models.District]
 }
 
 type districtRepository struct {
-	BaseRepository[models.District]
+	pkg.BaseRepository[models.District]
 	db *gorm.DB
 }
 
-func NewDistrictRepository(db *gorm.DB, baseRepository BaseRepository[models.District]) DistrictRepository {
+func NewDistrictRepository(db *gorm.DB, baseRepository pkg.BaseRepository[models.District]) DistrictRepository {
 	return &districtRepository{
 		BaseRepository: baseRepository,
 		db:             db,

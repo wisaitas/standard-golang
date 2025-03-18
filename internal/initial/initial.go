@@ -9,7 +9,7 @@ import (
 
 	"github.com/wisaitas/standard-golang/internal/configs"
 	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,7 +29,7 @@ func InitializeApp() *App {
 
 	configs := initializeConfigs()
 
-	redisUtils := utils.NewRedisClient(configs.Redis)
+	redisUtils := pkg.NewRedisClient(configs.Redis)
 
 	repositories := initializeRepositories(configs.DB)
 	services := initializeServices(repositories, redisUtils)
@@ -56,7 +56,7 @@ func (r *App) SetupRoutes() {
 func (r *App) Run() {
 	go func() {
 		if err := r.App.Listen(fmt.Sprintf(":%s", configs.ENV.PORT)); err != nil {
-			log.Fatalf("error starting server: %v\n", utils.Error(err))
+			log.Fatalf("error starting server: %v\n", pkg.Error(err))
 		}
 	}()
 
@@ -70,15 +70,15 @@ func (r *App) Run() {
 func (r *App) close() {
 	sqlDB, err := r.Configs.DB.DB()
 	if err != nil {
-		log.Fatalf("error getting database: %v\n", utils.Error(err))
+		log.Fatalf("error getting database: %v\n", pkg.Error(err))
 	}
 
 	if err := sqlDB.Close(); err != nil {
-		log.Fatalf("error closing database: %v\n", utils.Error(err))
+		log.Fatalf("error closing database: %v\n", pkg.Error(err))
 	}
 
 	if err := r.Configs.Redis.Close(); err != nil {
-		log.Fatalf("error closing redis: %v\n", utils.Error(err))
+		log.Fatalf("error closing redis: %v\n", pkg.Error(err))
 	}
 
 	log.Println("gracefully shutdown")

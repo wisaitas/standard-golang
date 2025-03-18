@@ -6,7 +6,7 @@ import (
 	provinceService "github.com/wisaitas/standard-golang/internal/services/province"
 	subDistrictService "github.com/wisaitas/standard-golang/internal/services/sub-district"
 	userService "github.com/wisaitas/standard-golang/internal/services/user"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Services struct {
@@ -17,7 +17,7 @@ type Services struct {
 	SubDistrictService subDistrictService.SubDistrictService
 }
 
-func initializeServices(repos *Repositories, redisClient utils.RedisClient) *Services {
+func initializeServices(repos *Repositories, redisClient pkg.RedisClient) *Services {
 	return &Services{
 		UserService: userService.NewUserService(
 			userService.NewRead(repos.UserRepository, redisClient),

@@ -10,17 +10,16 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/configs"
-	"github.com/wisaitas/standard-golang/internal/dtos/queries"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T) error {
 	if err := c.BodyParser(&req); err != nil {
-		return utils.Error(err)
+		return err
 	}
 
 	if err := validator.New().Struct(req); err != nil {
-		return utils.Error(err)
+		return err
 	}
 
 	return nil
@@ -28,13 +27,13 @@ func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T) error {
 
 func validateCommonRequestParams[T any](c *fiber.Ctx, req *T) error {
 	if err := c.ParamsParser(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	fmt.Println(req)
 
 	if err := validator.New().Struct(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	return nil
@@ -42,11 +41,11 @@ func validateCommonRequestParams[T any](c *fiber.Ctx, req *T) error {
 
 func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T) error {
 	if err := c.BodyParser(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	if err := validator.New().Struct(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	if form, err := c.MultipartForm(); err == nil {
@@ -79,19 +78,19 @@ func validateImageFiles(files []*multipart.FileHeader) error {
 
 	for _, file := range files {
 		if file.Size > 1024*1024*maxFileSize {
-			return utils.Error(errors.New("image file size must be less than " + strconv.FormatInt(maxFileSize, 10) + "MB"))
+			return pkg.Error(errors.New("image file size must be less than " + strconv.FormatInt(maxFileSize, 10) + "MB"))
 		}
 
 		if file.Size == 0 {
-			return utils.Error(errors.New("image file is required"))
+			return pkg.Error(errors.New("image file is required"))
 		}
 
 		if file.Filename == "" {
-			return utils.Error(errors.New("image file name is required"))
+			return pkg.Error(errors.New("image file name is required"))
 		}
 
 		if file.Header.Get("content-type") != "image/jpeg" && file.Header.Get("content-type") != "image/png" && file.Header.Get("content-type") != "image/gif" {
-			return utils.Error(errors.New("image file must be a valid image"))
+			return pkg.Error(errors.New("image file must be a valid image"))
 		}
 	}
 
@@ -100,26 +99,26 @@ func validateImageFiles(files []*multipart.FileHeader) error {
 
 func validateCommonPaginationQuery[T any](c *fiber.Ctx, req *T) error {
 	if err := c.QueryParser(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	val := reflect.ValueOf(req).Elem()
 	paginationField := val.FieldByName("PaginationQuery")
 
 	if paginationField.IsValid() {
-		pagination := paginationField.Addr().Interface().(*queries.PaginationQuery)
+		pagination := paginationField.Addr().Interface().(*pkg.PaginationQuery)
 
 		if err := validatePageAndPageSize(pagination.Page, pagination.PageSize); err != nil {
-			return utils.Error(err)
+			return pkg.Error(err)
 		}
 
 		if err := validateSortAndOrder(pagination.Sort, pagination.Order); err != nil {
-			return utils.Error(err)
+			return pkg.Error(err)
 		}
 	}
 
 	if err := validator.New().Struct(req); err != nil {
-		return utils.Error(err)
+		return pkg.Error(err)
 	}
 
 	return nil
@@ -127,20 +126,20 @@ func validateCommonPaginationQuery[T any](c *fiber.Ctx, req *T) error {
 
 func validatePageAndPageSize(page *int, pageSize *int) error {
 	if page != nil && pageSize == nil {
-		return utils.Error(errors.New("pageSize is required"))
+		return pkg.Error(errors.New("pageSize is required"))
 	}
 
 	if page == nil && pageSize != nil {
-		return utils.Error(errors.New("page is required"))
+		return pkg.Error(errors.New("page is required"))
 	}
 
 	if page != nil && pageSize != nil {
 		if *page < 0 {
-			return utils.Error(errors.New("page must be greater than 0"))
+			return pkg.Error(errors.New("page must be greater than 0"))
 		}
 
 		if *pageSize < 0 {
-			return utils.Error(errors.New("pageSize must be greater than 0"))
+			return pkg.Error(errors.New("pageSize must be greater than 0"))
 		}
 	}
 
@@ -149,20 +148,20 @@ func validatePageAndPageSize(page *int, pageSize *int) error {
 
 func validateSortAndOrder(sort *string, order *string) error {
 	if sort != nil && order == nil {
-		return utils.Error(errors.New("order is required"))
+		return pkg.Error(errors.New("order is required"))
 	}
 
 	if sort == nil && order != nil {
-		return utils.Error(errors.New("sort is required"))
+		return pkg.Error(errors.New("sort is required"))
 	}
 
 	if sort != nil && order != nil {
 		if *sort == "" {
-			return utils.Error(errors.New("sort must be a valid field"))
+			return pkg.Error(errors.New("sort must be a valid field"))
 		}
 
 		if *order != "asc" && *order != "desc" {
-			return utils.Error(errors.New("order must be asc or desc"))
+			return pkg.Error(errors.New("order must be asc or desc"))
 		}
 	}
 

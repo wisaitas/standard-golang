@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/wisaitas/standard-golang/internal/repositories"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Transaction interface {
@@ -10,12 +10,12 @@ type Transaction interface {
 
 type transaction struct {
 	userRepository repositories.UserRepository
-	redisUtil      utils.RedisClient
+	redisUtil      pkg.RedisClient
 }
 
 func NewTransaction(
 	userRepository repositories.UserRepository,
-	redisUtil utils.RedisClient,
+	redisUtil pkg.RedisClient,
 ) Transaction {
 	return &transaction{
 		userRepository: userRepository,

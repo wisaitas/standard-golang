@@ -9,7 +9,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
-	"github.com/wisaitas/standard-golang/internal/utils"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Update interface {
@@ -19,13 +19,13 @@ type Update interface {
 type update struct {
 	userRepository        repositories.UserRepository
 	userHistoryRepository repositories.UserHistoryRepository
-	redisUtil             utils.RedisClient
+	redisUtil             pkg.RedisClient
 }
 
 func NewUpdate(
 	userRepository repositories.UserRepository,
 	userHistoryRepository repositories.UserHistoryRepository,
-	redisUtil utils.RedisClient,
+	redisUtil pkg.RedisClient,
 ) Update {
 	return &update{
 		userRepository:        userRepository,
@@ -38,7 +38,7 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 	user := models.User{}
 
 	if err := r.userRepository.GetBy(map[string]any{"id": param.ID}, &user, "Addresses"); err != nil {
-		return resp, http.StatusNotFound, utils.Error(err)
+		return resp, http.StatusNotFound, pkg.Error(err)
 	}
 
 	tx := r.userRepository.BeginTx()
@@ -54,7 +54,7 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 		},
 	).Error; err != nil {
 		tx.Rollback()
-		return resp, http.StatusInternalServerError, utils.Error(err)
+		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	if request.FirstName != nil {
@@ -71,12 +71,12 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 
 	if err := tx.Updates(&user).Error; err != nil {
 		tx.Rollback()
-		return resp, http.StatusInternalServerError, utils.Error(err)
+		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return resp, http.StatusInternalServerError, utils.Error(err)
+		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	respInfo := responses.UpdateUserResponse{}

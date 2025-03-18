@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type LoginResponse struct {
@@ -19,7 +20,7 @@ func (r *LoginResponse) ToResponse(accessToken, refreshToken string) LoginRespon
 }
 
 type RegisterResponse struct {
-	BaseResponse
+	pkg.BaseResponse
 	Username  string    `json:"username"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
