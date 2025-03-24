@@ -25,4 +25,5 @@ type UpdateUserRequest struct {
 	FirstName *string    `json:"first_name" validate:"omitempty,min=3,max=255"`
 	LastName  *string    `json:"last_name" validate:"omitempty,min=3,max=255"`
 	BirthDate *time.Time `json:"birth_date" validate:"omitempty"`
+	Email     *string    `json:"email" validate:"omitempty,email"`
 }

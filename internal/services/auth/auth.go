@@ -29,18 +29,24 @@ type AuthService interface {
 type authService struct {
 	userRepository        repositories.UserRepository
 	userHistoryRepository repositories.UserHistoryRepository
-	redis                 pkg.RedisClient
+	transactionUtil       pkg.TransactionUtil
+	redisUtil             pkg.RedisUtil
+	bcryptUtil            pkg.BcryptUtil
 }
 
 func NewAuthService(
 	userRepository repositories.UserRepository,
 	userHistoryRepository repositories.UserHistoryRepository,
-	redis pkg.RedisClient,
+	transactionUtil pkg.TransactionUtil,
+	redisUtil pkg.RedisUtil,
+	bcryptUtil pkg.BcryptUtil,
 ) AuthService {
 	return &authService{
 		userRepository:        userRepository,
 		userHistoryRepository: userHistoryRepository,
-		redis:                 redis,
+		transactionUtil:       transactionUtil,
+		redisUtil:             redisUtil,
+		bcryptUtil:            bcryptUtil,
 	}
 }
 
@@ -54,7 +60,7 @@ func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResp
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+	if err := r.bcryptUtil.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return resp, http.StatusUnauthorized, pkg.Error(err)
 	}
 
@@ -80,11 +86,11 @@ func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResp
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
@@ -94,53 +100,51 @@ func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResp
 func (r *authService) Register(req requests.RegisterRequest) (resp responses.RegisterResponse, statusCode int, err error) {
 	user := req.ReqToModel()
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := r.bcryptUtil.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
 	user.Password = string(hashedPassword)
 
-	tx := r.userRepository.BeginTx()
+	if err := r.transactionUtil.ExecuteInTransaction(func(tx *gorm.DB) error {
+		if err = tx.Create(&user).Error; err != nil {
+			if strings.Contains(err.Error(), "unique constraint") {
+				return pkg.Error(errors.New("username already exists"))
+			}
 
-	if err = tx.Create(&user).Error; err != nil {
-		if strings.Contains(err.Error(), "unique constraint") {
-			tx.Rollback()
-			return resp, http.StatusBadRequest, pkg.Error(errors.New("username already exists"))
+			return pkg.Error(err)
 		}
 
-		tx.Rollback()
+		userHistory := models.UserHistory{
+			Action:       constants.Action.Create,
+			UserID:       user.ID,
+			OldFirstName: user.FirstName,
+			OldLastName:  user.LastName,
+			OldBirthDate: user.BirthDate,
+			OldPassword:  user.Password,
+			OldEmail:     user.Email,
+			OldVersion:   user.Version,
+		}
+
+		if err = tx.Create(&userHistory).Error; err != nil {
+			return pkg.Error(err)
+		}
+
+		return nil
+	}); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := tx.Create(
-		&models.UserHistory{
-			Action:      constants.ACTION.CREATE,
-			UserID:      user.ID,
-			FirstName:   user.FirstName,
-			LastName:    user.LastName,
-			BirthDate:   user.BirthDate,
-			UserVersion: user.Version,
-		},
-	).Error; err != nil {
-		tx.Rollback()
-		return resp, http.StatusInternalServerError, pkg.Error(err)
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return resp, http.StatusInternalServerError, pkg.Error(err)
-	}
-
-	return resp.ToResponse(user), http.StatusCreated, pkg.Error(err)
+	return resp.ToResponse(user), http.StatusCreated, nil
 }
 
 func (r *authService) Logout(userContext models.UserContext) (statusCode int, err error) {
-	if err := r.redis.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.ID)); err != nil {
+	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.ID)); err != nil {
 		return http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redis.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.ID)); err != nil {
+	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.ID)); err != nil {
 		return http.StatusInternalServerError, pkg.Error(err)
 	}
 
@@ -175,11 +179,11 @@ func (r *authService) RefreshToken(userContext models.UserContext) (resp respons
 		return resp, http.StatusInternalServerError, err
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 

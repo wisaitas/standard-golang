@@ -21,12 +21,12 @@ type Read interface {
 
 type read struct {
 	districtRepository repositories.DistrictRepository
-	redisUtil          pkg.RedisClient
+	redisUtil          pkg.RedisUtil
 }
 
 func NewRead(
 	districtRepository repositories.DistrictRepository,
-	redisUtil pkg.RedisClient,
+	redisUtil pkg.RedisUtil,
 ) Read {
 	return &read{
 		districtRepository: districtRepository,

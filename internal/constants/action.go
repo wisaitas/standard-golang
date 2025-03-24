@@ -1,13 +1,11 @@
 package constants
 
-type Action struct {
-	CREATE string
-	UPDATE string
-	DELETE string
-}
-
-var ACTION = Action{
-	CREATE: "CREATE",
-	UPDATE: "UPDATE",
-	DELETE: "DELETE",
+var Action = struct {
+	Create string
+	Update string
+	Delete string
+}{
+	Create: "CREATE",
+	Update: "UPDATE",
+	Delete: "DELETE",
 }

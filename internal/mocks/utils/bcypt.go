@@ -6,12 +6,16 @@ type MockBcrypt struct {
 	mock.Mock
 }
 
-func (m *MockBcrypt) GenerateFromPassword(password string, cost int) ([]byte, error) {
-	args := m.Called(password, cost)
+func NewMockBcrypt() *MockBcrypt {
+	return &MockBcrypt{}
+}
+
+func (r *MockBcrypt) GenerateFromPassword(password string, cost int) ([]byte, error) {
+	args := r.Called(password, cost)
 	return args.Get(0).([]byte), args.Error(1)
 }
 
-func (m *MockBcrypt) CompareHashAndPassword(hashedPassword, password []byte) error {
-	args := m.Called(hashedPassword, password)
+func (r *MockBcrypt) CompareHashAndPassword(hashedPassword, password []byte) error {
+	args := r.Called(hashedPassword, password)
 	return args.Error(0)
 }

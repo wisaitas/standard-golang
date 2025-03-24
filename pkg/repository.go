@@ -9,14 +9,13 @@ type BaseRepository[T any] interface {
 	GetBy(condition interface{}, item *T, relations ...string) error
 	Create(item *T) error
 	CreateMany(items *[]T) error
-	Updates(item *T) error
+	Update(item *T) error
 	UpdateMany(items *[]T) error
 	Save(item *T) error
 	SaveMany(items *[]T) error
 	Delete(item *T) error
-	BeginTx() *gorm.DB
-	CommitTx() error
-	RollbackTx() error
+	DeleteMany(items *[]T) error
+	WithTx(tx *gorm.DB) BaseRepository[T]
 }
 
 type baseRepository[T any] struct {
@@ -26,12 +25,6 @@ type baseRepository[T any] struct {
 func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 	return &baseRepository[T]{
 		db: db,
-	}
-}
-
-func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
-	return &baseRepository[T]{
-		db: tx,
 	}
 }
 
@@ -73,7 +66,7 @@ func (r *baseRepository[T]) CreateMany(items *[]T) error {
 	return r.db.Create(items).Error
 }
 
-func (r *baseRepository[T]) Updates(item *T) error {
+func (r *baseRepository[T]) Update(item *T) error {
 	return r.db.Updates(item).Error
 }
 
@@ -93,14 +86,12 @@ func (r *baseRepository[T]) Delete(item *T) error {
 	return r.db.Delete(item).Error
 }
 
-func (r *baseRepository[T]) BeginTx() *gorm.DB {
-	return r.db.Begin()
+func (r *baseRepository[T]) DeleteMany(items *[]T) error {
+	return r.db.Delete(items).Error
 }
 
-func (r *baseRepository[T]) CommitTx() error {
-	return r.db.Commit().Error
-}
-
-func (r *baseRepository[T]) RollbackTx() error {
-	return r.db.Rollback().Error
+func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
+	return &baseRepository[T]{
+		db: tx,
+	}
 }

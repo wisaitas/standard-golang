@@ -18,12 +18,12 @@ type Create interface {
 
 type create struct {
 	userRepository repositories.UserRepository
-	redisUtil      pkg.RedisClient
+	redisUtil      pkg.RedisUtil
 }
 
 func NewCreate(
 	userRepository repositories.UserRepository,
-	redisUtil pkg.RedisClient,
+	redisUtil pkg.RedisUtil,
 ) Create {
 	return &create{
 		userRepository: userRepository,

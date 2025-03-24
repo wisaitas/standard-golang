@@ -15,9 +15,9 @@ type Routes struct {
 
 func initializeRoutes(
 	apiRoutes fiber.Router,
-	handlers *Handlers,
-	validates *Validates,
-	middlewares *Middlewares,
+	handlers *Handler,
+	validates *Validate,
+	middlewares *Middleware,
 ) *Routes {
 	return &Routes{
 		UserRoutes: routes.NewUserRoutes(

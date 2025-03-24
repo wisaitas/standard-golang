@@ -2,9 +2,10 @@ package initial
 
 import (
 	"github.com/wisaitas/standard-golang/internal/validates"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Validates struct {
+type Validate struct {
 	UserValidate        validates.UserValidate
 	AuthValidate        validates.AuthValidate
 	ProvinceValidate    validates.ProvinceValidate
@@ -12,12 +13,12 @@ type Validates struct {
 	SubDistrictValidate validates.SubDistrictValidate
 }
 
-func initializeValidates() *Validates {
-	return &Validates{
-		UserValidate:        *validates.NewUserValidate(),
-		AuthValidate:        *validates.NewAuthValidate(),
-		ProvinceValidate:    *validates.NewProvinceValidate(),
-		DistrictValidate:    *validates.NewDistrictValidate(),
-		SubDistrictValidate: *validates.NewSubDistrictValidate(),
+func NewValidate(validator pkg.ValidatorUtil) *Validate {
+	return &Validate{
+		UserValidate:        *validates.NewUserValidate(validator),
+		AuthValidate:        *validates.NewAuthValidate(validator),
+		ProvinceValidate:    *validates.NewProvinceValidate(validator),
+		DistrictValidate:    *validates.NewDistrictValidate(validator),
+		SubDistrictValidate: *validates.NewSubDistrictValidate(validator),
 	}
 }

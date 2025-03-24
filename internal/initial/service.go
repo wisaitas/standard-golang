@@ -6,10 +6,9 @@ import (
 	provinceService "github.com/wisaitas/standard-golang/internal/services/province"
 	subDistrictService "github.com/wisaitas/standard-golang/internal/services/sub-district"
 	userService "github.com/wisaitas/standard-golang/internal/services/user"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Services struct {
+type Service struct {
 	UserService        userService.UserService
 	AuthService        authService.AuthService
 	ProvinceService    provinceService.ProvinceService
@@ -17,24 +16,24 @@ type Services struct {
 	SubDistrictService subDistrictService.SubDistrictService
 }
 
-func initializeServices(repos *Repositories, redisClient pkg.RedisClient) *Services {
-	return &Services{
+func NewService(repos *Repository, utils *Util) *Service {
+	return &Service{
 		UserService: userService.NewUserService(
-			userService.NewRead(repos.UserRepository, redisClient),
-			userService.NewCreate(repos.UserRepository, redisClient),
-			userService.NewUpdate(repos.UserRepository, repos.UserHistoryRepository, redisClient),
-			userService.NewDelete(repos.UserRepository, redisClient),
-			userService.NewTransaction(repos.UserRepository, redisClient),
+			userService.NewRead(repos.UserRepository, utils.RedisUtil),
+			userService.NewCreate(repos.UserRepository, utils.RedisUtil),
+			userService.NewUpdate(repos.UserRepository, repos.UserHistoryRepository, utils.TransactionUtil, utils.RedisUtil),
+			userService.NewDelete(repos.UserRepository, utils.RedisUtil),
+			userService.NewTransaction(repos.UserRepository, utils.RedisUtil),
 		),
-		AuthService: authService.NewAuthService(repos.UserRepository, repos.UserHistoryRepository, redisClient),
+		AuthService: authService.NewAuthService(repos.UserRepository, repos.UserHistoryRepository, utils.TransactionUtil, utils.RedisUtil, utils.BcryptUtil),
 		ProvinceService: provinceService.NewProvinceService(
-			provinceService.NewRead(repos.ProvinceRepository, redisClient),
+			provinceService.NewRead(repos.ProvinceRepository, utils.RedisUtil),
 		),
 		DistrictService: districtService.NewDistrictService(
-			districtService.NewRead(repos.DistrictRepository, redisClient),
+			districtService.NewRead(repos.DistrictRepository, utils.RedisUtil),
 		),
 		SubDistrictService: subDistrictService.NewSubDistrictService(
-			subDistrictService.NewRead(repos.SubDistrictRepository, redisClient),
+			subDistrictService.NewRead(repos.SubDistrictRepository, utils.RedisUtil),
 		),
 	}
 }

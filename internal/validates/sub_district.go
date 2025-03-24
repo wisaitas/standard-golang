@@ -7,16 +7,21 @@ import (
 )
 
 type SubDistrictValidate struct {
+	validator pkg.ValidatorUtil
 }
 
-func NewSubDistrictValidate() *SubDistrictValidate {
-	return &SubDistrictValidate{}
+func NewSubDistrictValidate(
+	validator pkg.ValidatorUtil,
+) *SubDistrictValidate {
+	return &SubDistrictValidate{
+		validator: validator,
+	}
 }
 
 func (r *SubDistrictValidate) ValidateGetSubDistrictsRequest(c *fiber.Ctx) error {
 	query := queries.SubDistrictQuery{}
 
-	if err := validateCommonPaginationQuery(c, &query); err != nil {
+	if err := validateCommonPaginationQuery(c, &query, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})

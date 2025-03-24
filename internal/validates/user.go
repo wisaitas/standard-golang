@@ -11,16 +11,21 @@ import (
 )
 
 type UserValidate struct {
+	validator pkg.ValidatorUtil
 }
 
-func NewUserValidate() *UserValidate {
-	return &UserValidate{}
+func NewUserValidate(
+	validator pkg.ValidatorUtil,
+) *UserValidate {
+	return &UserValidate{
+		validator: validator,
+	}
 }
 
 func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 	req := requests.CreateUserRequest{}
 
-	if err := validateCommonRequestJSONBody(c, &req); err != nil {
+	if err := validateCommonRequestJSONBody(c, &req, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: fmt.Sprintf("failed to validate request: %s", err.Error()),
 		})
@@ -33,7 +38,7 @@ func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
 	query := pkg.PaginationQuery{}
 
-	if err := validateCommonPaginationQuery(c, &query); err != nil {
+	if err := validateCommonPaginationQuery(c, &query, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})
@@ -48,13 +53,13 @@ func (r *UserValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
 	req := requests.UpdateUserRequest{}
 	params := params.UserParams{}
 
-	if err := validateCommonRequestParams(c, &params); err != nil {
+	if err := validateCommonRequestParams(c, &params, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})
 	}
 
-	if err := validateCommonRequestJSONBody(c, &req); err != nil {
+	if err := validateCommonRequestJSONBody(c, &req, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})

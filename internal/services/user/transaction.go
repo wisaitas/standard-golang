@@ -10,12 +10,12 @@ type Transaction interface {
 
 type transaction struct {
 	userRepository repositories.UserRepository
-	redisUtil      pkg.RedisClient
+	redisUtil      pkg.RedisUtil
 }
 
 func NewTransaction(
 	userRepository repositories.UserRepository,
-	redisUtil pkg.RedisClient,
+	redisUtil pkg.RedisUtil,
 ) Transaction {
 	return &transaction{
 		userRepository: userRepository,

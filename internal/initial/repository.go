@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repositories struct {
+type Repository struct {
 	UserRepository        repositories.UserRepository
 	UserHistoryRepository repositories.UserHistoryRepository
 	ProvinceRepository    repositories.ProvinceRepository
@@ -15,8 +15,8 @@ type Repositories struct {
 	SubDistrictRepository repositories.SubDistrictRepository
 }
 
-func initializeRepositories(db *gorm.DB) *Repositories {
-	return &Repositories{
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
 		UserRepository:        repositories.NewUserRepository(db, pkg.NewBaseRepository[models.User](db)),
 		UserHistoryRepository: repositories.NewUserHistoryRepository(db, pkg.NewBaseRepository[models.UserHistory](db)),
 		ProvinceRepository:    repositories.NewProvinceRepository(db, pkg.NewBaseRepository[models.Province](db)),

@@ -10,12 +10,12 @@ type Delete interface {
 
 type delete struct {
 	userRepository repositories.UserRepository
-	redisUtil      pkg.RedisClient
+	redisUtil      pkg.RedisUtil
 }
 
 func NewDelete(
 	userRepository repositories.UserRepository,
-	redisUtil pkg.RedisClient,
+	redisUtil pkg.RedisUtil,
 ) Delete {
 	return &delete{
 		userRepository: userRepository,

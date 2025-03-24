@@ -7,36 +7,36 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisClient interface {
+type RedisUtil interface {
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
 	Get(ctx context.Context, key string) (string, error)
 	Del(ctx context.Context, keys ...string) error
 	Exists(ctx context.Context, keys ...string) (bool, error)
 }
 
-type redisClient struct {
+type redisUtil struct {
 	Client *redis.Client
 }
 
-func NewRedisClient(client *redis.Client) RedisClient {
-	return &redisClient{
+func NewRedisUtil(client *redis.Client) RedisUtil {
+	return &redisUtil{
 		Client: client,
 	}
 }
 
-func (r *redisClient) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+func (r *redisUtil) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
 	return r.Client.Set(ctx, key, value, expiration).Err()
 }
 
-func (r *redisClient) Get(ctx context.Context, key string) (string, error) {
+func (r *redisUtil) Get(ctx context.Context, key string) (string, error) {
 	return r.Client.Get(ctx, key).Result()
 }
 
-func (r *redisClient) Del(ctx context.Context, keys ...string) error {
+func (r *redisUtil) Del(ctx context.Context, keys ...string) error {
 	return r.Client.Del(ctx, keys...).Err()
 }
 
-func (r *redisClient) Exists(ctx context.Context, keys ...string) (bool, error) {
+func (r *redisUtil) Exists(ctx context.Context, keys ...string) (bool, error) {
 	exists, err := r.Client.Exists(ctx, keys...).Result()
 	if err != nil {
 		return false, err
