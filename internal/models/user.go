@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type User struct {
-	BaseModel
+	pkg.BaseModel
 	Username  string    `gorm:"not null;unique"`
 	FirstName string    `gorm:"not null"`
 	LastName  string    `gorm:"not null"`
