@@ -2,7 +2,6 @@ package validates
 
 import (
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"reflect"
 	"strconv"
@@ -28,8 +27,6 @@ func validateCommonRequestParams[T any](c *fiber.Ctx, req *T, validator pkg.Vali
 	if err := c.ParamsParser(req); err != nil {
 		return pkg.Error(err)
 	}
-
-	fmt.Println(req)
 
 	if err := validator.Validate(req); err != nil {
 		return pkg.Error(err)
