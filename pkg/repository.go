@@ -31,14 +31,16 @@ func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 func (r *baseRepository[T]) GetAll(items *[]T, pagination *PaginationQuery, condition interface{}, relations ...string) error {
 	query := r.db.Where(condition)
 
-	if pagination.Page != nil && pagination.PageSize != nil {
-		offset := *pagination.Page * *pagination.PageSize
-		query = query.Offset(offset).Limit(*pagination.PageSize)
-	}
+	if pagination != nil {
+		if pagination.Page != nil && pagination.PageSize != nil {
+			offset := *pagination.Page * *pagination.PageSize
+			query = query.Offset(offset).Limit(*pagination.PageSize)
+		}
 
-	if pagination.Sort != nil && pagination.Order != nil {
-		orderClause := *pagination.Sort + " " + *pagination.Order
-		query = query.Order(orderClause)
+		if pagination.Sort != nil && pagination.Order != nil {
+			orderClause := *pagination.Sort + " " + *pagination.Order
+			query = query.Order(orderClause)
+		}
 	}
 
 	for _, relation := range relations {
