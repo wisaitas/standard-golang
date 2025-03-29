@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type UserHistory struct {
-	BaseModel
+	pkg.BaseModel
 	Action       string    `gorm:"not null"`
 	OldVersion   int       `gorm:"not null"`
 	OldFirstName string    `gorm:"not null"`

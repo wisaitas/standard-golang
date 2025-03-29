@@ -2,10 +2,11 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Address struct {
-	BaseModel
+	pkg.BaseModel
 	ProvinceID    int
 	DistrictID    int
 	SubDistrictID int

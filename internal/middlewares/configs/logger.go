@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,9 +21,9 @@ func Logger() fiber.Handler {
 						requestBody := string(c.Request().Body())
 						compactRequest := new(bytes.Buffer)
 						if err := json.Compact(compactRequest, []byte(requestBody)); err == nil {
-							fmt.Printf("request: %s\n", compactRequest.String())
+							log.Printf("request: %s\n", compactRequest.String())
 						} else {
-							fmt.Printf("request: %s\n", requestBody)
+							log.Printf("request: %s\n", requestBody)
 						}
 					}
 				}
