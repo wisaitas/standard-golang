@@ -33,7 +33,7 @@ func NewService(repos *Repository, utils *Util) *Service {
 			districtService.NewRead(repos.DistrictRepository, utils.RedisUtil),
 		),
 		SubDistrictService: subDistrictService.NewSubDistrictService(
-			subDistrictService.NewRead(repos.SubDistrictRepository, utils.RedisUtil),
+			subDistrictService.NewGet(repos.SubDistrictRepository, utils.RedisUtil),
 		),
 	}
 }

@@ -51,7 +51,7 @@ func (r *read) GetUsers(query pkg.PaginationQuery) (resp []responses.GetUsersRes
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.userRepository.GetAll(&users, &query, nil); err != nil {
+	if err := r.userRepository.GetAll(&users, &query, nil, nil); err != nil {
 		return []responses.GetUsersResponse{}, http.StatusInternalServerError, pkg.Error(err)
 	}
 

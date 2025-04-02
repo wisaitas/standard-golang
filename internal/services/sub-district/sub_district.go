@@ -1,17 +1,17 @@
 package sub_district
 
 type SubDistrictService interface {
-	Read
+	Get
 }
 
 type subDistrictService struct {
-	Read
+	Get
 }
 
 func NewSubDistrictService(
-	read Read,
+	get Get,
 ) SubDistrictService {
 	return &subDistrictService{
-		Read: read,
+		Get: get,
 	}
 }

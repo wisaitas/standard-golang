@@ -13,13 +13,13 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (r *MockUserRepository) GetAll(items *[]models.User, pagination *pkg.PaginationQuery, condition interface{}, relations ...string) error {
+func (r *MockUserRepository) GetAll(items *[]models.User, pagination *pkg.PaginationQuery, condition *pkg.Condition, relations *[]pkg.Relation) error {
 	args := r.Called(items, pagination, condition, relations)
 	return args.Error(0)
 }
 
-func (r *MockUserRepository) GetBy(condition interface{}, item *models.User, relations ...string) error {
-	args := r.Called(condition, item, relations)
+func (r *MockUserRepository) GetBy(item *models.User, condition *pkg.Condition, relations *[]pkg.Relation) error {
+	args := r.Called(item, condition, relations)
 	return args.Error(0)
 }
 

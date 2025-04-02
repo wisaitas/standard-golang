@@ -15,26 +15,26 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Read interface {
+type Get interface {
 	GetSubDistricts(query queries.SubDistrictQuery) (resp []responses.SubDistrictResponse, statusCode int, err error)
 }
 
-type read struct {
+type get struct {
 	subDistrictRepository repositories.SubDistrictRepository
 	redisUtil             pkg.RedisUtil
 }
 
-func NewRead(
+func NewGet(
 	subDistrictRepository repositories.SubDistrictRepository,
 	redisUtil pkg.RedisUtil,
-) Read {
-	return &read{
+) Get {
+	return &get{
 		subDistrictRepository: subDistrictRepository,
 		redisUtil:             redisUtil,
 	}
 }
 
-func (r *read) GetSubDistricts(query queries.SubDistrictQuery) (resp []responses.SubDistrictResponse, statusCode int, err error) {
+func (r *get) GetSubDistricts(query queries.SubDistrictQuery) (resp []responses.SubDistrictResponse, statusCode int, err error) {
 	subDistricts := []models.SubDistrict{}
 
 	cacheKey := fmt.Sprintf("get_sub_districts:%v:%v:%v:%v:%v", query.Page, query.PageSize, query.Sort, query.Order, query.DistrictID)
@@ -52,7 +52,7 @@ func (r *read) GetSubDistricts(query queries.SubDistrictQuery) (resp []responses
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.subDistrictRepository.GetAll(&subDistricts, &query.PaginationQuery, map[string]interface{}{"district_id": query.DistrictID}); err != nil {
+	if err := r.subDistrictRepository.GetAll(&subDistricts, &query.PaginationQuery, pkg.NewCondition("district_id = ?", query.DistrictID)); err != nil {
 		return nil, http.StatusInternalServerError, pkg.Error(err)
 	}
 
