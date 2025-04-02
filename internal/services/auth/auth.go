@@ -52,7 +52,8 @@ func NewAuthService(
 
 func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResponse, statusCode int, err error) {
 	user := models.User{}
-	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", req.Username)); err != nil {
+
+	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", req.Username), nil); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return resp, http.StatusNotFound, pkg.Error(err)
 		}
@@ -153,7 +154,7 @@ func (r *authService) Logout(userContext models.UserContext) (statusCode int, er
 
 func (r *authService) RefreshToken(userContext models.UserContext) (resp responses.LoginResponse, statusCode int, err error) {
 	user := models.User{}
-	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", userContext.Username)); err != nil {
+	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", userContext.Username), nil); err != nil {
 		return resp, http.StatusNotFound, pkg.Error(err)
 	}
 

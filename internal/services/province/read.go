@@ -51,7 +51,7 @@ func (r *read) GetProvinces(query pkg.PaginationQuery) (resp []responses.Provinc
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.provinceRepository.GetAll(&provinces, &query, nil); err != nil {
+	if err := r.provinceRepository.GetAll(&provinces, &query, nil, nil); err != nil {
 		return []responses.ProvinceResponse{}, http.StatusInternalServerError, pkg.Error(err)
 	}
 
