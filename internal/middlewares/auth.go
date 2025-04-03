@@ -5,7 +5,12 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type AuthMiddleware struct {
+type AuthMiddleware interface {
+	Logout(c *fiber.Ctx) error
+	RefreshToken(c *fiber.Ctx) error
+}
+
+type authMiddleware struct {
 	redisUtil pkg.RedisUtil
 	jwtUtil   pkg.JWTUtil
 }
@@ -13,14 +18,14 @@ type AuthMiddleware struct {
 func NewAuthMiddleware(
 	redisUtil pkg.RedisUtil,
 	jwtUtil pkg.JWTUtil,
-) *AuthMiddleware {
-	return &AuthMiddleware{
+) AuthMiddleware {
+	return &authMiddleware{
 		redisUtil: redisUtil,
 		jwtUtil:   jwtUtil,
 	}
 }
 
-func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
+func (r *authMiddleware) Logout(c *fiber.Ctx) error {
 	if err := authRefreshToken(c, r.redisUtil, r.jwtUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
@@ -31,7 +36,7 @@ func (r *AuthMiddleware) Logout(c *fiber.Ctx) error {
 
 }
 
-func (r *AuthMiddleware) RefreshToken(c *fiber.Ctx) error {
+func (r *authMiddleware) RefreshToken(c *fiber.Ctx) error {
 	if err := authRefreshToken(c, r.redisUtil, r.jwtUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),

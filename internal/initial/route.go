@@ -23,15 +23,15 @@ func initializeRoutes(
 		UserRoutes: routes.NewUserRoutes(
 			apiRoutes,
 			&handlers.UserHandler,
-			&validates.UserValidate,
-			&middlewares.AuthMiddleware,
-			&middlewares.UserMiddleware,
+			validates.UserValidate,
+			middlewares.AuthMiddleware,
+			middlewares.UserMiddleware,
 		),
 		AuthRoutes: routes.NewAuthRoutes(
 			apiRoutes,
 			&handlers.AuthHandler,
-			&validates.AuthValidate,
-			&middlewares.AuthMiddleware,
+			validates.AuthValidate,
+			middlewares.AuthMiddleware,
 		),
 		ProvinceRoutes: routes.NewProvinceRoutes(
 			apiRoutes,

@@ -5,19 +5,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type UserMiddleware struct {
+type UserMiddleware interface {
+	UpdateUser(c *fiber.Ctx) error
+}
+
+type userMiddleware struct {
 	redisUtil pkg.RedisUtil
 	jwtUtil   pkg.JWTUtil
 }
 
-func NewUserMiddleware(redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil) *UserMiddleware {
-	return &UserMiddleware{
+func NewUserMiddleware(redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil) UserMiddleware {
+	return &userMiddleware{
 		redisUtil: redisUtil,
 		jwtUtil:   jwtUtil,
 	}
 }
 
-func (r *UserMiddleware) UpdateUser(c *fiber.Ctx) error {
+func (r *userMiddleware) UpdateUser(c *fiber.Ctx) error {
 	if err := authAccessToken(c, r.redisUtil, r.jwtUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),

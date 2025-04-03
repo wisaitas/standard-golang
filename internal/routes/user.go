@@ -11,17 +11,17 @@ import (
 type UserRoutes struct {
 	app            fiber.Router
 	userHandler    *handlers.UserHandler
-	userValidate   *validates.UserValidate
-	authMiddleware *middlewares.AuthMiddleware
-	userMiddleware *middlewares.UserMiddleware
+	userValidate   validates.UserValidate
+	authMiddleware middlewares.AuthMiddleware
+	userMiddleware middlewares.UserMiddleware
 }
 
 func NewUserRoutes(
 	app fiber.Router,
 	userHandler *handlers.UserHandler,
-	userValidate *validates.UserValidate,
-	authMiddleware *middlewares.AuthMiddleware,
-	userMiddleware *middlewares.UserMiddleware,
+	userValidate validates.UserValidate,
+	authMiddleware middlewares.AuthMiddleware,
+	userMiddleware middlewares.UserMiddleware,
 ) *UserRoutes {
 	return &UserRoutes{
 		app:            app,
