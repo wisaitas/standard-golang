@@ -10,15 +10,15 @@ import (
 type AuthRoutes struct {
 	app            fiber.Router
 	authHandler    *handlers.AuthHandler
-	authValidate   *validates.AuthValidate
-	authMiddleware *middlewares.AuthMiddleware
+	authValidate   validates.AuthValidate
+	authMiddleware middlewares.AuthMiddleware
 }
 
 func NewAuthRoutes(
 	app fiber.Router,
 	authHandler *handlers.AuthHandler,
-	authValidate *validates.AuthValidate,
-	authMiddleware *middlewares.AuthMiddleware,
+	authValidate validates.AuthValidate,
+	authMiddleware middlewares.AuthMiddleware,
 
 ) *AuthRoutes {
 	return &AuthRoutes{
