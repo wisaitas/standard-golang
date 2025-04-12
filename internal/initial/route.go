@@ -24,31 +24,31 @@ func newRoute(
 	route := route{
 		UserRoutes: routes.NewUserRoutes(
 			apiRoute,
-			&handler.userHandler,
+			handler.userHandler,
 			validate.userValidate,
 			middleware.AuthMiddleware,
 			middleware.UserMiddleware,
 		),
 		AuthRoutes: routes.NewAuthRoutes(
 			apiRoute,
-			&handler.authHandler,
+			handler.authHandler,
 			validate.authValidate,
 			middleware.AuthMiddleware,
 		),
 		ProvinceRoutes: routes.NewProvinceRoutes(
 			apiRoute,
-			&handler.provinceHandler,
-			&validate.provinceValidate,
+			handler.provinceHandler,
+			validate.provinceValidate,
 		),
 		DistrictRoutes: routes.NewDistrictRoutes(
 			apiRoute,
-			&handler.districtHandler,
-			&validate.districtValidate,
+			handler.districtHandler,
+			validate.districtValidate,
 		),
 		SubDistrictRoutes: routes.NewSubDistrictRoutes(
 			apiRoute,
-			&handler.subDistrictHandler,
-			&validate.subDistrictValidate,
+			handler.subDistrictHandler,
+			validate.subDistrictValidate,
 		),
 	}
 

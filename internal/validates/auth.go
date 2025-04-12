@@ -6,19 +6,24 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type AuthValidate struct {
+type AuthValidate interface {
+	ValidateLoginRequest(c *fiber.Ctx) error
+	ValidateRegisterRequest(c *fiber.Ctx) error
+}
+
+type authValidate struct {
 	validator pkg.ValidatorUtil
 }
 
 func NewAuthValidate(
 	validator pkg.ValidatorUtil,
-) *AuthValidate {
-	return &AuthValidate{
+) AuthValidate {
+	return &authValidate{
 		validator: validator,
 	}
 }
 
-func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
+func (r *authValidate) ValidateLoginRequest(c *fiber.Ctx) error {
 	req := requests.LoginRequest{}
 
 	if err := validateCommonRequestJSONBody(c, &req, r.validator); err != nil {
@@ -31,7 +36,7 @@ func (r *AuthValidate) ValidateLoginRequest(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func (r *AuthValidate) ValidateRegisterRequest(c *fiber.Ctx) error {
+func (r *authValidate) ValidateRegisterRequest(c *fiber.Ctx) error {
 	req := requests.RegisterRequest{}
 
 	if err := validateCommonRequestJSONBody(c, &req, r.validator); err != nil {

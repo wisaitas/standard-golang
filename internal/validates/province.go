@@ -5,19 +5,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type ProvinceValidate struct {
+type ProvinceValidate interface {
+	ValidateGetProvincesRequest(c *fiber.Ctx) error
+}
+
+type provinceValidate struct {
 	validator pkg.ValidatorUtil
 }
 
 func NewProvinceValidate(
 	validator pkg.ValidatorUtil,
-) *ProvinceValidate {
-	return &ProvinceValidate{
+) ProvinceValidate {
+	return &provinceValidate{
 		validator: validator,
 	}
 }
 
-func (r *ProvinceValidate) ValidateGetProvincesRequest(c *fiber.Ctx) error {
+func (r *provinceValidate) ValidateGetProvincesRequest(c *fiber.Ctx) error {
 	query := pkg.PaginationQuery{}
 
 	if err := validateCommonPaginationQuery(c, &query, r.validator); err != nil {

@@ -8,19 +8,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type ProvinceHandler struct {
+type ProvinceHandler interface {
+	GetProvinces(c *fiber.Ctx) error
+}
+
+type provinceHandler struct {
 	provinceService provinceService.ProvinceService
 }
 
 func NewProvinceHandler(
 	provinceService provinceService.ProvinceService,
-) *ProvinceHandler {
-	return &ProvinceHandler{
+) ProvinceHandler {
+	return &provinceHandler{
 		provinceService: provinceService,
 	}
 }
 
-func (r *ProvinceHandler) GetProvinces(c *fiber.Ctx) error {
+func (r *provinceHandler) GetProvinces(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(pkg.PaginationQuery)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{

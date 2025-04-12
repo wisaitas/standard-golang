@@ -10,7 +10,7 @@ import (
 
 type UserRoutes struct {
 	app            fiber.Router
-	userHandler    *handlers.UserHandler
+	userHandler    handlers.UserHandler
 	userValidate   validates.UserValidate
 	authMiddleware middlewares.AuthMiddleware
 	userMiddleware middlewares.UserMiddleware
@@ -18,7 +18,7 @@ type UserRoutes struct {
 
 func NewUserRoutes(
 	app fiber.Router,
-	userHandler *handlers.UserHandler,
+	userHandler handlers.UserHandler,
 	userValidate validates.UserValidate,
 	authMiddleware middlewares.AuthMiddleware,
 	userMiddleware middlewares.UserMiddleware,

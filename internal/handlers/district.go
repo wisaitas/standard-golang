@@ -9,19 +9,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type DistrictHandler struct {
+type DistrictHandler interface {
+	GetDistricts(c *fiber.Ctx) error
+}
+
+type districtHandler struct {
 	districtService districtService.DistrictService
 }
 
 func NewDistrictHandler(
 	districtService districtService.DistrictService,
-) *DistrictHandler {
-	return &DistrictHandler{
+) DistrictHandler {
+	return &districtHandler{
 		districtService: districtService,
 	}
 }
 
-func (r *DistrictHandler) GetDistricts(c *fiber.Ctx) error {
+func (r *districtHandler) GetDistricts(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(queries.DistrictQuery)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{

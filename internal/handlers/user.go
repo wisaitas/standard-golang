@@ -11,19 +11,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserHandler struct {
+type UserHandler interface {
+	GetUsers(c *fiber.Ctx) error
+	CreateUser(c *fiber.Ctx) error
+	UpdateUser(c *fiber.Ctx) error
+}
+
+type userHandler struct {
 	userService user.UserService
 }
 
 func NewUserHandler(
 	userService user.UserService,
-) *UserHandler {
-	return &UserHandler{
+) UserHandler {
+	return &userHandler{
 		userService: userService,
 	}
 }
 
-func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
+func (r *userHandler) GetUsers(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(pkg.PaginationQuery)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
@@ -44,7 +50,7 @@ func (r *UserHandler) GetUsers(c *fiber.Ctx) error {
 	})
 }
 
-func (r *UserHandler) CreateUser(c *fiber.Ctx) error {
+func (r *userHandler) CreateUser(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.CreateUserRequest)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
@@ -65,7 +71,7 @@ func (r *UserHandler) CreateUser(c *fiber.Ctx) error {
 	})
 }
 
-func (r *UserHandler) UpdateUser(c *fiber.Ctx) error {
+func (r *userHandler) UpdateUser(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.UpdateUserRequest)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{

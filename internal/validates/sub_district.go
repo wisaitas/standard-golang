@@ -6,19 +6,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type SubDistrictValidate struct {
+type SubDistrictValidate interface {
+	ValidateGetSubDistrictsRequest(c *fiber.Ctx) error
+}
+
+type subDistrictValidate struct {
 	validator pkg.ValidatorUtil
 }
 
 func NewSubDistrictValidate(
 	validator pkg.ValidatorUtil,
-) *SubDistrictValidate {
-	return &SubDistrictValidate{
+) SubDistrictValidate {
+	return &subDistrictValidate{
 		validator: validator,
 	}
 }
 
-func (r *SubDistrictValidate) ValidateGetSubDistrictsRequest(c *fiber.Ctx) error {
+func (r *subDistrictValidate) ValidateGetSubDistrictsRequest(c *fiber.Ctx) error {
 	query := queries.SubDistrictQuery{}
 
 	if err := validateCommonPaginationQuery(c, &query, r.validator); err != nil {

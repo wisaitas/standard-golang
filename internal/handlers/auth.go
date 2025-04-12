@@ -10,17 +10,24 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type AuthHandler struct {
+type AuthHandler interface {
+	Login(c *fiber.Ctx) error
+	Register(c *fiber.Ctx) error
+	Logout(c *fiber.Ctx) error
+	RefreshToken(c *fiber.Ctx) error
+}
+
+type authHandler struct {
 	authService authService.AuthService
 }
 
-func NewAuthHandler(authService authService.AuthService) *AuthHandler {
-	return &AuthHandler{
+func NewAuthHandler(authService authService.AuthService) AuthHandler {
+	return &authHandler{
 		authService: authService,
 	}
 }
 
-func (r *AuthHandler) Login(c *fiber.Ctx) error {
+func (r *authHandler) Login(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.LoginRequest)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
@@ -41,7 +48,7 @@ func (r *AuthHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
-func (r *AuthHandler) Register(c *fiber.Ctx) error {
+func (r *authHandler) Register(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.RegisterRequest)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
@@ -62,7 +69,7 @@ func (r *AuthHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-func (r *AuthHandler) Logout(c *fiber.Ctx) error {
+func (r *authHandler) Logout(c *fiber.Ctx) error {
 	userContext, ok := c.Locals("userContext").(models.UserContext)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
@@ -82,7 +89,7 @@ func (r *AuthHandler) Logout(c *fiber.Ctx) error {
 	})
 }
 
-func (r *AuthHandler) RefreshToken(c *fiber.Ctx) error {
+func (r *authHandler) RefreshToken(c *fiber.Ctx) error {
 	userContext, ok := c.Locals("userContext").(models.UserContext)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{

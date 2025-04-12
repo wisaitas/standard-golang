@@ -9,19 +9,23 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type SubDistrictHandler struct {
+type SubDistrictHandler interface {
+	GetSubDistricts(c *fiber.Ctx) error
+}
+
+type subDistrictHandler struct {
 	subDistrictService subDistrictService.SubDistrictService
 }
 
 func NewSubDistrictHandler(
 	subDistrictService subDistrictService.SubDistrictService,
-) *SubDistrictHandler {
-	return &SubDistrictHandler{
+) SubDistrictHandler {
+	return &subDistrictHandler{
 		subDistrictService: subDistrictService,
 	}
 }
 
-func (r *SubDistrictHandler) GetSubDistricts(c *fiber.Ctx) error {
+func (r *subDistrictHandler) GetSubDistricts(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(queries.SubDistrictQuery)
 	if !ok {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{

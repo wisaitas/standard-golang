@@ -10,19 +10,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserValidate struct {
+type UserValidate interface {
+	ValidateCreateUserRequest(c *fiber.Ctx) error
+	ValidateGetUsersRequest(c *fiber.Ctx) error
+	ValidateUpdateUserRequest(c *fiber.Ctx) error
+}
+
+type userValidate struct {
 	validator pkg.ValidatorUtil
 }
 
 func NewUserValidate(
 	validator pkg.ValidatorUtil,
-) *UserValidate {
-	return &UserValidate{
+) UserValidate {
+	return &userValidate{
 		validator: validator,
 	}
 }
 
-func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
+func (r *userValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 	req := requests.CreateUserRequest{}
 
 	if err := validateCommonRequestJSONBody(c, &req, r.validator); err != nil {
@@ -35,7 +41,7 @@ func (r *UserValidate) ValidateCreateUserRequest(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
+func (r *userValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
 	query := pkg.PaginationQuery{}
 
 	if err := validateCommonPaginationQuery(c, &query, r.validator); err != nil {
@@ -49,7 +55,7 @@ func (r *UserValidate) ValidateGetUsersRequest(c *fiber.Ctx) error {
 
 }
 
-func (r *UserValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
+func (r *userValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
 	req := requests.UpdateUserRequest{}
 	params := params.UserParams{}
 

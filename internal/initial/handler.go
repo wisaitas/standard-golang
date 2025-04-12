@@ -14,10 +14,10 @@ type handler struct {
 
 func newHandler(service *service) *handler {
 	return &handler{
-		userHandler:        *handlers.NewUserHandler(service.userService),
-		authHandler:        *handlers.NewAuthHandler(service.authService),
-		provinceHandler:    *handlers.NewProvinceHandler(service.provinceService),
-		districtHandler:    *handlers.NewDistrictHandler(service.districtService),
-		subDistrictHandler: *handlers.NewSubDistrictHandler(service.subDistrictService),
+		userHandler:        handlers.NewUserHandler(service.userService),
+		authHandler:        handlers.NewAuthHandler(service.authService),
+		provinceHandler:    handlers.NewProvinceHandler(service.provinceService),
+		districtHandler:    handlers.NewDistrictHandler(service.districtService),
+		subDistrictHandler: handlers.NewSubDistrictHandler(service.subDistrictService),
 	}
 }

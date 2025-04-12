@@ -14,10 +14,10 @@ type validate struct {
 
 func newValidate(util *util) *validate {
 	return &validate{
-		userValidate:        *validates.NewUserValidate(util.validatorUtil),
-		authValidate:        *validates.NewAuthValidate(util.validatorUtil),
-		provinceValidate:    *validates.NewProvinceValidate(util.validatorUtil),
-		districtValidate:    *validates.NewDistrictValidate(util.validatorUtil),
-		subDistrictValidate: *validates.NewSubDistrictValidate(util.validatorUtil),
+		userValidate:        validates.NewUserValidate(util.validatorUtil),
+		authValidate:        validates.NewAuthValidate(util.validatorUtil),
+		provinceValidate:    validates.NewProvinceValidate(util.validatorUtil),
+		districtValidate:    validates.NewDistrictValidate(util.validatorUtil),
+		subDistrictValidate: validates.NewSubDistrictValidate(util.validatorUtil),
 	}
 }

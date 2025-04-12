@@ -8,14 +8,14 @@ import (
 
 type ProvinceRoutes struct {
 	app              fiber.Router
-	provinceHandler  *handlers.ProvinceHandler
-	provinceValidate *validates.ProvinceValidate
+	provinceHandler  handlers.ProvinceHandler
+	provinceValidate validates.ProvinceValidate
 }
 
 func NewProvinceRoutes(
 	app fiber.Router,
-	provinceHandler *handlers.ProvinceHandler,
-	provinceValidate *validates.ProvinceValidate,
+	provinceHandler handlers.ProvinceHandler,
+	provinceValidate validates.ProvinceValidate,
 ) *ProvinceRoutes {
 	return &ProvinceRoutes{
 		app:              app,
