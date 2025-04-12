@@ -7,55 +7,37 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/wisaitas/standard-golang/internal/configs"
-	middlewareConfigs "github.com/wisaitas/standard-golang/internal/middlewares/configs"
+	"github.com/wisaitas/standard-golang/internal/env"
 	"github.com/wisaitas/standard-golang/pkg"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func init() {
-	configs.LoadEnv()
+	env.LoadEnv()
 }
 
-type App struct {
-	App     *fiber.App
-	Configs *Configs
-	routes  func()
-}
+func InitializeApp() {
+	config := newConfig()
 
-func InitializeApp() *App {
 	app := fiber.New()
 
-	configs := initializeConfigs()
+	util := newUtil(config)
 
-	utils := NewUtil(configs)
+	repository := newRepository(config)
+	service := newService(repository, util)
+	handler := newHandler(service)
+	validate := newValidate(util)
+	middleware := newMiddleware(util)
 
-	repositories := NewRepository(configs.DB)
-	services := NewService(repositories, utils)
-	handlers := NewHandler(services)
-	validates := NewValidate(utils.ValidatorUtil)
-	middlewares := NewMiddleware(utils.RedisUtil, utils.JWTUtil)
+	newRoute(app, handler, validate, middleware)
 
-	apiRoutes := app.Group("/api/v1")
-	appRoutes := initializeRoutes(apiRoutes, handlers, validates, middlewares)
-
-	return &App{
-		App:     app,
-		Configs: configs,
-		routes: func() {
-			appRoutes.SetupRoutes()
-		},
-	}
+	run(app, config)
 }
 
-func (r *App) SetupRoutes() {
-	r.routes()
-}
-
-func (r *App) Run() {
+func run(app *fiber.App, configs *config) {
 	go func() {
-		if err := r.App.Listen(fmt.Sprintf(":%s", configs.ENV.PORT)); err != nil {
+		if err := app.Listen(fmt.Sprintf(":%s", env.PORT)); err != nil {
 			log.Fatalf("error starting server: %v\n", pkg.Error(err))
 		}
 	}()
@@ -64,11 +46,12 @@ func (r *App) Run() {
 	signal.Notify(gracefulShutdown, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 
 	<-gracefulShutdown
-	r.close()
+
+	close(app, configs)
 }
 
-func (r *App) close() {
-	sqlDB, err := r.Configs.DB.DB()
+func close(app *fiber.App, config *config) {
+	sqlDB, err := config.DB.DB()
 	if err != nil {
 		log.Fatalf("error getting database: %v\n", pkg.Error(err))
 	}
@@ -77,19 +60,13 @@ func (r *App) close() {
 		log.Fatalf("error closing database: %v\n", pkg.Error(err))
 	}
 
-	if err := r.Configs.Redis.Close(); err != nil {
+	if err := config.Redis.Close(); err != nil {
 		log.Fatalf("error closing redis: %v\n", pkg.Error(err))
 	}
 
-	log.Println("gracefully shutdown")
-}
+	if err := app.Shutdown(); err != nil {
+		log.Fatalf("error shutting down app: %v\n", pkg.Error(err))
+	}
 
-func (r *App) SetupMiddlewares() {
-	r.App.Use(
-		middlewareConfigs.Recovery(),
-		middlewareConfigs.Limiter(),
-		middlewareConfigs.CORS(),
-		middlewareConfigs.Healthz(),
-		middlewareConfigs.Logger(),
-	)
+	log.Println("gracefully shutdown")
 }

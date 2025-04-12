@@ -4,23 +4,22 @@ import (
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/internal/repositories"
 	"github.com/wisaitas/standard-golang/pkg"
-	"gorm.io/gorm"
 )
 
-type Repository struct {
-	UserRepository        repositories.UserRepository
-	UserHistoryRepository repositories.UserHistoryRepository
-	ProvinceRepository    repositories.ProvinceRepository
-	DistrictRepository    repositories.DistrictRepository
-	SubDistrictRepository repositories.SubDistrictRepository
+type repository struct {
+	userRepository        repositories.UserRepository
+	userHistoryRepository repositories.UserHistoryRepository
+	provinceRepository    repositories.ProvinceRepository
+	districtRepository    repositories.DistrictRepository
+	subDistrictRepository repositories.SubDistrictRepository
 }
 
-func NewRepository(db *gorm.DB) *Repository {
-	return &Repository{
-		UserRepository:        repositories.NewUserRepository(db, pkg.NewBaseRepository[models.User](db)),
-		UserHistoryRepository: repositories.NewUserHistoryRepository(db, pkg.NewBaseRepository[models.UserHistory](db)),
-		ProvinceRepository:    repositories.NewProvinceRepository(db, pkg.NewBaseRepository[models.Province](db)),
-		DistrictRepository:    repositories.NewDistrictRepository(db, pkg.NewBaseRepository[models.District](db)),
-		SubDistrictRepository: repositories.NewSubDistrictRepository(db, pkg.NewBaseRepository[models.SubDistrict](db)),
+func newRepository(config *config) *repository {
+	return &repository{
+		userRepository:        repositories.NewUserRepository(config.DB, pkg.NewBaseRepository[models.User](config.DB)),
+		userHistoryRepository: repositories.NewUserHistoryRepository(config.DB, pkg.NewBaseRepository[models.UserHistory](config.DB)),
+		provinceRepository:    repositories.NewProvinceRepository(config.DB, pkg.NewBaseRepository[models.Province](config.DB)),
+		districtRepository:    repositories.NewDistrictRepository(config.DB, pkg.NewBaseRepository[models.District](config.DB)),
+		subDistrictRepository: repositories.NewSubDistrictRepository(config.DB, pkg.NewBaseRepository[models.SubDistrict](config.DB)),
 	}
 }

@@ -6,19 +6,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type Configs struct {
+type config struct {
 	DB    *gorm.DB
 	Redis *redis.Client
 }
 
-func initializeConfigs() *Configs {
-	configs.LoadEnv()
-
+func newConfig() *config {
 	db := configs.ConnectDB()
 
 	redis := configs.ConnectRedis()
 
-	return &Configs{
+	return &config{
 		DB:    db,
 		Redis: redis,
 	}

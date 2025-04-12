@@ -5,7 +5,7 @@ import (
 	"github.com/wisaitas/standard-golang/internal/routes"
 )
 
-type Routes struct {
+type route struct {
 	UserRoutes        *routes.UserRoutes
 	AuthRoutes        *routes.AuthRoutes
 	ProvinceRoutes    *routes.ProvinceRoutes
@@ -13,45 +13,49 @@ type Routes struct {
 	SubDistrictRoutes *routes.SubDistrictRoutes
 }
 
-func initializeRoutes(
-	apiRoutes fiber.Router,
-	handlers *Handler,
-	validates *Validate,
-	middlewares *Middleware,
-) *Routes {
-	return &Routes{
+func newRoute(
+	app *fiber.App,
+	handler *handler,
+	validate *validate,
+	middleware *middleware,
+) {
+	apiRoute := app.Group("/api/v1")
+
+	route := route{
 		UserRoutes: routes.NewUserRoutes(
-			apiRoutes,
-			&handlers.UserHandler,
-			validates.UserValidate,
-			middlewares.AuthMiddleware,
-			middlewares.UserMiddleware,
+			apiRoute,
+			&handler.userHandler,
+			validate.userValidate,
+			middleware.AuthMiddleware,
+			middleware.UserMiddleware,
 		),
 		AuthRoutes: routes.NewAuthRoutes(
-			apiRoutes,
-			&handlers.AuthHandler,
-			validates.AuthValidate,
-			middlewares.AuthMiddleware,
+			apiRoute,
+			&handler.authHandler,
+			validate.authValidate,
+			middleware.AuthMiddleware,
 		),
 		ProvinceRoutes: routes.NewProvinceRoutes(
-			apiRoutes,
-			&handlers.ProvinceHandler,
-			&validates.ProvinceValidate,
+			apiRoute,
+			&handler.provinceHandler,
+			&validate.provinceValidate,
 		),
 		DistrictRoutes: routes.NewDistrictRoutes(
-			apiRoutes,
-			&handlers.DistrictHandler,
-			&validates.DistrictValidate,
+			apiRoute,
+			&handler.districtHandler,
+			&validate.districtValidate,
 		),
 		SubDistrictRoutes: routes.NewSubDistrictRoutes(
-			apiRoutes,
-			&handlers.SubDistrictHandler,
-			&validates.SubDistrictValidate,
+			apiRoute,
+			&handler.subDistrictHandler,
+			&validate.subDistrictValidate,
 		),
 	}
+
+	route.setupRoute()
 }
 
-func (r *Routes) SetupRoutes() {
+func (r *route) setupRoute() {
 	r.UserRoutes.UserRoutes()
 	r.AuthRoutes.AuthRoutes()
 	r.ProvinceRoutes.ProvinceRoutes()

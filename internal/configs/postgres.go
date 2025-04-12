@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/wisaitas/standard-golang/internal/env"
 	"github.com/wisaitas/standard-golang/internal/models"
 
 	"gorm.io/driver/postgres"
@@ -16,11 +17,11 @@ import (
 
 func ConnectDB() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
-		ENV.DB_HOST,
-		ENV.DB_USER,
-		ENV.DB_PASSWORD,
-		ENV.DB_NAME,
-		ENV.DB_PORT,
+		env.DB_HOST,
+		env.DB_USER,
+		env.DB_PASSWORD,
+		env.DB_NAME,
+		env.DB_PORT,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -66,9 +67,9 @@ func autoSeed(db *gorm.DB) error {
 		destination interface{}
 		entityName  string
 	}{
-		{&models.Province{}, ENV.PROVINCE_FILE_PATH, &[]models.Province{}, "provinces"},
-		{&models.District{}, ENV.DISTRICT_FILE_PATH, &[]models.District{}, "districts"},
-		{&models.SubDistrict{}, ENV.SUB_DISTRICT_FILE_PATH, &[]models.SubDistrict{}, "sub districts"},
+		{&models.Province{}, env.PROVINCE_FILE_PATH, &[]models.Province{}, "provinces"},
+		{&models.District{}, env.DISTRICT_FILE_PATH, &[]models.District{}, "districts"},
+		{&models.SubDistrict{}, env.SUB_DISTRICT_FILE_PATH, &[]models.SubDistrict{}, "sub districts"},
 	}
 
 	for _, config := range seedConfigs {

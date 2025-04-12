@@ -2,20 +2,20 @@ package initial
 
 import "github.com/wisaitas/standard-golang/pkg"
 
-type Util struct {
-	RedisUtil       pkg.RedisUtil
-	JWTUtil         pkg.JWTUtil
-	TransactionUtil pkg.TransactionUtil
-	ValidatorUtil   pkg.ValidatorUtil
-	BcryptUtil      pkg.BcryptUtil
+type util struct {
+	redisUtil       pkg.RedisUtil
+	jwtUtil         pkg.JWTUtil
+	transactionUtil pkg.TransactionUtil
+	validatorUtil   pkg.ValidatorUtil
+	bcryptUtil      pkg.BcryptUtil
 }
 
-func NewUtil(configs *Configs) *Util {
-	return &Util{
-		RedisUtil:       pkg.NewRedisUtil(configs.Redis),
-		JWTUtil:         pkg.NewJWTUtil(),
-		TransactionUtil: pkg.NewTransactionUtil(configs.DB),
-		ValidatorUtil:   pkg.NewValidatorUtil(),
-		BcryptUtil:      pkg.NewBcrypt(),
+func newUtil(config *config) *util {
+	return &util{
+		redisUtil:       pkg.NewRedisUtil(config.Redis),
+		jwtUtil:         pkg.NewJWTUtil(),
+		transactionUtil: pkg.NewTransactionUtil(config.DB),
+		validatorUtil:   pkg.NewValidatorUtil(),
+		bcryptUtil:      pkg.NewBcrypt(),
 	}
 }

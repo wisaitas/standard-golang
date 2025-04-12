@@ -2,23 +2,22 @@ package initial
 
 import (
 	"github.com/wisaitas/standard-golang/internal/validates"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Validate struct {
-	UserValidate        validates.UserValidate
-	AuthValidate        validates.AuthValidate
-	ProvinceValidate    validates.ProvinceValidate
-	DistrictValidate    validates.DistrictValidate
-	SubDistrictValidate validates.SubDistrictValidate
+type validate struct {
+	userValidate        validates.UserValidate
+	authValidate        validates.AuthValidate
+	provinceValidate    validates.ProvinceValidate
+	districtValidate    validates.DistrictValidate
+	subDistrictValidate validates.SubDistrictValidate
 }
 
-func NewValidate(validator pkg.ValidatorUtil) *Validate {
-	return &Validate{
-		UserValidate:        *validates.NewUserValidate(validator),
-		AuthValidate:        *validates.NewAuthValidate(validator),
-		ProvinceValidate:    *validates.NewProvinceValidate(validator),
-		DistrictValidate:    *validates.NewDistrictValidate(validator),
-		SubDistrictValidate: *validates.NewSubDistrictValidate(validator),
+func newValidate(util *util) *validate {
+	return &validate{
+		userValidate:        *validates.NewUserValidate(util.validatorUtil),
+		authValidate:        *validates.NewAuthValidate(util.validatorUtil),
+		provinceValidate:    *validates.NewProvinceValidate(util.validatorUtil),
+		districtValidate:    *validates.NewDistrictValidate(util.validatorUtil),
+		subDistrictValidate: *validates.NewSubDistrictValidate(util.validatorUtil),
 	}
 }

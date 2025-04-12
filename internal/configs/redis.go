@@ -6,11 +6,12 @@ import (
 	"log"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/wisaitas/standard-golang/internal/env"
 )
 
 func ConnectRedis() *redis.Client {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", ENV.REDIS_HOST, ENV.REDIS_PORT),
+		Addr:     fmt.Sprintf("%s:%s", env.REDIS_HOST, env.REDIS_PORT),
 		Password: "",
 		DB:       0,
 	})

@@ -1,18 +1,29 @@
 package initial
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/wisaitas/standard-golang/internal/middlewares"
-	"github.com/wisaitas/standard-golang/pkg"
+	middlewareConfig "github.com/wisaitas/standard-golang/internal/middlewares/configs"
 )
 
-type Middleware struct {
+type middleware struct {
 	AuthMiddleware middlewares.AuthMiddleware
 	UserMiddleware middlewares.UserMiddleware
 }
 
-func NewMiddleware(redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil) *Middleware {
-	return &Middleware{
-		AuthMiddleware: middlewares.NewAuthMiddleware(redisUtil, jwtUtil),
-		UserMiddleware: middlewares.NewUserMiddleware(redisUtil, jwtUtil),
+func newMiddleware(util *util) *middleware {
+	return &middleware{
+		AuthMiddleware: middlewares.NewAuthMiddleware(util.redisUtil, util.jwtUtil),
+		UserMiddleware: middlewares.NewUserMiddleware(util.redisUtil, util.jwtUtil),
 	}
+}
+
+func setupMiddleware(app *fiber.App) {
+	app.Use(
+		middlewareConfig.Recovery(),
+		middlewareConfig.Limiter(),
+		middlewareConfig.CORS(),
+		middlewareConfig.Logger(),
+		middlewareConfig.Healthz(),
+	)
 }

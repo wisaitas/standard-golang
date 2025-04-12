@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/configs"
+	"github.com/wisaitas/standard-golang/internal/env"
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
@@ -70,7 +70,7 @@ func validateCommonRequestFormBody[T any](c *fiber.Ctx, req *T, validator pkg.Va
 }
 
 func validateImageFiles(files []*multipart.FileHeader) error {
-	maxFileSize := configs.ENV.MAX_FILE_SIZE
+	maxFileSize := env.MAX_FILE_SIZE
 
 	for _, file := range files {
 		if file.Size > 1024*1024*maxFileSize {

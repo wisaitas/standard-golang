@@ -8,32 +8,32 @@ import (
 	userService "github.com/wisaitas/standard-golang/internal/services/user"
 )
 
-type Service struct {
-	UserService        userService.UserService
-	AuthService        authService.AuthService
-	ProvinceService    provinceService.ProvinceService
-	DistrictService    districtService.DistrictService
-	SubDistrictService subDistrictService.SubDistrictService
+type service struct {
+	userService        userService.UserService
+	authService        authService.AuthService
+	provinceService    provinceService.ProvinceService
+	districtService    districtService.DistrictService
+	subDistrictService subDistrictService.SubDistrictService
 }
 
-func NewService(repos *Repository, utils *Util) *Service {
-	return &Service{
-		UserService: userService.NewUserService(
-			userService.NewRead(repos.UserRepository, utils.RedisUtil),
-			userService.NewCreate(repos.UserRepository, utils.RedisUtil),
-			userService.NewUpdate(repos.UserRepository, repos.UserHistoryRepository, utils.TransactionUtil, utils.RedisUtil),
-			userService.NewDelete(repos.UserRepository, utils.RedisUtil),
-			userService.NewTransaction(repos.UserRepository, utils.RedisUtil),
+func newService(repo *repository, util *util) *service {
+	return &service{
+		userService: userService.NewUserService(
+			userService.NewRead(repo.userRepository, util.redisUtil),
+			userService.NewCreate(repo.userRepository, util.redisUtil),
+			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, util.transactionUtil, util.redisUtil),
+			userService.NewDelete(repo.userRepository, util.redisUtil),
+			userService.NewTransaction(repo.userRepository, util.redisUtil),
 		),
-		AuthService: authService.NewAuthService(repos.UserRepository, repos.UserHistoryRepository, utils.TransactionUtil, utils.RedisUtil, utils.BcryptUtil),
-		ProvinceService: provinceService.NewProvinceService(
-			provinceService.NewRead(repos.ProvinceRepository, utils.RedisUtil),
+		authService: authService.NewAuthService(repo.userRepository, repo.userHistoryRepository, util.transactionUtil, util.redisUtil, util.bcryptUtil),
+		provinceService: provinceService.NewProvinceService(
+			provinceService.NewRead(repo.provinceRepository, util.redisUtil),
 		),
-		DistrictService: districtService.NewDistrictService(
-			districtService.NewRead(repos.DistrictRepository, utils.RedisUtil),
+		districtService: districtService.NewDistrictService(
+			districtService.NewRead(repo.districtRepository, util.redisUtil),
 		),
-		SubDistrictService: subDistrictService.NewSubDistrictService(
-			subDistrictService.NewGet(repos.SubDistrictRepository, utils.RedisUtil),
+		subDistrictService: subDistrictService.NewSubDistrictService(
+			subDistrictService.NewGet(repo.subDistrictRepository, util.redisUtil),
 		),
 	}
 }

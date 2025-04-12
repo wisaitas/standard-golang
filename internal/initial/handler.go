@@ -4,20 +4,20 @@ import (
 	"github.com/wisaitas/standard-golang/internal/handlers"
 )
 
-type Handler struct {
-	UserHandler        handlers.UserHandler
-	AuthHandler        handlers.AuthHandler
-	ProvinceHandler    handlers.ProvinceHandler
-	DistrictHandler    handlers.DistrictHandler
-	SubDistrictHandler handlers.SubDistrictHandler
+type handler struct {
+	userHandler        handlers.UserHandler
+	authHandler        handlers.AuthHandler
+	provinceHandler    handlers.ProvinceHandler
+	districtHandler    handlers.DistrictHandler
+	subDistrictHandler handlers.SubDistrictHandler
 }
 
-func NewHandler(services *Service) *Handler {
-	return &Handler{
-		UserHandler:        *handlers.NewUserHandler(services.UserService),
-		AuthHandler:        *handlers.NewAuthHandler(services.AuthService),
-		ProvinceHandler:    *handlers.NewProvinceHandler(services.ProvinceService),
-		DistrictHandler:    *handlers.NewDistrictHandler(services.DistrictService),
-		SubDistrictHandler: *handlers.NewSubDistrictHandler(services.SubDistrictService),
+func newHandler(service *service) *handler {
+	return &handler{
+		userHandler:        *handlers.NewUserHandler(service.userService),
+		authHandler:        *handlers.NewAuthHandler(service.authService),
+		provinceHandler:    *handlers.NewProvinceHandler(service.provinceService),
+		districtHandler:    *handlers.NewDistrictHandler(service.districtService),
+		subDistrictHandler: *handlers.NewSubDistrictHandler(service.subDistrictService),
 	}
 }

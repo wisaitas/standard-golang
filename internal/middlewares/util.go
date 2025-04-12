@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/wisaitas/standard-golang/internal/configs"
+	"github.com/wisaitas/standard-golang/internal/env"
 	"github.com/wisaitas/standard-golang/internal/models"
 	"github.com/wisaitas/standard-golang/pkg"
 )
@@ -23,7 +23,7 @@ func authAccessToken(c *fiber.Ctx, redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil)
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
 	var userContext models.UserContext
-	_, err := jwtUtil.Parse(token, &userContext, configs.ENV.JWT_SECRET)
+	_, err := jwtUtil.Parse(token, &userContext, env.JWT_SECRET)
 	if err != nil {
 		return pkg.Error(err)
 	}
@@ -50,7 +50,7 @@ func authRefreshToken(c *fiber.Ctx, redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
 	var userContext models.UserContext
-	_, err := jwtUtil.Parse(token, &userContext, configs.ENV.JWT_SECRET)
+	_, err := jwtUtil.Parse(token, &userContext, env.JWT_SECRET)
 	if err != nil {
 		return pkg.Error(err)
 	}
