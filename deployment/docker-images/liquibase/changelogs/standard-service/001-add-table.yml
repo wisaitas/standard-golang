@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: jj
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/001-add-table-user-up.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/001-add-table-user-down.sql
+            stripComments: true
+  - changeSet:
+      id: 2
+      author: jj
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/002-add-table-item-up.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/002-add-table-item-down.sql
+            stripComments: true
