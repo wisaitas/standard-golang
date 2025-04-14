@@ -76,7 +76,6 @@ func (r *authHandler) Logout(c *fiber.Ctx) error {
 			Message: pkg.Error(errors.New("user context not found")).Error(),
 		})
 	}
-	return c.JSON(userContext)
 
 	statusCode, err := r.authService.Logout(userContext)
 	if err != nil {
