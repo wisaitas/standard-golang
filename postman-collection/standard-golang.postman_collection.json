@@ -1,22 +1,22 @@
 {
 	"info": {
 		"_postman_id": "35a70af9-69e2-4f77-87c6-3bbdb419d425",
-		"name": "Standard Golang",
+		"name": "standard-golang",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "10589004"
 	},
 	"item": [
 		{
-			"name": "Auth",
+			"name": "auth",
 			"item": [
 				{
-					"name": "Register",
+					"name": "register",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"test\",\r\n    \"email\": \"t@t.com\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\",\r\n    \"addresses\": [\r\n        {\r\n            \"province_id\": 1,\r\n            \"district_id\": 1012,\r\n            \"sub_district_id\": 101203,\r\n            \"address\": \"ช่องนนทรี\"\r\n        },\r\n        {\r\n            \"province_id\": 1,\r\n            \"district_id\": 1011,\r\n            \"sub_district_id\": 101104,\r\n            \"address\": \"ลำปลาทิว\"\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"email\": \"t@t.com\",\r\n    \"username\": \"johndoe\",\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"birth_date\": \"1999-08-08T00:00:00+07:00\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\",\r\n    \"addresses\": [\r\n        {\r\n            \"province_id\": \"098caf62-a4df-4df3-b795-5afd51198944\",\r\n            \"district_id\": \"ba90e0a4-5871-46f1-9e31-ccb8785e4daf\",\r\n            \"sub_district_id\": \"6356dcde-b7f1-4d0a-bace-3dfe23594117\",\r\n            \"address\": \"เทส address\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -37,7 +37,7 @@
 					"response": []
 				},
 				{
-					"name": "Login",
+					"name": "login",
 					"event": [
 						{
 							"listen": "test",
@@ -56,7 +56,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"12345678\" \r\n}",
+							"raw": "{\r\n    \"username\": \"johndoe\",\r\n    \"password\": \"12345678\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -77,7 +77,7 @@
 					"response": []
 				},
 				{
-					"name": "Refresh Token",
+					"name": "refresh token",
 					"event": [
 						{
 							"listen": "test",
@@ -126,7 +126,7 @@
 					"response": []
 				},
 				{
-					"name": "Logout",
+					"name": "logout",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -141,11 +141,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/logout",
+							"raw": "{{url}}/auth/logout",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
+								"auth",
 								"logout"
 							]
 						}
@@ -155,10 +156,10 @@
 			]
 		},
 		{
-			"name": "User",
+			"name": "user",
 			"item": [
 				{
-					"name": "Get Users",
+					"name": "get users",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -203,14 +204,51 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "update user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Michael\",\r\n    \"last_name\": \"Jackson\",\r\n    \"birth_date\": \"1999-08-07T00:00:00+07:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/94e53aa4-c385-4eb2-9444-33b461bc6e45",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"94e53aa4-c385-4eb2-9444-33b461bc6e45"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "Province",
+			"name": "province",
 			"item": [
 				{
-					"name": "Get Provinces",
+					"name": "get provinces",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -261,10 +299,10 @@
 			]
 		},
 		{
-			"name": "District",
+			"name": "district",
 			"item": [
 				{
-					"name": "Get Districts",
+					"name": "get districts",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -279,7 +317,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/districts?province_id=1",
+							"raw": "{{url}}/districts?province_id=098caf62-a4df-4df3-b795-5afd51198944",
 							"host": [
 								"{{url}}"
 							],
@@ -309,7 +347,7 @@
 								},
 								{
 									"key": "province_id",
-									"value": "1"
+									"value": "098caf62-a4df-4df3-b795-5afd51198944"
 								}
 							]
 						}
@@ -319,10 +357,10 @@
 			]
 		},
 		{
-			"name": "Sub District",
+			"name": "sub districts",
 			"item": [
 				{
-					"name": "Get Sub Districts",
+					"name": "get sub districts",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -337,7 +375,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/sub-districts?district_id=1002",
+							"raw": "{{url}}/sub-districts?district_id=ba90e0a4-5871-46f1-9e31-ccb8785e4daf",
 							"host": [
 								"{{url}}"
 							],
@@ -367,7 +405,7 @@
 								},
 								{
 									"key": "district_id",
-									"value": "1002"
+									"value": "ba90e0a4-5871-46f1-9e31-ccb8785e4daf"
 								}
 							]
 						}
@@ -377,22 +415,14 @@
 			]
 		},
 		{
-			"name": "Healthz",
+			"name": "healthz",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://127.0.0.1:8082/healthz",
-					"protocol": "http",
+					"raw": "{{url-healthz}}",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "8082",
-					"path": [
-						"healthz"
+						"{{url-healthz}}"
 					]
 				}
 			},
