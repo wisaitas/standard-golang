@@ -2,12 +2,12 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/wisaitas/standard-golang/internal/env"
 	"github.com/wisaitas/standard-golang/internal/models"
@@ -22,18 +22,23 @@ func authAccessToken(c *fiber.Ctx, redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil)
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
-	var userContext models.UserContext
-	_, err := jwtUtil.Parse(token, &userContext, env.JWT_SECRET)
+	var tokenContext models.TokenContext
+	_, err := jwtUtil.Parse(token, &tokenContext, env.JWT_SECRET)
 	if err != nil {
 		return pkg.Error(err)
 	}
 
-	_, err = redisUtil.Get(context.Background(), fmt.Sprintf("access_token:%s", uuid.MustParse(userContext.ID)))
+	userContextJSON, err := redisUtil.Get(context.Background(), fmt.Sprintf("access_token:%s", tokenContext.UserID))
 	if err != nil {
 		if err == redis.Nil {
 			return pkg.Error(errors.New("session not found"))
 		}
 
+		return pkg.Error(err)
+	}
+
+	var userContext models.UserContext
+	if err := json.Unmarshal([]byte(userContextJSON), &userContext); err != nil {
 		return pkg.Error(err)
 	}
 
@@ -49,18 +54,23 @@ func authRefreshToken(c *fiber.Ctx, redisUtil pkg.RedisUtil, jwtUtil pkg.JWTUtil
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
-	var userContext models.UserContext
-	_, err := jwtUtil.Parse(token, &userContext, env.JWT_SECRET)
+	var tokenContext models.TokenContext
+	_, err := jwtUtil.Parse(token, &tokenContext, env.JWT_SECRET)
 	if err != nil {
 		return pkg.Error(err)
 	}
 
-	_, err = redisUtil.Get(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.ID))
+	userContextJSON, err := redisUtil.Get(context.Background(), fmt.Sprintf("refresh_token:%s", tokenContext.UserID))
 	if err != nil {
 		if err == redis.Nil {
 			return pkg.Error(errors.New("session not found"))
 		}
 
+		return pkg.Error(err)
+	}
+
+	var userContext models.UserContext
+	if err := json.Unmarshal([]byte(userContextJSON), &userContext); err != nil {
 		return pkg.Error(err)
 	}
 

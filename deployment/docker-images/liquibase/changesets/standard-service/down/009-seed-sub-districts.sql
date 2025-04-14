@@ -1,0 +1,1 @@
+DELETE FROM sub_districts;

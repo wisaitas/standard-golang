@@ -1,21 +1,25 @@
 package responses
 
-import "github.com/wisaitas/standard-golang/internal/models"
+import (
+	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/internal/models"
+	"github.com/wisaitas/standard-golang/pkg"
+)
 
 type SubDistrictResponse struct {
-	ID         int    `json:"id"`
-	NameTH     string `json:"name_th"`
-	NameEN     string `json:"name_en"`
-	DistrictID int    `json:"district_id"`
-	ZipCode    int    `json:"zip_code"`
+	pkg.BaseResponse
+	NameTH     string    `json:"name_th"`
+	NameEN     string    `json:"name_en"`
+	DistrictID uuid.UUID `json:"district_id"`
+	PostalCode string    `json:"postal_code"`
 }
 
 func (r *SubDistrictResponse) ModelToResponse(model models.SubDistrict) SubDistrictResponse {
-	r.ID = model.ID
+	r.BaseResponse.ModelToResponse(model.BaseModel)
 	r.NameTH = model.NameTH
 	r.NameEN = model.NameEN
 	r.DistrictID = model.DistrictID
-	r.ZipCode = model.ZipCode
+	r.PostalCode = model.PostalCode
 
 	return *r
 }

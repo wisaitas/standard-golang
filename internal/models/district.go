@@ -1,8 +1,13 @@
 package models
 
+import (
+	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/pkg"
+)
+
 type District struct {
-	ID         int    `gorm:"primaryKey" json:"id"`
-	NameTH     string `json:"name_th"`
-	NameEN     string `json:"name_en"`
-	ProvinceID int    `json:"province_id"`
+	pkg.BaseModel
+	NameTH     string
+	NameEN     string
+	ProvinceID uuid.UUID
 }

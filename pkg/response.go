@@ -16,7 +16,19 @@ type ErrorResponse struct {
 }
 
 type BaseResponse struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	CreatedBy *uuid.UUID `json:"created_by"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	UpdatedBy *uuid.UUID `json:"updated_by"`
+}
+
+func (r *BaseResponse) ModelToResponse(model BaseModel) BaseResponse {
+	r.ID = model.ID
+	r.CreatedAt = model.CreatedAt
+	r.UpdatedAt = model.UpdatedAt
+	r.CreatedBy = model.CreatedBy
+	r.UpdatedBy = model.UpdatedBy
+
+	return *r
 }

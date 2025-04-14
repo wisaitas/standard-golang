@@ -5,6 +5,7 @@ import (
 
 	"github.com/wisaitas/standard-golang/internal/dtos/params"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
+	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/services/user"
 	"github.com/wisaitas/standard-golang/pkg"
 
@@ -42,6 +43,10 @@ func (r *userHandler) GetUsers(c *fiber.Ctx) error {
 		return c.Status(statusCode).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})
+	}
+
+	if len(users) == 0 {
+		users = []responses.GetUsersResponse{}
 	}
 
 	return c.Status(statusCode).JSON(pkg.SuccessResponse{

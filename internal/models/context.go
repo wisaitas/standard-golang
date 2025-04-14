@@ -1,10 +1,31 @@
 package models
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+)
+
+// type UserContext struct {
+// 	ID       string `json:"id"`
+// 	Username string `json:"username"`
+// 	Email    string `json:"email"`
+// 	jwt.RegisteredClaims
+// }
+
+type TokenContext struct {
+	UserID uuid.UUID `json:"user_id"`
+	jwt.RegisteredClaims
+}
 
 type UserContext struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	jwt.RegisteredClaims
+	UserID       uuid.UUID `json:"user_id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	BirthDate    time.Time `json:"birth_date"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
 }

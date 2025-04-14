@@ -21,11 +21,12 @@ func (r *LoginResponse) ToResponse(accessToken, refreshToken string) LoginRespon
 
 type RegisterResponse struct {
 	pkg.BaseResponse
-	Username  string    `json:"username"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	BirthDate time.Time `json:"birth_date"`
-	Email     string    `json:"email"`
+	Username  string            `json:"username"`
+	FirstName string            `json:"first_name"`
+	LastName  string            `json:"last_name"`
+	BirthDate time.Time         `json:"birth_date"`
+	Email     string            `json:"email"`
+	Addresses []AddressResponse `json:"addresses"`
 }
 
 func (r *RegisterResponse) ToResponse(user models.User) RegisterResponse {
@@ -37,6 +38,15 @@ func (r *RegisterResponse) ToResponse(user models.User) RegisterResponse {
 	r.LastName = user.LastName
 	r.BirthDate = user.BirthDate
 	r.Email = user.Email
+
+	for _, address := range user.Addresses {
+		addressResponse := AddressResponse{}
+		r.Addresses = append(r.Addresses, addressResponse.ModelToResponse(address))
+	}
+
+	if len(r.Addresses) == 0 {
+		r.Addresses = []AddressResponse{}
+	}
 
 	return *r
 }

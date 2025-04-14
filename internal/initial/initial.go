@@ -22,6 +22,8 @@ func InitializeApp() {
 
 	app := fiber.New()
 
+	setupMiddleware(app)
+
 	util := newUtil(config)
 
 	repository := newRepository(config)

@@ -59,7 +59,7 @@ func (r *userValidate) ValidateUpdateUserRequest(c *fiber.Ctx) error {
 	req := requests.UpdateUserRequest{}
 	params := params.UserParams{}
 
-	if err := validateCommonRequestParams(c, &params, r.validator); err != nil {
+	if err := validateCommonRequestParam(c, &params, r.validator); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})

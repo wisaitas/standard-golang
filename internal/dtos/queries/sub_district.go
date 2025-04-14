@@ -1,8 +1,11 @@
 package queries
 
-import "github.com/wisaitas/standard-golang/pkg"
+import (
+	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/pkg"
+)
 
 type SubDistrictQuery struct {
 	pkg.PaginationQuery
-	DistrictID int `query:"district_id"`
+	DistrictID uuid.UUID `query:"district_id"`
 }

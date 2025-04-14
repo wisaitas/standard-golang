@@ -26,7 +26,7 @@ func NewAuthMiddleware(
 }
 
 func (r *authMiddleware) Logout(c *fiber.Ctx) error {
-	if err := authRefreshToken(c, r.redisUtil, r.jwtUtil); err != nil {
+	if err := authAccessToken(c, r.redisUtil, r.jwtUtil); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})

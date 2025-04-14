@@ -1,7 +1,9 @@
 package models
 
+import "github.com/wisaitas/standard-golang/pkg"
+
 type Province struct {
-	ID     int    `gorm:"primaryKey" json:"id"`
-	NameTH string `json:"name_th"`
-	NameEN string `json:"name_en"`
+	pkg.BaseModel
+	NameTH string
+	NameEN string
 }

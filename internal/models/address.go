@@ -7,9 +7,9 @@ import (
 
 type Address struct {
 	pkg.BaseModel
-	ProvinceID    int
-	DistrictID    int
-	SubDistrictID int
+	ProvinceID    uuid.UUID
+	DistrictID    uuid.UUID
+	SubDistrictID uuid.UUID
 	Address       *string
 
 	UserID uuid.UUID

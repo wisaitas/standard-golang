@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -69,33 +70,45 @@ func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResp
 	accessTokenExp := timeNow.Add(time.Hour * 1)
 	refreshTokenExp := timeNow.Add(time.Hour * 24)
 
-	accessToken, err := utils.GenerateToken(map[string]interface{}{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	}, accessTokenExp.Unix())
+	tokenData := map[string]interface{}{
+		"user_id": user.ID,
+	}
+
+	accessToken, err := utils.GenerateToken(tokenData, accessTokenExp.Unix())
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	refreshToken, err := utils.GenerateToken(map[string]interface{}{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	}, refreshTokenExp.Unix())
+	refreshToken, err := utils.GenerateToken(tokenData, refreshTokenExp.Unix())
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
+	sessionData := models.UserContext{
+		UserID:       user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		BirthDate:    user.BirthDate,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	sessionDataJSON, err := json.Marshal(sessionData)
+	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	return resp.ToResponse(accessToken, refreshToken), statusCode, pkg.Error(err)
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, pkg.Error(err)
+	}
+
+	return resp.ToResponse(accessToken, refreshToken), http.StatusOK, nil
 }
 
 func (r *authService) Register(req requests.RegisterRequest) (resp responses.RegisterResponse, statusCode int, err error) {
@@ -119,7 +132,6 @@ func (r *authService) Register(req requests.RegisterRequest) (resp responses.Reg
 
 		userHistory := models.UserHistory{
 			Action:       constants.Action.Create,
-			UserID:       user.ID,
 			OldFirstName: user.FirstName,
 			OldLastName:  user.LastName,
 			OldBirthDate: user.BirthDate,
@@ -141,11 +153,11 @@ func (r *authService) Register(req requests.RegisterRequest) (resp responses.Reg
 }
 
 func (r *authService) Logout(userContext models.UserContext) (statusCode int, err error) {
-	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.ID)); err != nil {
+	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.UserID)); err != nil {
 		return http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.ID)); err != nil {
+	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.UserID)); err != nil {
 		return http.StatusInternalServerError, pkg.Error(err)
 	}
 
@@ -162,29 +174,41 @@ func (r *authService) RefreshToken(userContext models.UserContext) (resp respons
 	accessTokenExp := timeNow.Add(time.Hour * 1)
 	refreshTokenExp := timeNow.Add(time.Hour * 24)
 
-	accessToken, err := utils.GenerateToken(map[string]interface{}{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	}, accessTokenExp.Unix())
+	tokenData := map[string]interface{}{
+		"user_id": user.ID,
+	}
+
+	accessToken, err := utils.GenerateToken(tokenData, accessTokenExp.Unix())
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	refreshToken, err := utils.GenerateToken(map[string]interface{}{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	}, refreshTokenExp.Unix())
+	refreshToken, err := utils.GenerateToken(tokenData, refreshTokenExp.Unix())
 	if err != nil {
 		return resp, http.StatusInternalServerError, err
 	}
 
-	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), accessToken, accessTokenExp.Sub(timeNow)); err != nil {
+	sessionData := models.UserContext{
+		UserID:       user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		BirthDate:    user.BirthDate,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	sessionDataJSON, err := json.Marshal(sessionData)
+	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), refreshToken, refreshTokenExp.Sub(timeNow)); err != nil {
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, pkg.Error(err)
+	}
+
+	if err := r.redisUtil.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 

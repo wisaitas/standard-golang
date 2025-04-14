@@ -1,20 +1,20 @@
 version: "3.9"
 
 services:
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: deployment/docker-images/api/api.Dockerfile
-  #   container_name: standard-api
-  #   ports:
-  #     - 8082:8082
-  #   env_file:
-  #     - deployment/env/api.env
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
+  api:
+    build:
+      context: .
+      dockerfile: deployment/docker-images/api/api.Dockerfile
+    container_name: standard-api
+    ports:
+      - 8082:8082
+    env_file:
+      - deployment/env/api.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
   db:
     build:
       context: .
@@ -39,8 +39,9 @@ services:
       bash -c "
       liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties update
       "
-    # this update liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties update
-    # this roll back liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties rollbackCount 1
+    # this update: liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties update
+    # this roll back one: liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties rollbackCount 1
+    # this roll back all: liquibase --defaultsFile=/liquibase/standard-service/properties/standard-service.properties rollbackToDate 1970-01-01
     depends_on:
       db:
         condition: service_healthy

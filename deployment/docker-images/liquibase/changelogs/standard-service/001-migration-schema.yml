@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/001-table-user.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/001-table-user.sql
+            stripComments: true
+  - changeSet:
+      id: 2
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/002-table-province.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/002-table-province.sql
+            stripComments: true
+  - changeSet:
+      id: 3
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/003-table-district.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/003-table-district.sql
+            stripComments: true
+  - changeSet:
+      id: 4
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/004-table-sub-district.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/004-table-sub-district.sql
+            stripComments: true
+  - changeSet:
+      id: 5
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/005-table-address.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/005-table-address.sql
+            stripComments: true
+  - changeSet:
+      id: 6
+      author: migration-schema
+      changes:
+        - sqlFile:
+            path: changesets/standard-service/up/006-table-user-history.sql
+            stripComments: true
+      rollback:
+        - sqlFile:
+            path: changesets/standard-service/down/006-table-user-history.sql
+            stripComments: true

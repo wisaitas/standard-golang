@@ -57,7 +57,6 @@ func (r *update) UpdateUser(param params.UserParams, request requests.UpdateUser
 
 		userBeforeUpdate := models.UserHistory{
 			Action:       constants.Action.Update,
-			UserID:       user.ID,
 			OldFirstName: user.FirstName,
 			OldLastName:  user.LastName,
 			OldBirthDate: user.BirthDate,

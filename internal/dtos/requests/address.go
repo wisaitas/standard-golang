@@ -1,12 +1,15 @@
 package requests
 
-import "github.com/wisaitas/standard-golang/internal/models"
+import (
+	"github.com/google/uuid"
+	"github.com/wisaitas/standard-golang/internal/models"
+)
 
 type AddressRequest struct {
-	ProvinceID    int     `json:"province_id" validate:"required"`
-	DistrictID    int     `json:"district_id" validate:"required"`
-	SubDistrictID int     `json:"sub_district_id" validate:"required"`
-	Address       *string `json:"address"`
+	ProvinceID    uuid.UUID `json:"province_id" validate:"required"`
+	DistrictID    uuid.UUID `json:"district_id" validate:"required"`
+	SubDistrictID uuid.UUID `json:"sub_district_id" validate:"required"`
+	Address       *string   `json:"address"`
 }
 
 func (r *AddressRequest) ReqToModel() models.Address {

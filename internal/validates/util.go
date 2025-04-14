@@ -23,7 +23,7 @@ func validateCommonRequestJSONBody[T any](c *fiber.Ctx, req *T, validator pkg.Va
 	return nil
 }
 
-func validateCommonRequestParams[T any](c *fiber.Ctx, req *T, validator pkg.ValidatorUtil) error {
+func validateCommonRequestParam[T any](c *fiber.Ctx, req *T, validator pkg.ValidatorUtil) error {
 	if err := c.ParamsParser(req); err != nil {
 		return pkg.Error(err)
 	}
