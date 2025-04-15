@@ -14,9 +14,13 @@ type DistrictResponse struct {
 }
 
 func (r *DistrictResponse) ModelToResponse(model models.District) DistrictResponse {
-	r.BaseResponse.ModelToResponse(model.BaseModel)
-	r.NameTH = model.NameTH
-	r.NameEN = model.NameEN
+	r.ID = model.ID
+	r.CreatedAt = model.CreatedAt
+	r.UpdatedAt = model.UpdatedAt
+	r.CreatedBy = model.CreatedBy
+	r.UpdatedBy = model.UpdatedBy
+	r.NameTH = model.NameTh
+	r.NameEN = model.NameEn
 	r.ProvinceID = model.ProvinceID
 
 	return *r

@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/standard-golang/internal/contexts"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
-	"github.com/wisaitas/standard-golang/internal/models"
 	authService "github.com/wisaitas/standard-golang/internal/services/auth"
 	"github.com/wisaitas/standard-golang/pkg"
 )
@@ -70,7 +70,7 @@ func (r *authHandler) Register(c *fiber.Ctx) error {
 }
 
 func (r *authHandler) Logout(c *fiber.Ctx) error {
-	userContext, ok := c.Locals("userContext").(models.UserContext)
+	userContext, ok := c.Locals("userContext").(contexts.UserContext)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(errors.New("user context not found")).Error(),
@@ -90,7 +90,7 @@ func (r *authHandler) Logout(c *fiber.Ctx) error {
 }
 
 func (r *authHandler) RefreshToken(c *fiber.Ctx) error {
-	userContext, ok := c.Locals("userContext").(models.UserContext)
+	userContext, ok := c.Locals("userContext").(contexts.UserContext)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(errors.New("user context not found")).Error(),

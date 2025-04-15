@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/wisaitas/standard-golang/internal/constants"
+	"github.com/wisaitas/standard-golang/internal/contexts"
 	"github.com/wisaitas/standard-golang/internal/dtos/requests"
 	"github.com/wisaitas/standard-golang/internal/dtos/responses"
 	"github.com/wisaitas/standard-golang/internal/models"
@@ -23,8 +24,8 @@ import (
 type AuthService interface {
 	Login(req requests.LoginRequest) (resp responses.LoginResponse, statusCode int, err error)
 	Register(req requests.RegisterRequest) (resp responses.RegisterResponse, statusCode int, err error)
-	Logout(userContext models.UserContext) (statusCode int, err error)
-	RefreshToken(userContext models.UserContext) (resp responses.LoginResponse, statusCode int, err error)
+	Logout(userContext contexts.UserContext) (statusCode int, err error)
+	RefreshToken(userContext contexts.UserContext) (resp responses.LoginResponse, statusCode int, err error)
 }
 
 type authService struct {
@@ -84,7 +85,7 @@ func (r *authService) Login(req requests.LoginRequest) (resp responses.LoginResp
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	sessionData := models.UserContext{
+	sessionData := contexts.UserContext{
 		UserID:       user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
@@ -149,10 +150,12 @@ func (r *authService) Register(req requests.RegisterRequest) (resp responses.Reg
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
+	fmt.Println(user.ID)
+
 	return resp.ToResponse(user), http.StatusCreated, nil
 }
 
-func (r *authService) Logout(userContext models.UserContext) (statusCode int, err error) {
+func (r *authService) Logout(userContext contexts.UserContext) (statusCode int, err error) {
 	if err := r.redisUtil.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.UserID)); err != nil {
 		return http.StatusInternalServerError, pkg.Error(err)
 	}
@@ -164,7 +167,7 @@ func (r *authService) Logout(userContext models.UserContext) (statusCode int, er
 	return http.StatusOK, nil
 }
 
-func (r *authService) RefreshToken(userContext models.UserContext) (resp responses.LoginResponse, statusCode int, err error) {
+func (r *authService) RefreshToken(userContext contexts.UserContext) (resp responses.LoginResponse, statusCode int, err error) {
 	user := models.User{}
 	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", userContext.Username), nil); err != nil {
 		return resp, http.StatusNotFound, pkg.Error(err)
@@ -188,7 +191,7 @@ func (r *authService) RefreshToken(userContext models.UserContext) (resp respons
 		return resp, http.StatusInternalServerError, err
 	}
 
-	sessionData := models.UserContext{
+	sessionData := contexts.UserContext{
 		UserID:       user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
