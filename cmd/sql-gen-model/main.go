@@ -1,12 +1,15 @@
-package scripts
+package main
 
 import (
 	"flag"
 	"log"
 	"os"
+
+	"github.com/wisaitas/standard-golang/internal/scripts"
 )
 
-func HandleArgument() {
+// go run cmd/sql-gen-model/main.go -source deployment/docker-images/liquibase/changesets/standard-service/up/ -dest internal/models
+func main() {
 	sourcePath := flag.String("source", "", "Source directory containing SQL files")
 	destPath := flag.String("dest", "", "Destination directory for generated model files")
 
@@ -17,7 +20,7 @@ func HandleArgument() {
 	}
 
 	if *sourcePath != "" && *destPath != "" {
-		converter := NewSQLToModelConverter(*sourcePath, *destPath)
+		converter := scripts.NewSQLToModelConverter(*sourcePath, *destPath)
 		if err := converter.GenerateModels(); err != nil {
 			log.Fatalf("error generating models: %v", err)
 		}
@@ -26,4 +29,5 @@ func HandleArgument() {
 
 		os.Exit(0)
 	}
+
 }
