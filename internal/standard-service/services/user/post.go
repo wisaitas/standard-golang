@@ -12,26 +12,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Create interface {
+type Post interface {
 	CreateUser(req requests.CreateUserRequest) (resp responses.CreateUserResponse, statusCode int, err error)
 }
 
-type create struct {
+type post struct {
 	userRepository repositories.UserRepository
 	redisUtil      pkg.RedisUtil
 }
 
-func NewCreate(
+func NewPost(
 	userRepository repositories.UserRepository,
 	redisUtil pkg.RedisUtil,
-) Create {
-	return &create{
+) Post {
+	return &post{
 		userRepository: userRepository,
 		redisUtil:      redisUtil,
 	}
 }
 
-func (r *create) CreateUser(req requests.CreateUserRequest) (resp responses.CreateUserResponse, statusCode int, err error) {
+func (r *post) CreateUser(req requests.CreateUserRequest) (resp responses.CreateUserResponse, statusCode int, err error) {
 	user := req.ToModel()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

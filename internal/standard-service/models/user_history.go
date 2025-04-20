@@ -3,30 +3,18 @@ package models
 
 import (
 	"time"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
+
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type UserHistory struct {
-	ID        uuid.UUID       `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Version   int             `gorm:"type:integer;not null;default:0"`
-	CreatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	CreatedBy *uuid.UUID      `gorm:"type:uuid"`
-	UpdatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	UpdatedBy *uuid.UUID      `gorm:"type:uuid"`
-	DeletedAt *gorm.DeletedAt `gorm:"type:timestamp"`
+	pkg.BaseModel
 
-	Action string `gorm:"type:user_action;not null;comment:enum type"`
-	OldVersion int `gorm:"type:integer;not null"`
-	OldFirstName string `gorm:"type:varchar(100);not null"`
-	OldLastName string `gorm:"type:varchar(100);not null"`
+	Action       string    `gorm:"type:user_action;not null;comment:enum type"`
+	OldVersion   int       `gorm:"type:integer;not null"`
+	OldFirstName string    `gorm:"type:varchar(100);not null"`
+	OldLastName  string    `gorm:"type:varchar(100);not null"`
 	OldBirthDate time.Time `gorm:"type:date;not null"`
-	OldPassword string `gorm:"type:varchar(100);not null"`
-	OldEmail string `gorm:"type:varchar(100);not null"`
-
-}
-
-func (r *UserHistory) BeforeUpdate(tx *gorm.DB) (err error) {
-	r.Version++
-	return
+	OldPassword  string    `gorm:"type:varchar(100);not null"`
+	OldEmail     string    `gorm:"type:varchar(100);not null"`
 }

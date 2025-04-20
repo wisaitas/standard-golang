@@ -14,11 +14,7 @@ type CreateUserResponse struct {
 }
 
 func (r *CreateUserResponse) ModelToResponse(user models.User) CreateUserResponse {
-	r.ID = user.ID
-	r.CreatedAt = user.CreatedAt
-	r.UpdatedAt = user.UpdatedAt
-	r.CreatedBy = user.CreatedBy
-	r.UpdatedBy = user.UpdatedBy
+	r.BaseResponse.ModelToResponse(user.BaseModel)
 	r.Username = user.Username
 	r.Email = user.Email
 
@@ -36,11 +32,7 @@ type GetUsersResponse struct {
 }
 
 func (r *GetUsersResponse) ModelToResponse(user models.User) GetUsersResponse {
-	r.ID = user.ID
-	r.CreatedAt = user.CreatedAt
-	r.UpdatedAt = user.UpdatedAt
-	r.CreatedBy = user.CreatedBy
-	r.UpdatedBy = user.UpdatedBy
+	r.BaseResponse.ModelToResponse(user.BaseModel)
 	r.Username = user.Username
 	r.Email = user.Email
 	r.FirstName = user.FirstName
@@ -70,9 +62,7 @@ type UpdateUserResponse struct {
 }
 
 func (r *UpdateUserResponse) ModelToResponse(user models.User) UpdateUserResponse {
-	r.ID = user.ID
-	r.CreatedAt = user.CreatedAt
-	r.UpdatedAt = user.UpdatedAt
+	r.BaseResponse.ModelToResponse(user.BaseModel)
 	r.Username = user.Username
 	r.Email = user.Email
 	r.FirstName = user.FirstName

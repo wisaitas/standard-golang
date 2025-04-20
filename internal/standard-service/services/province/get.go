@@ -14,26 +14,26 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Read interface {
+type Get interface {
 	GetProvinces(query pkg.PaginationQuery) (resp []responses.ProvinceResponse, statusCode int, err error)
 }
 
-type read struct {
+type get struct {
 	provinceRepository repositories.ProvinceRepository
 	redisUtil          pkg.RedisUtil
 }
 
-func NewRead(
+func NewGet(
 	provinceRepository repositories.ProvinceRepository,
 	redisUtil pkg.RedisUtil,
-) Read {
-	return &read{
+) Get {
+	return &get{
 		provinceRepository: provinceRepository,
 		redisUtil:          redisUtil,
 	}
 }
 
-func (r *read) GetProvinces(query pkg.PaginationQuery) (resp []responses.ProvinceResponse, statusCode int, err error) {
+func (r *get) GetProvinces(query pkg.PaginationQuery) (resp []responses.ProvinceResponse, statusCode int, err error) {
 	provinces := []models.Province{}
 
 	cacheKey := fmt.Sprintf("get_provinces:%v:%v:%v:%v", query.Page, query.PageSize, query.Sort, query.Order)

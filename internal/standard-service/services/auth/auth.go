@@ -150,9 +150,7 @@ func (r *authService) Register(req requests.RegisterRequest) (resp responses.Reg
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	fmt.Println(user.ID)
-
-	return resp.ToResponse(user), http.StatusCreated, nil
+	return resp.ModelToResponse(user), http.StatusCreated, nil
 }
 
 func (r *authService) Logout(userContext contexts.UserContext) (statusCode int, err error) {

@@ -2,28 +2,11 @@
 package models
 
 import (
-	"time"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Province struct {
-	ID        uuid.UUID       `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Version   int             `gorm:"type:integer;not null;default:0"`
-	CreatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	CreatedBy *uuid.UUID      `gorm:"type:uuid"`
-	UpdatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	UpdatedBy *uuid.UUID      `gorm:"type:uuid"`
-	DeletedAt *gorm.DeletedAt `gorm:"type:timestamp"`
-
-	NameTh string `gorm:"type:varchar(100);not null"`
-	NameEn string `gorm:"type:varchar(100);not null"`
-
-	Districts []District `gorm:"foreignKey:ProvinceID"`
-	Addresses []Address `gorm:"foreignKey:ProvinceID"`
-}
-
-func (r *Province) BeforeUpdate(tx *gorm.DB) (err error) {
-	r.Version++
-	return
+	pkg.BaseModel
+	NameTH string `gorm:"column:name_th;"`
+	NameEN string `gorm:"column:name_en;"`
 }

@@ -19,18 +19,18 @@ type service struct {
 func newService(repo *repository, util *util) *service {
 	return &service{
 		userService: userService.NewUserService(
-			userService.NewRead(repo.userRepository, util.redisUtil),
-			userService.NewCreate(repo.userRepository, util.redisUtil),
+			userService.NewGet(repo.userRepository, util.redisUtil),
+			userService.NewPost(repo.userRepository, util.redisUtil),
 			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, util.transactionUtil, util.redisUtil),
 			userService.NewDelete(repo.userRepository, util.redisUtil),
 			userService.NewTransaction(repo.userRepository, util.redisUtil),
 		),
 		authService: authService.NewAuthService(repo.userRepository, repo.userHistoryRepository, util.transactionUtil, util.redisUtil, util.bcryptUtil),
 		provinceService: provinceService.NewProvinceService(
-			provinceService.NewRead(repo.provinceRepository, util.redisUtil),
+			provinceService.NewGet(repo.provinceRepository, util.redisUtil),
 		),
 		districtService: districtService.NewDistrictService(
-			districtService.NewRead(repo.districtRepository, util.redisUtil),
+			districtService.NewGet(repo.districtRepository, util.redisUtil),
 		),
 		subDistrictService: subDistrictService.NewSubDistrictService(
 			subDistrictService.NewGet(repo.subDistrictRepository, util.redisUtil),

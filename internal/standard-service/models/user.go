@@ -3,30 +3,19 @@ package models
 
 import (
 	"time"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
+
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type User struct {
-	ID        uuid.UUID       `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Version   int             `gorm:"type:integer;not null;default:0"`
-	CreatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	CreatedBy *uuid.UUID      `gorm:"type:uuid"`
-	UpdatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	UpdatedBy *uuid.UUID      `gorm:"type:uuid"`
-	DeletedAt *gorm.DeletedAt `gorm:"type:timestamp"`
+	pkg.BaseModel
 
-	Username string `gorm:"type:varchar(100);not null;unique"`
-	FirstName string `gorm:"type:varchar(100);not null"`
-	LastName string `gorm:"type:varchar(100);not null"`
-	BirthDate time.Time `gorm:"type:date;not null"`
-	Email string `gorm:"type:varchar(100);not null;unique"`
-	Password string `gorm:"type:varchar(100);not null"`
+	Username  string    `gorm:"column:username;"`
+	FirstName string    `gorm:"column:first_name;"`
+	LastName  string    `gorm:"column:last_name;"`
+	BirthDate time.Time `gorm:"column:birth_date;"`
+	Email     string    `gorm:"column:email;"`
+	Password  string    `gorm:"column:password;"`
 
 	Addresses []Address `gorm:"foreignKey:UserID"`
-}
-
-func (r *User) BeforeUpdate(tx *gorm.DB) (err error) {
-	r.Version++
-	return
 }

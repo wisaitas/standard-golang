@@ -15,13 +15,9 @@ type SubDistrictResponse struct {
 }
 
 func (r *SubDistrictResponse) ModelToResponse(model models.SubDistrict) SubDistrictResponse {
-	r.ID = model.ID
-	r.CreatedAt = model.CreatedAt
-	r.UpdatedAt = model.UpdatedAt
-	r.CreatedBy = model.CreatedBy
-	r.UpdatedBy = model.UpdatedBy
-	r.NameTH = model.NameTh
-	r.NameEN = model.NameEn
+	r.BaseResponse.ModelToResponse(model.BaseModel)
+	r.NameTH = model.NameTH
+	r.NameEN = model.NameEN
 	r.DistrictID = model.DistrictID
 	r.PostalCode = model.PostalCode
 

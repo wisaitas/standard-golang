@@ -2,34 +2,22 @@
 package models
 
 import (
-	"time"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Address struct {
-	ID        uuid.UUID       `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Version   int             `gorm:"type:integer;not null;default:0"`
-	CreatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	CreatedBy *uuid.UUID      `gorm:"type:uuid"`
-	UpdatedAt time.Time       `gorm:"type:timestamp;not null;default:now()"`
-	UpdatedBy *uuid.UUID      `gorm:"type:uuid"`
-	DeletedAt *gorm.DeletedAt `gorm:"type:timestamp"`
+	pkg.BaseModel
 
-	Address *string `gorm:"type:varchar(400)"`
+	Address *string `gorm:"column:address;"`
 
-	ProvinceID uuid.UUID `gorm:"type:uuid;column:province_id"`
-	DistrictID uuid.UUID `gorm:"type:uuid;column:district_id"`
-	SubDistrictID uuid.UUID `gorm:"type:uuid;column:sub_district_id"`
-	UserID uuid.UUID `gorm:"type:uuid;column:user_id"`
+	ProvinceID    uuid.UUID `gorm:"column:province_id;"`
+	DistrictID    uuid.UUID `gorm:"column:district_id;"`
+	SubDistrictID uuid.UUID `gorm:"column:sub_district_id;"`
+	UserID        uuid.UUID `gorm:"column:user_id;"`
 
-	Province *Province `gorm:"foreignKey:ProvinceID;references:ID"`
-	District *District `gorm:"foreignKey:DistrictID;references:ID"`
+	Province    *Province    `gorm:"foreignKey:ProvinceID;references:ID"`
+	District    *District    `gorm:"foreignKey:DistrictID;references:ID"`
 	SubDistrict *SubDistrict `gorm:"foreignKey:SubDistrictID;references:ID"`
-	User *User `gorm:"foreignKey:UserID;references:ID"`
-}
-
-func (r *Address) BeforeUpdate(tx *gorm.DB) (err error) {
-	r.Version++
-	return
+	User        *User        `gorm:"foreignKey:UserID;references:ID"`
 }

@@ -20,14 +20,14 @@ type createUserTestSuite struct {
 	mockRepo   *mock_repositories.MockUserRepository
 	mockBcrypt *mock_utils.MockBcrypt
 	mockRedis  *mock_utils.MockRedis
-	service    user.Create
+	service    user.Post
 }
 
 func (s *createUserTestSuite) SetupTest() {
 	s.mockRepo = new(mock_repositories.MockUserRepository)
 	s.mockBcrypt = new(mock_utils.MockBcrypt)
 	s.mockRedis = new(mock_utils.MockRedis)
-	s.service = user.NewCreate(s.mockRepo, s.mockRedis)
+	s.service = user.NewPost(s.mockRepo, s.mockRedis)
 }
 
 func (s *createUserTestSuite) TestCreateUserSuccess() {

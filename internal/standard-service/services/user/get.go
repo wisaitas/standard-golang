@@ -14,26 +14,26 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Read interface {
+type Get interface {
 	GetUsers(query pkg.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error)
 }
 
-type read struct {
+type get struct {
 	userRepository repositories.UserRepository
 	redisUtil      pkg.RedisUtil
 }
 
-func NewRead(
+func NewGet(
 	userRepository repositories.UserRepository,
 	redisUtil pkg.RedisUtil,
-) Read {
-	return &read{
+) Get {
+	return &get{
 		userRepository: userRepository,
 		redisUtil:      redisUtil,
 	}
 }
 
-func (r *read) GetUsers(query pkg.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error) {
+func (r *get) GetUsers(query pkg.PaginationQuery) (resp []responses.GetUsersResponse, statusCode int, err error) {
 	users := []models.User{}
 
 	cacheKey := fmt.Sprintf("get_users:%v:%v:%v:%v", query.Page, query.PageSize, query.Sort, query.Order)

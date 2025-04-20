@@ -12,13 +12,9 @@ type ProvinceResponse struct {
 }
 
 func (r *ProvinceResponse) ModelToResponse(model models.Province) ProvinceResponse {
-	r.ID = model.ID
-	r.CreatedAt = model.CreatedAt
-	r.UpdatedAt = model.UpdatedAt
-	r.CreatedBy = model.CreatedBy
-	r.UpdatedBy = model.UpdatedBy
-	r.NameTH = model.NameTh
-	r.NameEN = model.NameEn
+	r.BaseResponse.ModelToResponse(model.BaseModel)
+	r.NameTH = model.NameTH
+	r.NameEN = model.NameEN
 
 	return *r
 }

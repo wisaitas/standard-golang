@@ -1,31 +1,31 @@
 package user
 
 type UserService interface {
-	Read
-	Create
+	Get
+	Post
 	Update
 	Delete
 	Transaction
 }
 
 type userService struct {
-	Read
-	Create
+	Get
+	Post
 	Update
 	Delete
 	Transaction
 }
 
 func NewUserService(
-	read Read,
-	create Create,
+	get Get,
+	post Post,
 	update Update,
 	delete Delete,
 	transaction Transaction,
 ) UserService {
 	return &userService{
-		Read:        read,
-		Create:      create,
+		Get:         get,
+		Post:        post,
 		Update:      update,
 		Delete:      delete,
 		Transaction: transaction,

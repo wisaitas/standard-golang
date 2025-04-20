@@ -15,11 +15,7 @@ type AddressResponse struct {
 }
 
 func (r *AddressResponse) ModelToResponse(address models.Address) AddressResponse {
-	r.ID = address.ID
-	r.CreatedAt = address.CreatedAt
-	r.UpdatedAt = address.UpdatedAt
-	r.CreatedBy = address.CreatedBy
-	r.UpdatedBy = address.UpdatedBy
+	r.BaseResponse.ModelToResponse(address.BaseModel)
 	r.ProvinceID = address.ProvinceID
 	r.DistrictID = address.DistrictID
 	r.SubDistrictID = address.SubDistrictID

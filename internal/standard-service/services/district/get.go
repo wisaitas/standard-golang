@@ -15,26 +15,26 @@ import (
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
-type Read interface {
+type Get interface {
 	GetDistricts(query queries.DistrictQuery) (resp []responses.DistrictResponse, statusCode int, err error)
 }
 
-type read struct {
+type get struct {
 	districtRepository repositories.DistrictRepository
 	redisUtil          pkg.RedisUtil
 }
 
-func NewRead(
+func NewGet(
 	districtRepository repositories.DistrictRepository,
 	redisUtil pkg.RedisUtil,
-) Read {
-	return &read{
+) Get {
+	return &get{
 		districtRepository: districtRepository,
 		redisUtil:          redisUtil,
 	}
 }
 
-func (r *read) GetDistricts(query queries.DistrictQuery) (resp []responses.DistrictResponse, statusCode int, err error) {
+func (r *get) GetDistricts(query queries.DistrictQuery) (resp []responses.DistrictResponse, statusCode int, err error) {
 	districts := []models.District{}
 
 	cacheKey := fmt.Sprintf("get_districts:%v:%v:%v:%v:%v", query.Page, query.PageSize, query.Sort, query.Order, query.ProvinceID)
@@ -51,8 +51,6 @@ func (r *read) GetDistricts(query queries.DistrictQuery) (resp []responses.Distr
 
 		return resp, http.StatusOK, nil
 	}
-
-	fmt.Println("query.ProvinceID", query.ProvinceID)
 
 	if err := r.districtRepository.GetAll(&districts, &query.PaginationQuery, pkg.NewCondition("province_id = ?", query.ProvinceID), nil); err != nil {
 		return nil, http.StatusInternalServerError, pkg.Error(err)

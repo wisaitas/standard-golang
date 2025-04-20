@@ -29,10 +29,8 @@ type RegisterResponse struct {
 	Addresses []AddressResponse `json:"addresses"`
 }
 
-func (r *RegisterResponse) ToResponse(user models.User) RegisterResponse {
-	r.ID = user.ID
-	r.CreatedAt = user.CreatedAt
-	r.UpdatedAt = user.UpdatedAt
+func (r *RegisterResponse) ModelToResponse(user models.User) RegisterResponse {
+	r.BaseResponse.ModelToResponse(user.BaseModel)
 	r.Username = user.Username
 	r.FirstName = user.FirstName
 	r.LastName = user.LastName
