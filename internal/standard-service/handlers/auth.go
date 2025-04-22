@@ -27,6 +27,16 @@ func NewAuthHandler(authService authService.AuthService) AuthHandler {
 	}
 }
 
+// @Summary Login
+// @Description Login
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param loginRequest body requests.LoginRequest true "Login Request"
+// @Success 200 {object} pkg.SuccessResponse
+// @Failure 400 {object} pkg.ErrorResponse
+// @Failure 500 {object} pkg.ErrorResponse
+// @Router /auth/login [post]
 func (r *authHandler) Login(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.LoginRequest)
 	if !ok {
@@ -48,6 +58,16 @@ func (r *authHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Register
+// @Description Register
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param registerRequest body requests.RegisterRequest true "Register Request"
+// @Success 200 {object} pkg.SuccessResponse
+// @Failure 400 {object} pkg.ErrorResponse
+// @Failure 500 {object} pkg.ErrorResponse
+// @Router /auth/register [post]
 func (r *authHandler) Register(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.RegisterRequest)
 	if !ok {
@@ -69,6 +89,16 @@ func (r *authHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Logout
+// @Description Logout
+// @Tags Auth
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} pkg.SuccessResponse
+// @Failure 401 {object} pkg.ErrorResponse
+// @Failure 500 {object} pkg.ErrorResponse
+// @Router /auth/logout [post]
 func (r *authHandler) Logout(c *fiber.Ctx) error {
 	userContext, ok := c.Locals("userContext").(contexts.UserContext)
 	if !ok {
@@ -89,6 +119,16 @@ func (r *authHandler) Logout(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Refresh Token
+// @Description Refresh Token
+// @Tags Auth
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} pkg.SuccessResponse
+// @Failure 401 {object} pkg.ErrorResponse
+// @Failure 500 {object} pkg.ErrorResponse
+// @Router /auth/refresh-token [post]
 func (r *authHandler) RefreshToken(c *fiber.Ctx) error {
 	userContext, ok := c.Locals("userContext").(contexts.UserContext)
 	if !ok {

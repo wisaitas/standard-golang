@@ -6,10 +6,10 @@ import (
 )
 
 type AddressRequest struct {
-	ProvinceID    uuid.UUID `json:"province_id" validate:"required"`
-	DistrictID    uuid.UUID `json:"district_id" validate:"required"`
-	SubDistrictID uuid.UUID `json:"sub_district_id" validate:"required"`
-	Address       *string   `json:"address"`
+	ProvinceID    uuid.UUID `json:"province_id" validate:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
+	DistrictID    uuid.UUID `json:"district_id" validate:"required" example:"123e4567-e89b-12d3-a456-426614174001"`
+	SubDistrictID uuid.UUID `json:"sub_district_id" validate:"required" example:"123e4567-e89b-12d3-a456-426614174002"`
+	Address       *string   `json:"address" example:"123 Main Street, Apartment 4B"`
 }
 
 func (r *AddressRequest) ReqToModel() models.Address {

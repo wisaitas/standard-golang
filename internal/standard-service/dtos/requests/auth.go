@@ -7,18 +7,18 @@ import (
 )
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=255"`
-	Password string `json:"password" validate:"required,min=8"`
+	Username string `json:"username" validate:"required,min=3,max=255" example:"john_doe"`
+	Password string `json:"password" validate:"required,min=8" example:"Str0ngP@ssw0rd"`
 }
 
 type RegisterRequest struct {
-	Username        string           `json:"username" validate:"required,min=3,max=255"`
-	Email           string           `json:"email" validate:"required,email"`
-	FirstName       string           `json:"first_name" validate:"required,min=3,max=255"`
-	LastName        string           `json:"last_name" validate:"required,min=3,max=255"`
-	BirthDate       time.Time        `json:"birth_date" validate:"required"`
-	Password        string           `json:"password" validate:"required,min=8"`
-	ConfirmPassword string           `json:"confirm_password" validate:"required,eqfield=Password"`
+	Username        string           `json:"username" validate:"required,min=3,max=255" example:"john_doe"`
+	Email           string           `json:"email" validate:"required,email" example:"john.doe@example.com"`
+	FirstName       string           `json:"first_name" validate:"required,min=3,max=255" example:"John"`
+	LastName        string           `json:"last_name" validate:"required,min=3,max=255" example:"Doe"`
+	BirthDate       time.Time        `json:"birth_date" validate:"required" example:"1990-01-01T00:00:00Z"`
+	Password        string           `json:"password" validate:"required,min=8" example:"Str0ngP@ssw0rd"`
+	ConfirmPassword string           `json:"confirm_password" validate:"required,eqfield=Password" example:"Str0ngP@ssw0rd"`
 	Addresses       []AddressRequest `json:"addresses" validate:"dive"`
 }
 
