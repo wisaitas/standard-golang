@@ -25,6 +25,14 @@ func NewSubDistrictHandler(
 	}
 }
 
+// @Summary Get Sub Districts
+// @Description Get Sub Districts
+// @Tags Sub District
+// @Accept json
+// @Produce json
+// @Param query query queries.SubDistrictQuery true "Sub District Query"
+// @Success 200 {object} pkg.SuccessResponse
+// @Router /sub-districts [get]
 func (r *subDistrictHandler) GetSubDistricts(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(queries.SubDistrictQuery)
 	if !ok {

@@ -30,6 +30,14 @@ func NewUserHandler(
 	}
 }
 
+// @Summary Get Users
+// @Description Get Users
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param query query pkg.PaginationQuery true "Pagination Query"
+// @Success 200 {object} pkg.SuccessResponse
+// @Router /users [get]
 func (r *userHandler) GetUsers(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(pkg.PaginationQuery)
 	if !ok {
@@ -76,6 +84,14 @@ func (r *userHandler) CreateUser(c *fiber.Ctx) error {
 	})
 }
 
+// @Summary Update User
+// @Description Update User
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param params path params.UserParams true "User Params"
+// @Success 200 {object} pkg.SuccessResponse
+// @Router /users/{id} [put]
 func (r *userHandler) UpdateUser(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(requests.UpdateUserRequest)
 	if !ok {
