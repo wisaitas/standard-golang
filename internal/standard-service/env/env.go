@@ -7,15 +7,18 @@ import (
 )
 
 var (
+	ENV                    string
 	PORT                   string
 	DB_HOST                string
 	DB_USER                string
 	DB_PASSWORD            string
 	DB_NAME                string
 	DB_PORT                string
+	DB_DRIVER              string
 	JWT_SECRET             string
 	REDIS_HOST             string
 	REDIS_PORT             string
+	REDIS_PASSWORD         string
 	MAX_FILE_SIZE          int64
 	DISTRICT_FILE_PATH     string
 	SUB_DISTRICT_FILE_PATH string
@@ -23,15 +26,18 @@ var (
 )
 
 type environment struct {
+	ENV                    string `env:"ENV" envDefault:"DEV"`
 	PORT                   string `env:"PORT" envDefault:"8082"`
 	DB_HOST                string `env:"DB_HOST" envDefault:"localhost"`
 	DB_USER                string `env:"DB_USER" envDefault:"postgres"`
 	DB_PASSWORD            string `env:"DB_PASSWORD" envDefault:"root"`
 	DB_NAME                string `env:"DB_NAME" envDefault:"postgres"`
 	DB_PORT                string `env:"DB_PORT" envDefault:"8080"`
+	DB_DRIVER              string `env:"DB_DRIVER" envDefault:"postgres"`
 	JWT_SECRET             string `env:"JWT_SECRET" envDefault:"secret"`
 	REDIS_HOST             string `env:"REDIS_HOST" envDefault:"localhost"`
 	REDIS_PORT             string `env:"REDIS_PORT" envDefault:"8081"`
+	REDIS_PASSWORD         string `env:"REDIS_PASSWORD" envDefault:""`
 	MAX_FILE_SIZE          int64  `env:"MAX_FILE_SIZE" envDefault:"5"`
 	DISTRICT_FILE_PATH     string `env:"DISTRICT_FILE_PATH" envDefault:"./data/districts.json"`
 	SUB_DISTRICT_FILE_PATH string `env:"SUB_DISTRICT_FILE_PATH" envDefault:"./data/sub_districts.json"`

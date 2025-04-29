@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"context"
@@ -6,13 +6,16 @@ import (
 	"log"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 )
 
-func ConnectRedis() *redis.Client {
+func ConnectRedis(
+	host string,
+	port string,
+	password string,
+) *redis.Client {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", env.REDIS_HOST, env.REDIS_PORT),
-		Password: "",
+		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Password: password,
 		DB:       0,
 	})
 

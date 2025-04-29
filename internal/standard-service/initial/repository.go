@@ -14,12 +14,12 @@ type repository struct {
 	subDistrictRepository repositories.SubDistrictRepository
 }
 
-func newRepository(config *config) *repository {
+func newRepository(clientConfig *clientConfig) *repository {
 	return &repository{
-		userRepository:        repositories.NewUserRepository(config.DB, pkg.NewBaseRepository[models.User](config.DB)),
-		userHistoryRepository: repositories.NewUserHistoryRepository(config.DB, pkg.NewBaseRepository[models.UserHistory](config.DB)),
-		provinceRepository:    repositories.NewProvinceRepository(config.DB, pkg.NewBaseRepository[models.Province](config.DB)),
-		districtRepository:    repositories.NewDistrictRepository(config.DB, pkg.NewBaseRepository[models.District](config.DB)),
-		subDistrictRepository: repositories.NewSubDistrictRepository(config.DB, pkg.NewBaseRepository[models.SubDistrict](config.DB)),
+		userRepository:        repositories.NewUserRepository(clientConfig.DB, pkg.NewBaseRepository[models.User](clientConfig.DB)),
+		userHistoryRepository: repositories.NewUserHistoryRepository(clientConfig.DB, pkg.NewBaseRepository[models.UserHistory](clientConfig.DB)),
+		provinceRepository:    repositories.NewProvinceRepository(clientConfig.DB, pkg.NewBaseRepository[models.Province](clientConfig.DB)),
+		districtRepository:    repositories.NewDistrictRepository(clientConfig.DB, pkg.NewBaseRepository[models.District](clientConfig.DB)),
+		subDistrictRepository: repositories.NewSubDistrictRepository(clientConfig.DB, pkg.NewBaseRepository[models.SubDistrict](clientConfig.DB)),
 	}
 }

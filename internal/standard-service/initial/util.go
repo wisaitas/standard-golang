@@ -10,11 +10,11 @@ type util struct {
 	bcryptUtil      pkg.BcryptUtil
 }
 
-func newUtil(config *config) *util {
+func newUtil(clientConfig *clientConfig) *util {
 	return &util{
-		redisUtil:       pkg.NewRedisUtil(config.Redis),
+		redisUtil:       pkg.NewRedisUtil(clientConfig.Redis),
 		jwtUtil:         pkg.NewJWTUtil(),
-		transactionUtil: pkg.NewTransactionUtil(config.DB),
+		transactionUtil: pkg.NewTransactionUtil(clientConfig.DB),
 		validatorUtil:   pkg.NewValidatorUtil(),
 		bcryptUtil:      pkg.NewBcrypt(),
 	}

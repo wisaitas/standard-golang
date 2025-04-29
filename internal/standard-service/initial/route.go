@@ -3,6 +3,8 @@ package initial
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	"github.com/wisaitas/standard-golang/internal/standard-service/constants"
+	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 	"github.com/wisaitas/standard-golang/internal/standard-service/routes"
 )
 
@@ -20,9 +22,11 @@ func newRoute(
 	validate *validate,
 	middleware *middleware,
 ) {
-	app.Get("/swagger/*", swagger.New(
-		swagger.Config{},
-	))
+	if env.ENV == constants.Util.Dev {
+		app.Get("/swagger/*", swagger.New(
+			swagger.Config{},
+		))
+	}
 	apiRoute := app.Group("/api/v1")
 
 	route := route{
