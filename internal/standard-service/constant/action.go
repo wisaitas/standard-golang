@@ -1,4 +1,4 @@
-package constants
+package constant
 
 var Action = struct {
 	Create string

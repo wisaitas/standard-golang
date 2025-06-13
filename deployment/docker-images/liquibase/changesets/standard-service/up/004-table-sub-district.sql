@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS sub_districts (
     updated_at timestamp NOT NULL DEFAULT NOW(),
     updated_by uuid,
     deleted_at timestamp,
+    deleted_by uuid,
+    
     name_th varchar(100) NOT NULL,
     name_en varchar(100) NOT NULL,
     district_id uuid NOT NULL,

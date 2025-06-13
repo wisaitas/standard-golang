@@ -24,14 +24,6 @@ func NewProvinceHandler(
 	}
 }
 
-// @Summary Get Provinces
-// @Description Get Provinces
-// @Tags Province
-// @Accept json
-// @Produce json
-// @Param query query queries.ProvinceQuery true "Province Query"
-// @Success 200 {object} pkg.SuccessResponse
-// @Router /provinces [get]
 func (r *provinceHandler) GetProvinces(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(pkg.PaginationQuery)
 	if !ok {

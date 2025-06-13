@@ -21,7 +21,7 @@ func newService(repo *repository, lib *lib) *service {
 		userService: userService.NewUserService(
 			userService.NewGet(repo.userRepository, lib.redis),
 			userService.NewPost(repo.userRepository, lib.redis),
-			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, lib.redis),
+			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, lib.redis, lib.txManagerFactory),
 			userService.NewDelete(repo.userRepository, lib.redis),
 		),
 		authService: authService.NewAuthService(
@@ -29,6 +29,8 @@ func newService(repo *repository, lib *lib) *service {
 			repo.userHistoryRepository,
 			lib.redis,
 			lib.bcrypt,
+			lib.jwt,
+			lib.txManagerFactory,
 		),
 		provinceService: provinceService.NewProvinceService(
 			provinceService.NewGet(repo.provinceRepository, lib.redis),

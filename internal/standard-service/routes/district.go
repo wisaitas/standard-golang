@@ -27,6 +27,5 @@ func NewDistrictRoutes(
 func (r *DistrictRoutes) DistrictRoutes() {
 	districts := r.app.Group("/districts")
 
-	// Method GET
 	districts.Get("/", r.districtValidate.GetDistricts, r.districtHandler.GetDistricts)
 }

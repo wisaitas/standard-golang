@@ -61,12 +61,7 @@ func (r *MockUserHistoryRepository) DeleteMany(items *[]entity.UserHistory) erro
 	return args.Error(0)
 }
 
-func (r *MockUserHistoryRepository) WithTxManager(tm *pkg.TxManager) pkg.BaseRepository[entity.UserHistory] {
-	args := r.Called(tm)
+func (r *MockUserHistoryRepository) WithTx(tx *gorm.DB) pkg.BaseRepository[entity.UserHistory] {
+	args := r.Called(tx)
 	return args.Get(0).(pkg.BaseRepository[entity.UserHistory])
-}
-
-func (r *MockUserHistoryRepository) GetDB() *gorm.DB {
-	args := r.Called()
-	return args.Get(0).(*gorm.DB)
 }

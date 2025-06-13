@@ -1,12 +1,10 @@
 package repository
 
 import (
-	"gorm.io/gorm"
-
+	"github.com/stretchr/testify/mock"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/pkg"
-
-	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 type MockUserRepository struct {
@@ -63,12 +61,7 @@ func (r *MockUserRepository) DeleteMany(items *[]entity.User) error {
 	return args.Error(0)
 }
 
-func (r *MockUserRepository) WithTxManager(tm *pkg.TxManager) pkg.BaseRepository[entity.User] {
-	args := r.Called(tm)
+func (r *MockUserRepository) WithTx(tx *gorm.DB) pkg.BaseRepository[entity.User] {
+	args := r.Called(tx)
 	return args.Get(0).(pkg.BaseRepository[entity.User])
-}
-
-func (r *MockUserRepository) GetDB() *gorm.DB {
-	args := r.Called()
-	return args.Get(0).(*gorm.DB)
 }

@@ -10,72 +10,56 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
-	"github.com/wisaitas/standard-golang/internal/standard-service/constants"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	mockRepository "github.com/wisaitas/standard-golang/internal/standard-service/mocks/repository"
-	mockUtil "github.com/wisaitas/standard-golang/internal/standard-service/mocks/utils"
+	mockPkg "github.com/wisaitas/standard-golang/internal/standard-service/mock/pkg"
+	mockRepo "github.com/wisaitas/standard-golang/internal/standard-service/mock/repository"
 	"github.com/wisaitas/standard-golang/internal/standard-service/service/auth"
-	"github.com/wisaitas/standard-golang/pkg"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-// MockDB implements a mock DB with Begin method
-type MockDB struct {
-	mock.Mock
-}
-
-func (m *MockDB) Begin() *gorm.DB {
-	args := m.Called()
-	return args.Get(0).(*gorm.DB)
-}
-
-type registerTestSuite struct {
+type authRegisterTestSuite struct {
 	suite.Suite
-	mockUserRepo          *mockRepository.MockUserRepository
-	mockUserHistoryRepo   *mockRepository.MockUserHistoryRepository
-	mockRedis             *mockUtil.MockRedis
-	mockBcrypt            *mockUtil.MockBcrypt
-	mockDB                *MockDB
-	mockTxDB              *gorm.DB
-	mockTxManager         *pkg.TxManager
-	mockTxUserRepo        *mockRepository.MockUserRepository
-	mockTxUserHistoryRepo *mockRepository.MockUserHistoryRepository
-	service               auth.AuthService
+	mockUserRepo        *mockRepo.MockUserRepository
+	mockUserHistoryRepo *mockRepo.MockUserHistoryRepository
+	mockRedis           *mockPkg.MockRedis
+	mockBcrypt          *mockPkg.MockBcrypt
+	mockJWT             *mockPkg.MockJwt
+	mockTxManager       *mockPkg.MockTransactionManager
+	service             auth.AuthService
 }
 
-func (s *registerTestSuite) SetupTest() {
-	s.mockUserRepo = new(mockRepository.MockUserRepository)
-	s.mockUserHistoryRepo = new(mockRepository.MockUserHistoryRepository)
-	s.mockRedis = new(mockUtil.MockRedis)
-	s.mockBcrypt = new(mockUtil.MockBcrypt)
-	s.mockTxUserRepo = new(mockRepository.MockUserRepository)
-	s.mockTxUserHistoryRepo = new(mockRepository.MockUserHistoryRepository)
-	s.mockDB = new(MockDB)
-	s.mockTxDB = &gorm.DB{}
+func (s *authRegisterTestSuite) SetupTest() {
+	s.mockUserRepo = new(mockRepo.MockUserRepository)
+	s.mockUserHistoryRepo = new(mockRepo.MockUserHistoryRepository)
+	s.mockRedis = new(mockPkg.MockRedis)
+	s.mockBcrypt = new(mockPkg.MockBcrypt)
+	s.mockJWT = new(mockPkg.MockJwt)
+	s.mockTxManager = new(mockPkg.MockTransactionManager)
 
 	s.service = auth.NewAuthService(
 		s.mockUserRepo,
 		s.mockUserHistoryRepo,
 		s.mockRedis,
 		s.mockBcrypt,
+		s.mockJWT,
+		s.mockTxManager,
 	)
 }
 
-func (s *registerTestSuite) TestRegisterSuccess() {
-	// Test data
-	birthDate := time.Now()
+func (s *authRegisterTestSuite) TestRegisterSuccess() {
+	testTime := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
 	provinceID := uuid.New()
 	districtID := uuid.New()
 	subDistrictID := uuid.New()
-	address := "123 Test St"
+	testAddress := "123 Test Street"
 
-	registerReq := request.RegisterRequest{
+	registerRequest := request.RegisterRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       testTime,
 		Password:        "password123",
 		ConfirmPassword: "password123",
 		Addresses: []request.AddressRequest{
@@ -83,273 +67,261 @@ func (s *registerTestSuite) TestRegisterSuccess() {
 				ProvinceID:    provinceID,
 				DistrictID:    districtID,
 				SubDistrictID: subDistrictID,
-				Address:       &address,
+				Address:       &testAddress,
 			},
 		},
 	}
 
-	// Mock bcrypt password hashing
-	hashedPassword := []byte("hashedpassword")
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return(hashedPassword, nil)
+	hashedPassword := []byte("hashed_password_123")
 
-	// Mock DB and transaction setup
-	s.mockDB.On("Begin").Return(s.mockTxDB)
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
 
-	// Mock transaction repositories
-	s.mockUserRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserHistoryRepo)
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(nil).Run(func(args mock.Arguments) {
+		txFunc := args.Get(0).(func(tx *gorm.DB) error)
+		mockTx := &gorm.DB{}
 
-	// Mock first user history creation
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(nil)
+		s.mockUserRepo.On("WithTx", mockTx).Return(s.mockUserRepo)
+		s.mockUserHistoryRepo.On("WithTx", mockTx).Return(s.mockUserHistoryRepo)
 
-	// Mock user creation
-	s.mockTxUserRepo.On("Create", mock.MatchedBy(func(user *entity.User) bool {
-		return user.Password == string(hashedPassword)
-	})).Return(nil)
+		s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
+			user := args.Get(0).(*entity.User)
+			user.ID = uuid.New()
+		})
+		s.mockUserHistoryRepo.On("Create", mock.AnythingOfType("*entity.UserHistory")).Return(nil)
 
-	// Mock second user history creation
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(nil).Once()
+		txFunc(mockTx)
+	})
 
-	// Mock transaction commit
-	s.mockTxDB.Error = nil // Ensure no error for commit
+	resp, statusCode, err := s.service.Register(registerRequest)
 
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
-
-	// Assertions
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusCreated, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	s.mockTxUserRepo.AssertExpectations(s.T())
-	s.mockTxUserHistoryRepo.AssertExpectations(s.T())
-	s.mockDB.AssertExpectations(s.T())
+	s.Require().Equal("testuser", resp.Username)
+	s.Require().Equal("test@example.com", resp.Email)
+	s.Require().Equal("John", resp.FirstName)
+	s.Require().Equal("Doe", resp.LastName)
+	s.Require().Equal(testTime, resp.BirthDate)
+	s.Require().Len(resp.Addresses, 1)
+	s.Require().Equal(provinceID, resp.Addresses[0].ProvinceID)
+	s.Require().Equal(districtID, resp.Addresses[0].DistrictID)
+	s.Require().Equal(subDistrictID, resp.Addresses[0].SubDistrictID)
+	s.Require().Equal(&testAddress, resp.Addresses[0].Address)
 }
 
-func (s *registerTestSuite) TestRegisterFailedBcrypt() {
-	// Test data
-	birthDate := time.Now()
-	registerReq := request.RegisterRequest{
+func (s *authRegisterTestSuite) TestRegisterBcryptError() {
+	registerRequest := request.RegisterRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       time.Now(),
 		Password:        "password123",
 		ConfirmPassword: "password123",
+		Addresses:       []request.AddressRequest{},
 	}
 
-	// Mock bcrypt password hashing failure
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return([]byte{}, errors.New("bcrypt error"))
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return([]byte(nil), errors.New("bcrypt error"))
 
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
+	_, statusCode, err := s.service.Register(registerRequest)
 
-	// Assertions
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusInternalServerError, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	// Ensure transaction was not started
-	s.mockUserRepo.AssertNotCalled(s.T(), "WithTxManager")
+	s.mockTxManager.AssertNotCalled(s.T(), "ExecuteInTransaction")
 }
 
-func (s *registerTestSuite) TestRegisterFailedFirstHistoryCreate() {
-	// Test data
-	birthDate := time.Now()
-	registerReq := request.RegisterRequest{
-		Username:        "testuser",
-		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
-		Password:        "password123",
-		ConfirmPassword: "password123",
-	}
-
-	// Mock bcrypt password hashing
-	hashedPassword := []byte("hashedpassword")
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return(hashedPassword, nil)
-
-	// Mock DB and transaction setup
-	s.mockDB.On("Begin").Return(s.mockTxDB)
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
-
-	// Mock transaction repositories
-	s.mockUserRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserHistoryRepo)
-
-	// Mock first user history creation failure
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(errors.New("history creation error"))
-
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
-
-	// Assertions
-	s.Require().Error(err)
-	s.Require().Equal(http.StatusInternalServerError, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	s.mockTxUserHistoryRepo.AssertExpectations(s.T())
-	s.mockDB.AssertExpectations(s.T())
-	// Ensure user creation was not called
-	s.mockTxUserRepo.AssertNotCalled(s.T(), "Create")
-}
-
-func (s *registerTestSuite) TestRegisterFailedUserCreate() {
-	// Test data
-	birthDate := time.Now()
-	registerReq := request.RegisterRequest{
-		Username:        "testuser",
-		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
-		Password:        "password123",
-		ConfirmPassword: "password123",
-	}
-
-	// Mock bcrypt password hashing
-	hashedPassword := []byte("hashedpassword")
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return(hashedPassword, nil)
-
-	// Mock DB and transaction setup
-	s.mockDB.On("Begin").Return(s.mockTxDB)
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
-
-	// Mock transaction repositories
-	s.mockUserRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserHistoryRepo)
-
-	// Mock first user history creation
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(nil).Once()
-
-	// Mock user creation failure
-	s.mockTxUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("database error"))
-
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
-
-	// Assertions
-	s.Require().Error(err)
-	s.Require().Equal(http.StatusInternalServerError, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	s.mockTxUserRepo.AssertExpectations(s.T())
-	s.mockTxUserHistoryRepo.AssertExpectations(s.T())
-	s.mockDB.AssertExpectations(s.T())
-}
-
-func (s *registerTestSuite) TestRegisterUserExistsError() {
-	// Test data
-	birthDate := time.Now()
-	registerReq := request.RegisterRequest{
+func (s *authRegisterTestSuite) TestRegisterUsernameAlreadyExists() {
+	registerRequest := request.RegisterRequest{
 		Username:        "existinguser",
 		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       time.Now(),
 		Password:        "password123",
 		ConfirmPassword: "password123",
+		Addresses:       []request.AddressRequest{},
 	}
 
-	// Mock bcrypt password hashing
-	hashedPassword := []byte("hashedpassword")
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return(hashedPassword, nil)
+	hashedPassword := []byte("hashed_password_123")
 
-	// Mock DB and transaction setup
-	s.mockDB.On("Begin").Return(s.mockTxDB)
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
 
-	// Mock transaction repositories
-	s.mockUserRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserHistoryRepo)
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
 
-	// Mock first user history creation
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(nil).Once()
+	_, statusCode, err := s.service.Register(registerRequest)
 
-	// Mock user creation with unique constraint error
-	s.mockTxUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
-
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
-
-	// Assertions
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusBadRequest, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	s.mockTxUserRepo.AssertExpectations(s.T())
-	s.mockTxUserHistoryRepo.AssertExpectations(s.T())
-	s.mockDB.AssertExpectations(s.T())
+	s.Require().Contains(err.Error(), "username already exists")
 }
 
-func (s *registerTestSuite) TestRegisterSecondHistoryCreateFailed() {
-	// Test data
-	birthDate := time.Now()
-	registerReq := request.RegisterRequest{
+func (s *authRegisterTestSuite) TestRegisterUserCreateError() {
+	registerRequest := request.RegisterRequest{
 		Username:        "testuser",
 		Email:           "test@example.com",
-		FirstName:       "Test",
-		LastName:        "User",
-		BirthDate:       birthDate,
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       time.Now(),
 		Password:        "password123",
 		ConfirmPassword: "password123",
+		Addresses:       []request.AddressRequest{},
 	}
 
-	// Mock bcrypt password hashing
-	hashedPassword := []byte("hashedpassword")
-	s.mockBcrypt.On("GenerateFromPassword", mock.Anything, bcrypt.DefaultCost).Return(hashedPassword, nil)
+	hashedPassword := []byte("hashed_password_123")
 
-	// Mock DB and transaction setup
-	s.mockDB.On("Begin").Return(s.mockTxDB)
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
 
-	// Mock transaction repositories
-	s.mockUserRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTxManager", mock.AnythingOfType("*pkg.TxManager")).Return(s.mockTxUserHistoryRepo)
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(errors.New("database connection error")).Run(func(args mock.Arguments) {
+		txFunc := args.Get(0).(func(tx *gorm.DB) error)
+		mockTx := &gorm.DB{}
 
-	// Mock first user history creation
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(nil).Once()
+		s.mockUserRepo.On("WithTx", mockTx).Return(s.mockUserRepo)
+		s.mockUserHistoryRepo.On("WithTx", mockTx).Return(s.mockUserHistoryRepo)
+		s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("database connection error"))
 
-	// Mock user creation
-	s.mockTxUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil)
+		txFunc(mockTx)
+	})
 
-	// Mock second user history creation failure
-	s.mockTxUserHistoryRepo.On("Create", mock.MatchedBy(func(history *entity.UserHistory) bool {
-		return history.Action == constants.Action.Create
-	})).Return(errors.New("second history creation error")).Once()
+	_, statusCode, err := s.service.Register(registerRequest)
 
-	// Execute the test
-	_, statusCode, err := s.service.Register(registerReq)
-
-	// Assertions
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusInternalServerError, statusCode)
-	s.mockBcrypt.AssertExpectations(s.T())
-	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	s.mockTxUserRepo.AssertExpectations(s.T())
-	s.mockTxUserHistoryRepo.AssertExpectations(s.T())
-	s.mockDB.AssertExpectations(s.T())
 }
 
-func TestRegister(t *testing.T) {
-	suite.Run(t, new(registerTestSuite))
+func (s *authRegisterTestSuite) TestRegisterUserHistoryCreateError() {
+	registerRequest := request.RegisterRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       time.Now(),
+		Password:        "password123",
+		ConfirmPassword: "password123",
+		Addresses:       []request.AddressRequest{},
+	}
+
+	hashedPassword := []byte("hashed_password_123")
+
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
+
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(errors.New("user history creation error")).Run(func(args mock.Arguments) {
+		txFunc := args.Get(0).(func(tx *gorm.DB) error)
+		mockTx := &gorm.DB{}
+
+		s.mockUserRepo.On("WithTx", mockTx).Return(s.mockUserRepo)
+		s.mockUserHistoryRepo.On("WithTx", mockTx).Return(s.mockUserHistoryRepo)
+
+		s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
+			user := args.Get(0).(*entity.User)
+			user.ID = uuid.New()
+		})
+		s.mockUserHistoryRepo.On("Create", mock.AnythingOfType("*entity.UserHistory")).Return(errors.New("user history creation error"))
+
+		txFunc(mockTx)
+	})
+
+	_, statusCode, err := s.service.Register(registerRequest)
+
+	s.Require().Error(err)
+	s.Require().Equal(http.StatusInternalServerError, statusCode)
+}
+
+func (s *authRegisterTestSuite) TestRegisterTransactionError() {
+	registerRequest := request.RegisterRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       time.Now(),
+		Password:        "password123",
+		ConfirmPassword: "password123",
+		Addresses:       []request.AddressRequest{},
+	}
+
+	hashedPassword := []byte("hashed_password_123")
+
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(errors.New("transaction failed"))
+
+	_, statusCode, err := s.service.Register(registerRequest)
+
+	s.Require().Error(err)
+	s.Require().Equal(http.StatusInternalServerError, statusCode)
+}
+
+func (s *authRegisterTestSuite) TestRegisterWithMultipleAddresses() {
+	testTime := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+	provinceID1 := uuid.New()
+	districtID1 := uuid.New()
+	subDistrictID1 := uuid.New()
+	testAddress1 := "123 Test Street"
+
+	provinceID2 := uuid.New()
+	districtID2 := uuid.New()
+	subDistrictID2 := uuid.New()
+	testAddress2 := "456 Another Street"
+
+	registerRequest := request.RegisterRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		FirstName:       "John",
+		LastName:        "Doe",
+		BirthDate:       testTime,
+		Password:        "password123",
+		ConfirmPassword: "password123",
+		Addresses: []request.AddressRequest{
+			{
+				ProvinceID:    provinceID1,
+				DistrictID:    districtID1,
+				SubDistrictID: subDistrictID1,
+				Address:       &testAddress1,
+			},
+			{
+				ProvinceID:    provinceID2,
+				DistrictID:    districtID2,
+				SubDistrictID: subDistrictID2,
+				Address:       &testAddress2,
+			},
+		},
+	}
+
+	hashedPassword := []byte("hashed_password_123")
+
+	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
+
+	s.mockTxManager.On("ExecuteInTransaction", mock.AnythingOfType("func(*gorm.DB) error")).Return(nil).Run(func(args mock.Arguments) {
+		txFunc := args.Get(0).(func(tx *gorm.DB) error)
+		mockTx := &gorm.DB{}
+
+		s.mockUserRepo.On("WithTx", mockTx).Return(s.mockUserRepo)
+		s.mockUserHistoryRepo.On("WithTx", mockTx).Return(s.mockUserHistoryRepo)
+
+		s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
+			user := args.Get(0).(*entity.User)
+			user.ID = uuid.New()
+		})
+		s.mockUserHistoryRepo.On("Create", mock.AnythingOfType("*entity.UserHistory")).Return(nil)
+
+		txFunc(mockTx)
+	})
+
+	resp, statusCode, err := s.service.Register(registerRequest)
+
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusCreated, statusCode)
+	s.Require().Equal("testuser", resp.Username)
+	s.Require().Len(resp.Addresses, 2)
+
+	s.Require().Equal(provinceID1, resp.Addresses[0].ProvinceID)
+	s.Require().Equal(districtID1, resp.Addresses[0].DistrictID)
+	s.Require().Equal(subDistrictID1, resp.Addresses[0].SubDistrictID)
+	s.Require().Equal(&testAddress1, resp.Addresses[0].Address)
+
+	s.Require().Equal(provinceID2, resp.Addresses[1].ProvinceID)
+	s.Require().Equal(districtID2, resp.Addresses[1].DistrictID)
+	s.Require().Equal(subDistrictID2, resp.Addresses[1].SubDistrictID)
+	s.Require().Equal(&testAddress2, resp.Addresses[1].Address)
+}
+
+func TestAuthRegister(t *testing.T) {
+	suite.Run(t, new(authRegisterTestSuite))
 }

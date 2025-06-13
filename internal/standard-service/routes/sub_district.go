@@ -27,6 +27,5 @@ func NewSubDistrictRoutes(
 func (r *SubDistrictRoutes) SubDistrictRoutes() {
 	subDistricts := r.app.Group("/sub-districts")
 
-	// Method GET
 	subDistricts.Get("/", r.subDistrictValidate.GetSubDistricts, r.subDistrictHandler.GetSubDistricts)
 }

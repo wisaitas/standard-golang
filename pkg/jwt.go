@@ -34,6 +34,7 @@ type JWT interface {
 	CreateStandardClaims(id string, expireTime time.Duration) StandardClaims
 	AuthAccessToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error
 	AuthRefreshToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error
+	GenerateToken(data map[string]interface{}, exp int64, secret string) (string, error)
 }
 
 type jwt struct{}
@@ -154,4 +155,19 @@ func (j *jwt) AuthRefreshToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string
 
 	c.Locals("userContext", userContext)
 	return nil
+}
+
+func (j *jwt) GenerateToken(data map[string]interface{}, exp int64, secret string) (string, error) {
+	claim := jwtLib.MapClaims(data)
+	claim["exp"] = exp
+	claim["iat"] = time.Now().Unix()
+
+	token := jwtLib.NewWithClaims(jwtLib.SigningMethodHS256, claim)
+
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", fmt.Errorf("[jwt] %w", err)
+	}
+
+	return tokenString, nil
 }

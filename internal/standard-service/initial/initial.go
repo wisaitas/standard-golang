@@ -13,7 +13,9 @@ import (
 )
 
 func init() {
-	env.LoadEnv()
+	if err := pkg.ReadConfig(&env.Environment); err != nil {
+		log.Fatalf("error reading config: %v\n", pkg.Error(err))
+	}
 }
 
 func InitializeApp() {
@@ -38,7 +40,7 @@ func InitializeApp() {
 
 func run(app *fiber.App, clientConfig *clientConfig) {
 	go func() {
-		if err := app.Listen(fmt.Sprintf(":%s", env.PORT)); err != nil {
+		if err := app.Listen(fmt.Sprintf(":%d", env.Environment.Server.Port)); err != nil {
 			log.Fatalf("error starting server: %v\n", pkg.Error(err))
 		}
 	}()

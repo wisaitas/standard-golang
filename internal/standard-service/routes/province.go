@@ -27,6 +27,5 @@ func NewProvinceRoutes(
 func (r *ProvinceRoutes) ProvinceRoutes() {
 	provinces := r.app.Group("/provinces")
 
-	// Method GET
 	provinces.Get("/", r.provinceValidate.GetProvinces, r.provinceHandler.GetProvinces)
 }

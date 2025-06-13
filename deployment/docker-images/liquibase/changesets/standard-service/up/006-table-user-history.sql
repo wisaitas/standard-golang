@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS user_histories (
     updated_at timestamp NOT NULL DEFAULT NOW(),
     updated_by uuid,
     deleted_at timestamp,
+    deleted_by uuid,
+    
     action user_action NOT NULL,
     old_version integer NOT NULL,
     old_first_name varchar(100) NOT NULL,

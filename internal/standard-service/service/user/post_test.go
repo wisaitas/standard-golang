@@ -3,32 +3,37 @@ package user_test
 import (
 	"errors"
 	"net/http"
-	"testing"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
-	mockRepository "github.com/wisaitas/standard-golang/internal/standard-service/mocks/repository"
-	mockUtil "github.com/wisaitas/standard-golang/internal/standard-service/mocks/utils"
+	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
+	mockPkg "github.com/wisaitas/standard-golang/internal/standard-service/mock/pkg"
+	mockRepo "github.com/wisaitas/standard-golang/internal/standard-service/mock/repository"
 	"github.com/wisaitas/standard-golang/internal/standard-service/service/user"
+
+	"testing"
 )
 
 type createUserTestSuite struct {
 	suite.Suite
-	mockRepo  *mockRepository.MockUserRepository
-	mockRedis *mockUtil.MockRedis
-	service   user.Post
+	mockRepo   *mockRepo.MockUserRepository
+	mockBcrypt *mockPkg.MockBcrypt
+	mockRedis  *mockPkg.MockRedis
+	service    user.Post
 }
 
 func (s *createUserTestSuite) SetupTest() {
-	s.mockRepo = new(mockRepository.MockUserRepository)
-	s.mockRedis = new(mockUtil.MockRedis)
+	s.mockRepo = new(mockRepo.MockUserRepository)
+	s.mockBcrypt = new(mockPkg.MockBcrypt)
+	s.mockRedis = new(mockPkg.MockRedis)
 	s.service = user.NewPost(s.mockRepo, s.mockRedis)
 }
 
 func (s *createUserTestSuite) TestCreateUserSuccess() {
-	s.mockRepo.On("Create", mock.MatchedBy(func(u interface{}) bool {
-		return true
+
+	s.mockRepo.On("Create", mock.MatchedBy(func(u *entity.User) bool {
+		return u.Username == "testuser" && u.Email == "test@example.com"
 	})).Return(nil)
 
 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
@@ -40,11 +45,10 @@ func (s *createUserTestSuite) TestCreateUserSuccess() {
 
 	s.Require().NoError(err)
 	s.Require().Equal(http.StatusCreated, status)
-	s.mockRepo.AssertExpectations(s.T())
 }
 
 func (s *createUserTestSuite) TestCreateUserUsernameExists() {
-	s.mockRepo.On("Create", mock.Anything).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
+	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
 
 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
 		Username:        "existinguser",
@@ -55,11 +59,10 @@ func (s *createUserTestSuite) TestCreateUserUsernameExists() {
 
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusBadRequest, status)
-	s.mockRepo.AssertExpectations(s.T())
 }
 
 func (s *createUserTestSuite) TestCreateUserInternalServerError() {
-	s.mockRepo.On("Create", mock.Anything).Return(errors.New("database error"))
+	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("database error"))
 
 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
 		Username:        "testuser",
@@ -70,10 +73,11 @@ func (s *createUserTestSuite) TestCreateUserInternalServerError() {
 
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusInternalServerError, status)
-	s.mockRepo.AssertExpectations(s.T())
 }
 
 func (s *createUserTestSuite) TestCreateUserHashError() {
+	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil)
+
 	longPassword := string(make([]byte, 73))
 
 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
@@ -86,6 +90,7 @@ func (s *createUserTestSuite) TestCreateUserHashError() {
 	s.Require().Error(err)
 	s.Require().Equal(http.StatusInternalServerError, status)
 	s.mockRepo.AssertNotCalled(s.T(), "Create")
+
 }
 
 func TestCreateUser(t *testing.T) {

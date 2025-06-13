@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS addresses (
     updated_at timestamp NOT NULL DEFAULT NOW(),
     updated_by uuid,
     deleted_at timestamp,
+    deleted_by uuid,
+    
     address varchar(400),
     province_id uuid NOT NULL,
     district_id uuid NOT NULL,

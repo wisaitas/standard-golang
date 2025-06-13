@@ -27,7 +27,7 @@ func NewAuthMiddleware(
 }
 
 func (r *authMiddleware) Logout(c *fiber.Ctx) error {
-	if err := r.jwt.AuthAccessToken(c, r.redis, r.jwt, env.JWT_SECRET); err != nil {
+	if err := r.jwt.AuthAccessToken(c, r.redis, r.jwt, env.Environment.Server.JwtSecret); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -38,7 +38,7 @@ func (r *authMiddleware) Logout(c *fiber.Ctx) error {
 }
 
 func (r *authMiddleware) RefreshToken(c *fiber.Ctx) error {
-	if err := r.jwt.AuthRefreshToken(c, r.redis, r.jwt, env.JWT_SECRET); err != nil {
+	if err := r.jwt.AuthRefreshToken(c, r.redis, r.jwt, env.Environment.Server.JwtSecret); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})

@@ -34,12 +34,9 @@ func NewUserRoutes(
 func (r *UserRoutes) UserRoutes() {
 	users := r.app.Group("/users")
 
-	// Method GET
 	users.Get("/", r.userValidate.GetUsers, r.userHandler.GetUsers)
 
-	// Method POST
 	users.Post("/", r.userValidate.CreateUser, r.userHandler.CreateUser)
 
-	// Method PATCH
 	users.Patch("/:id", r.userMiddleware.UpdateUser, r.userValidate.UpdateUser, r.userHandler.UpdateUser)
 }

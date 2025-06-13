@@ -23,7 +23,7 @@ func NewUserMiddleware(redis pkg.Redis, jwt pkg.JWT) UserMiddleware {
 }
 
 func (r *userMiddleware) UpdateUser(c *fiber.Ctx) error {
-	if err := r.jwt.AuthAccessToken(c, r.redis, r.jwt, env.JWT_SECRET); err != nil {
+	if err := r.jwt.AuthAccessToken(c, r.redis, r.jwt, env.Environment.Server.JwtSecret); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})

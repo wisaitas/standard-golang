@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS provinces (
     updated_at timestamp NOT NULL DEFAULT NOW(),
     updated_by uuid,
     deleted_at timestamp,
+    deleted_by uuid,
+    
     name_th varchar(100) NOT NULL,
     name_en varchar(100) NOT NULL
 );

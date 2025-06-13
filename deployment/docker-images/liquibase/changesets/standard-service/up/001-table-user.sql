@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at timestamp NOT NULL DEFAULT NOW(),
     updated_by uuid,
     deleted_at timestamp,
+    deleted_by uuid,
+
     username varchar(100) NOT NULL UNIQUE,
     first_name varchar(100) NOT NULL,
     last_name varchar(100) NOT NULL,

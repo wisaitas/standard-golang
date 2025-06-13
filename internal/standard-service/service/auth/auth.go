@@ -11,10 +11,10 @@ import (
 
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
-	"github.com/wisaitas/standard-golang/internal/standard-service/constants"
+	"github.com/wisaitas/standard-golang/internal/standard-service/constant"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
+	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/internal/standard-service/utils"
 	"github.com/wisaitas/standard-golang/pkg"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -32,6 +32,8 @@ type authService struct {
 	userHistoryRepository repository.UserHistoryRepository
 	redis                 pkg.Redis
 	bcrypt                pkg.Bcrypt
+	jwt                   pkg.JWT
+	transactionManager    pkg.TransactionManager
 }
 
 func NewAuthService(
@@ -39,12 +41,16 @@ func NewAuthService(
 	userHistoryRepository repository.UserHistoryRepository,
 	redis pkg.Redis,
 	bcrypt pkg.Bcrypt,
+	jwt pkg.JWT,
+	transactionManager pkg.TransactionManager,
 ) AuthService {
 	return &authService{
 		userRepository:        userRepository,
 		userHistoryRepository: userHistoryRepository,
 		redis:                 redis,
 		bcrypt:                bcrypt,
+		jwt:                   jwt,
+		transactionManager:    transactionManager,
 	}
 }
 
@@ -71,12 +77,12 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 		"user_id": user.ID,
 	}
 
-	accessToken, err := utils.GenerateToken(tokenData, accessTokenExp.Unix())
+	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	refreshToken, err := utils.GenerateToken(tokenData, refreshTokenExp.Unix())
+	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
@@ -109,7 +115,7 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 }
 
 func (r *authService) Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error) {
-	user := entity.User{}
+	user := req.RequestToEntity()
 
 	hashedPassword, err := r.bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
@@ -118,49 +124,36 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 
 	user.Password = string(hashedPassword)
 
-	tm := pkg.NewTxManager(r.userRepository.GetDB())
+	if err := r.transactionManager.ExecuteInTransaction(func(tx *gorm.DB) error {
+		txUserRepository := r.userRepository.WithTx(tx)
+		txUserHistoryRepository := r.userHistoryRepository.WithTx(tx)
 
-	txUserRepository := r.userRepository.WithTxManager(tm)
-	txUserHistoryRepository := r.userHistoryRepository.WithTxManager(tm)
+		if err := txUserRepository.Create(&user); err != nil {
+			return err
+		}
 
-	if err := txUserHistoryRepository.Create(&entity.UserHistory{
-		Action:       constants.Action.Create,
-		OldFirstName: user.FirstName,
-		OldLastName:  user.LastName,
-		OldBirthDate: user.BirthDate,
-		OldPassword:  user.Password,
-		OldEmail:     user.Email,
-		OldVersion:   user.Version,
+		userHistory := entity.UserHistory{
+			Action:       constant.Action.Create,
+			OldFirstName: user.FirstName,
+			OldLastName:  user.LastName,
+			OldBirthDate: user.BirthDate,
+			OldPassword:  user.Password,
+			OldEmail:     user.Email,
+			OldVersion:   user.Version,
+		}
+
+		if err := txUserHistoryRepository.Create(&userHistory); err != nil {
+			return err
+		}
+
+		return nil
 	}); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
-	}
-
-	if err := txUserRepository.Create(&user); err != nil {
 		if strings.Contains(err.Error(), "unique constraint") {
 			return resp, http.StatusBadRequest, pkg.Error(errors.New("username already exists"))
 		}
 
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
-
-	userHistory := entity.UserHistory{
-		Action:       constants.Action.Create,
-		OldFirstName: user.FirstName,
-		OldLastName:  user.LastName,
-		OldBirthDate: user.BirthDate,
-		OldPassword:  user.Password,
-		OldEmail:     user.Email,
-		OldVersion:   user.Version,
-	}
-
-	if err := txUserHistoryRepository.Create(&userHistory); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
-	}
-
-	if err := tm.Commit(); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
-	}
-
 	return resp.EntityToResponse(user), http.StatusCreated, nil
 }
 
@@ -190,12 +183,12 @@ func (r *authService) RefreshToken(userContext pkg.UserContext) (resp response.L
 		"user_id": user.ID,
 	}
 
-	accessToken, err := utils.GenerateToken(tokenData, accessTokenExp.Unix())
+	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, pkg.Error(err)
 	}
 
-	refreshToken, err := utils.GenerateToken(tokenData, refreshTokenExp.Unix())
+	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, err
 	}
