@@ -23,13 +23,13 @@ func InitializeApp() {
 
 	setupMiddleware(app)
 
-	util := newUtil(clientConfig)
+	lib := newLib(clientConfig)
 
 	repository := newRepository(clientConfig)
-	service := newService(repository, util)
+	service := newService(repository, lib)
 	handler := newHandler(service)
-	validate := newValidate(util)
-	middleware := newMiddleware(util)
+	validate := newValidate(lib)
+	middleware := newMiddleware(lib)
 
 	newRoute(app, handler, validate, middleware)
 

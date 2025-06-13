@@ -1,23 +1,25 @@
 package pkg
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	bcryptLib "golang.org/x/crypto/bcrypt"
+)
 
-type BcryptUtil interface {
+type Bcrypt interface {
 	GenerateFromPassword(password string, cost int) ([]byte, error)
 	CompareHashAndPassword(hashedPassword, password []byte) error
 }
 
-type bcryptUtil struct {
+type bcrypt struct {
 }
 
-func NewBcrypt() BcryptUtil {
-	return &bcryptUtil{}
+func NewBcrypt() Bcrypt {
+	return &bcrypt{}
 }
 
-func (r *bcryptUtil) GenerateFromPassword(password string, cost int) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(password), cost)
+func (r *bcrypt) GenerateFromPassword(password string, cost int) ([]byte, error) {
+	return bcryptLib.GenerateFromPassword([]byte(password), cost)
 }
 
-func (r *bcryptUtil) CompareHashAndPassword(hashedPassword, password []byte) error {
-	return bcrypt.CompareHashAndPassword(hashedPassword, password)
+func (r *bcrypt) CompareHashAndPassword(hashedPassword, password []byte) error {
+	return bcryptLib.CompareHashAndPassword(hashedPassword, password)
 }

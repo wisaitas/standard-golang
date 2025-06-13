@@ -28,6 +28,28 @@ func NewRelation(query string, args ...interface{}) *Relation {
 	}
 }
 
+type TxManager struct {
+	tx *gorm.DB
+}
+
+func NewTxManager(db *gorm.DB) *TxManager {
+	return &TxManager{
+		tx: db.Begin(),
+	}
+}
+
+func (tm *TxManager) GetTx() *gorm.DB {
+	return tm.tx
+}
+
+func (tm *TxManager) Commit() error {
+	return tm.tx.Commit().Error
+}
+
+func (tm *TxManager) Rollback() error {
+	return tm.tx.Rollback().Error
+}
+
 type BaseRepository[T any] interface {
 	GetAll(items *[]T, pagination *PaginationQuery, condition *Condition, relations *[]Relation) error
 	GetBy(item *T, condition *Condition, relations *[]Relation) error
@@ -39,7 +61,8 @@ type BaseRepository[T any] interface {
 	SaveMany(items *[]T) error
 	Delete(item *T) error
 	DeleteMany(items *[]T) error
-	WithTx(tx *gorm.DB) BaseRepository[T]
+	WithTxManager(tm *TxManager) BaseRepository[T]
+	GetDB() *gorm.DB
 }
 
 type baseRepository[T any] struct {
@@ -50,6 +73,10 @@ func NewBaseRepository[T any](db *gorm.DB) BaseRepository[T] {
 	return &baseRepository[T]{
 		db: db,
 	}
+}
+
+func (r *baseRepository[T]) GetDB() *gorm.DB {
+	return r.db
 }
 
 func (r *baseRepository[T]) GetAll(items *[]T, pagination *PaginationQuery, condition *Condition, relations *[]Relation) error {
@@ -128,8 +155,22 @@ func (r *baseRepository[T]) DeleteMany(items *[]T) error {
 	return r.db.Delete(items).Error
 }
 
-func (r *baseRepository[T]) WithTx(tx *gorm.DB) BaseRepository[T] {
+func (r *baseRepository[T]) WithTxManager(tm *TxManager) BaseRepository[T] {
 	return &baseRepository[T]{
-		db: tx,
+		db: tm.GetTx(),
 	}
+}
+
+func (r *baseRepository[T]) Begin() BaseRepository[T] {
+	return &baseRepository[T]{
+		db: r.db.Begin(),
+	}
+}
+
+func (r *baseRepository[T]) Rollback() error {
+	return r.db.Rollback().Error
+}
+
+func (r *baseRepository[T]) Commit() error {
+	return r.db.Commit().Error
 }

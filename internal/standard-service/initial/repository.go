@@ -1,25 +1,40 @@
 package initial
 
 import (
-	"github.com/wisaitas/standard-golang/internal/standard-service/models"
-	"github.com/wisaitas/standard-golang/internal/standard-service/repositories"
+	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
+	repositoryInternal "github.com/wisaitas/standard-golang/internal/standard-service/repository"
 	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type repository struct {
-	userRepository        repositories.UserRepository
-	userHistoryRepository repositories.UserHistoryRepository
-	provinceRepository    repositories.ProvinceRepository
-	districtRepository    repositories.DistrictRepository
-	subDistrictRepository repositories.SubDistrictRepository
+	userRepository        repositoryInternal.UserRepository
+	userHistoryRepository repositoryInternal.UserHistoryRepository
+	provinceRepository    repositoryInternal.ProvinceRepository
+	districtRepository    repositoryInternal.DistrictRepository
+	subDistrictRepository repositoryInternal.SubDistrictRepository
 }
 
 func newRepository(clientConfig *clientConfig) *repository {
 	return &repository{
-		userRepository:        repositories.NewUserRepository(clientConfig.DB, pkg.NewBaseRepository[models.User](clientConfig.DB)),
-		userHistoryRepository: repositories.NewUserHistoryRepository(clientConfig.DB, pkg.NewBaseRepository[models.UserHistory](clientConfig.DB)),
-		provinceRepository:    repositories.NewProvinceRepository(clientConfig.DB, pkg.NewBaseRepository[models.Province](clientConfig.DB)),
-		districtRepository:    repositories.NewDistrictRepository(clientConfig.DB, pkg.NewBaseRepository[models.District](clientConfig.DB)),
-		subDistrictRepository: repositories.NewSubDistrictRepository(clientConfig.DB, pkg.NewBaseRepository[models.SubDistrict](clientConfig.DB)),
+		userRepository: repositoryInternal.NewUserRepository(
+			clientConfig.DB,
+			pkg.NewBaseRepository[entity.User](clientConfig.DB),
+		),
+		userHistoryRepository: repositoryInternal.NewUserHistoryRepository(
+			clientConfig.DB,
+			pkg.NewBaseRepository[entity.UserHistory](clientConfig.DB),
+		),
+		provinceRepository: repositoryInternal.NewProvinceRepository(
+			clientConfig.DB,
+			pkg.NewBaseRepository[entity.Province](clientConfig.DB),
+		),
+		districtRepository: repositoryInternal.NewDistrictRepository(
+			clientConfig.DB,
+			pkg.NewBaseRepository[entity.District](clientConfig.DB),
+		),
+		subDistrictRepository: repositoryInternal.NewSubDistrictRepository(
+			clientConfig.DB,
+			pkg.NewBaseRepository[entity.SubDistrict](clientConfig.DB),
+		),
 	}
 }

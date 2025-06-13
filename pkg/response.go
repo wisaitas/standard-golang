@@ -23,12 +23,12 @@ type BaseResponse struct {
 	UpdatedBy *uuid.UUID `json:"updated_by"`
 }
 
-func (r *BaseResponse) ModelToResponse(model BaseModel) BaseResponse {
-	r.ID = model.ID
-	r.CreatedAt = model.CreatedAt
-	r.UpdatedAt = model.UpdatedAt
-	r.CreatedBy = model.CreatedBy
-	r.UpdatedBy = model.UpdatedBy
+func (r *BaseResponse) EntityToResponse(entity BaseEntity) BaseResponse {
+	r.ID = entity.ID
+	r.CreatedAt = entity.CreatedAt
+	r.UpdatedAt = entity.UpdatedAt
+	r.CreatedBy = entity.CreatedBy
+	r.UpdatedBy = entity.UpdatedBy
 
 	return *r
 }

@@ -1,22 +1,24 @@
 package pkg
 
 import (
-	"errors"
+	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
+	jwtLib "github.com/golang-jwt/jwt/v5"
+	redisLib "github.com/redis/go-redis/v9"
 )
 
 type JWTClaims interface {
-	jwt.Claims
+	jwtLib.Claims
 	GetID() string
 }
 
 type StandardClaims struct {
-	jwt.RegisteredClaims
+	jwtLib.RegisteredClaims
 	ID string `json:"id"`
 }
 
@@ -24,66 +26,132 @@ func (s StandardClaims) GetID() string {
 	return s.ID
 }
 
-type JWTUtil interface {
+type JWT interface {
 	Generate(claims JWTClaims, secret string) (string, error)
-	Parse(tokenString string, claims jwt.Claims, secret string) (jwt.Claims, error)
+	Parse(tokenString string, claims jwtLib.Claims, secret string) (jwtLib.Claims, error)
 	ExtractTokenFromHeader(c *fiber.Ctx) (string, error)
-	ValidateToken(tokenString string, claims jwt.Claims, secret string) error
+	ValidateToken(tokenString string, claims jwtLib.Claims, secret string) error
 	CreateStandardClaims(id string, expireTime time.Duration) StandardClaims
+	AuthAccessToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error
+	AuthRefreshToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error
 }
 
-type jwtUtil struct{}
+type jwt struct{}
 
-func NewJWTUtil() JWTUtil {
-	return &jwtUtil{}
+func NewJWT() JWT {
+	return &jwt{}
 }
 
-func (j *jwtUtil) Generate(claims JWTClaims, secret string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+func (j *jwt) Generate(claims JWTClaims, secret string) (string, error) {
+	token := jwtLib.NewWithClaims(jwtLib.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		return "", Error(err)
+		return "", fmt.Errorf("[jwt] %w", err)
 	}
 
 	return tokenString, nil
 }
 
-func (j *jwtUtil) ExtractTokenFromHeader(c *fiber.Ctx) (string, error) {
+func (j *jwt) ExtractTokenFromHeader(c *fiber.Ctx) (string, error) {
 	authHeader := c.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return "", Error(errors.New("invalid token type"))
+		return "", fmt.Errorf("[jwt] invalid token type")
 	}
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 	return token, nil
 }
 
-func (j *jwtUtil) Parse(tokenString string, claims jwt.Claims, secret string) (jwt.Claims, error) {
-	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+func (j *jwt) Parse(tokenString string, claims jwtLib.Claims, secret string) (jwtLib.Claims, error) {
+	_, err := jwtLib.ParseWithClaims(tokenString, claims, func(token *jwtLib.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwtLib.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("[jwt] unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(secret), nil
 	})
 
 	if err != nil {
-		return nil, Error(err)
+		return nil, fmt.Errorf("[jwt] %w", err)
 	}
 
 	return claims, nil
 }
 
-func (j *jwtUtil) ValidateToken(tokenString string, claims jwt.Claims, secret string) error {
+func (j *jwt) ValidateToken(tokenString string, claims jwtLib.Claims, secret string) error {
 	_, err := j.Parse(tokenString, claims, secret)
 	return err
 }
 
-func (j *jwtUtil) CreateStandardClaims(id string, expireTime time.Duration) StandardClaims {
+func (j *jwt) CreateStandardClaims(id string, expireTime time.Duration) StandardClaims {
 	return StandardClaims{
 		ID: id,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireTime)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		RegisteredClaims: jwtLib.RegisteredClaims{
+			ExpiresAt: jwtLib.NewNumericDate(time.Now().Add(expireTime)),
+			IssuedAt:  jwtLib.NewNumericDate(time.Now()),
 		},
 	}
+}
+
+func (j *jwt) AuthAccessToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error {
+	authHeader := c.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return fmt.Errorf("[jwt] invalid token type")
+	}
+
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	var tokenContext TokenContext
+	_, err := jwt.Parse(token, &tokenContext, secret)
+	if err != nil {
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	userContextJSON, err := redis.Get(context.Background(), fmt.Sprintf("access_token:%s", tokenContext.UserID))
+	if err != nil {
+		if err == redisLib.Nil {
+			return fmt.Errorf("[jwt] session not found")
+		}
+
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	var userContext UserContext
+	if err := json.Unmarshal([]byte(userContextJSON), &userContext); err != nil {
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	c.Locals("userContext", userContext)
+	return nil
+}
+
+func (j *jwt) AuthRefreshToken(c *fiber.Ctx, redis Redis, jwt JWT, secret string) error {
+	authHeader := c.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return fmt.Errorf("[jwt] invalid token type")
+	}
+
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	var tokenContext TokenContext
+	_, err := jwt.Parse(token, &tokenContext, secret)
+	if err != nil {
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	userContextJSON, err := redis.Get(context.Background(), fmt.Sprintf("refresh_token:%s", tokenContext.UserID))
+	if err != nil {
+		if err == redisLib.Nil {
+			return fmt.Errorf("[jwt] session not found")
+		}
+
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	var userContext UserContext
+	if err := json.Unmarshal([]byte(userContextJSON), &userContext); err != nil {
+		return fmt.Errorf("[jwt] %w", err)
+	}
+
+	c.Locals("userContext", userContext)
+	return nil
 }

@@ -2,20 +2,20 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/standard-service/handlers"
-	"github.com/wisaitas/standard-golang/internal/standard-service/validates"
+	"github.com/wisaitas/standard-golang/internal/standard-service/handler"
+	"github.com/wisaitas/standard-golang/internal/standard-service/validate"
 )
 
 type SubDistrictRoutes struct {
 	app                 fiber.Router
-	subDistrictHandler  handlers.SubDistrictHandler
-	subDistrictValidate validates.SubDistrictValidate
+	subDistrictHandler  handler.SubDistrictHandler
+	subDistrictValidate validate.SubDistrictValidate
 }
 
 func NewSubDistrictRoutes(
 	app fiber.Router,
-	subDistrictHandler handlers.SubDistrictHandler,
-	subDistrictValidate validates.SubDistrictValidate,
+	subDistrictHandler handler.SubDistrictHandler,
+	subDistrictValidate validate.SubDistrictValidate,
 ) *SubDistrictRoutes {
 	return &SubDistrictRoutes{
 		app:                 app,
@@ -28,5 +28,5 @@ func (r *SubDistrictRoutes) SubDistrictRoutes() {
 	subDistricts := r.app.Group("/sub-districts")
 
 	// Method GET
-	subDistricts.Get("/", r.subDistrictValidate.ValidateGetSubDistrictsRequest, r.subDistrictHandler.GetSubDistricts)
+	subDistricts.Get("/", r.subDistrictValidate.GetSubDistricts, r.subDistrictHandler.GetSubDistricts)
 }

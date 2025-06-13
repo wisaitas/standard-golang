@@ -1,27 +1,26 @@
 package routes
 
 import (
-	"github.com/wisaitas/standard-golang/internal/standard-service/handlers"
-	"github.com/wisaitas/standard-golang/internal/standard-service/middlewares"
-	"github.com/wisaitas/standard-golang/internal/standard-service/validates"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/standard-golang/internal/standard-service/handler"
+	"github.com/wisaitas/standard-golang/internal/standard-service/middleware"
+	"github.com/wisaitas/standard-golang/internal/standard-service/validate"
 )
 
 type UserRoutes struct {
 	app            fiber.Router
-	userHandler    handlers.UserHandler
-	userValidate   validates.UserValidate
-	authMiddleware middlewares.AuthMiddleware
-	userMiddleware middlewares.UserMiddleware
+	userHandler    handler.UserHandler
+	userValidate   validate.UserValidate
+	authMiddleware middleware.AuthMiddleware
+	userMiddleware middleware.UserMiddleware
 }
 
 func NewUserRoutes(
 	app fiber.Router,
-	userHandler handlers.UserHandler,
-	userValidate validates.UserValidate,
-	authMiddleware middlewares.AuthMiddleware,
-	userMiddleware middlewares.UserMiddleware,
+	userHandler handler.UserHandler,
+	userValidate validate.UserValidate,
+	authMiddleware middleware.AuthMiddleware,
+	userMiddleware middleware.UserMiddleware,
 ) *UserRoutes {
 	return &UserRoutes{
 		app:            app,
@@ -36,11 +35,11 @@ func (r *UserRoutes) UserRoutes() {
 	users := r.app.Group("/users")
 
 	// Method GET
-	users.Get("/", r.userValidate.ValidateGetUsersRequest, r.userHandler.GetUsers)
+	users.Get("/", r.userValidate.GetUsers, r.userHandler.GetUsers)
 
 	// Method POST
-	users.Post("/", r.userValidate.ValidateCreateUserRequest, r.userHandler.CreateUser)
+	users.Post("/", r.userValidate.CreateUser, r.userHandler.CreateUser)
 
 	// Method PATCH
-	users.Patch("/:id", r.userMiddleware.UpdateUser, r.userValidate.ValidateUpdateUserRequest, r.userHandler.UpdateUser)
+	users.Patch("/:id", r.userMiddleware.UpdateUser, r.userValidate.UpdateUser, r.userHandler.UpdateUser)
 }

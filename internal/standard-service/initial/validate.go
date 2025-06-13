@@ -1,23 +1,23 @@
 package initial
 
 import (
-	"github.com/wisaitas/standard-golang/internal/standard-service/validates"
+	validateInternal "github.com/wisaitas/standard-golang/internal/standard-service/validate"
 )
 
 type validate struct {
-	userValidate        validates.UserValidate
-	authValidate        validates.AuthValidate
-	provinceValidate    validates.ProvinceValidate
-	districtValidate    validates.DistrictValidate
-	subDistrictValidate validates.SubDistrictValidate
+	userValidate        validateInternal.UserValidate
+	authValidate        validateInternal.AuthValidate
+	provinceValidate    validateInternal.ProvinceValidate
+	districtValidate    validateInternal.DistrictValidate
+	subDistrictValidate validateInternal.SubDistrictValidate
 }
 
-func newValidate(util *util) *validate {
+func newValidate(lib *lib) *validate {
 	return &validate{
-		userValidate:        validates.NewUserValidate(util.validatorUtil),
-		authValidate:        validates.NewAuthValidate(util.validatorUtil),
-		provinceValidate:    validates.NewProvinceValidate(util.validatorUtil),
-		districtValidate:    validates.NewDistrictValidate(util.validatorUtil),
-		subDistrictValidate: validates.NewSubDistrictValidate(util.validatorUtil),
+		userValidate:        validateInternal.NewUserValidate(lib.validator),
+		authValidate:        validateInternal.NewAuthValidate(lib.validator),
+		provinceValidate:    validateInternal.NewProvinceValidate(lib.validator),
+		districtValidate:    validateInternal.NewDistrictValidate(lib.validator),
+		subDistrictValidate: validateInternal.NewSubDistrictValidate(lib.validator),
 	}
 }

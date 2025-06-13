@@ -1,23 +1,23 @@
 package initial
 
 import (
-	"github.com/wisaitas/standard-golang/internal/standard-service/handlers"
+	handlerInternal "github.com/wisaitas/standard-golang/internal/standard-service/handler"
 )
 
 type handler struct {
-	userHandler        handlers.UserHandler
-	authHandler        handlers.AuthHandler
-	provinceHandler    handlers.ProvinceHandler
-	districtHandler    handlers.DistrictHandler
-	subDistrictHandler handlers.SubDistrictHandler
+	userHandler        handlerInternal.UserHandler
+	authHandler        handlerInternal.AuthHandler
+	provinceHandler    handlerInternal.ProvinceHandler
+	districtHandler    handlerInternal.DistrictHandler
+	subDistrictHandler handlerInternal.SubDistrictHandler
 }
 
 func newHandler(service *service) *handler {
 	return &handler{
-		userHandler:        handlers.NewUserHandler(service.userService),
-		authHandler:        handlers.NewAuthHandler(service.authService),
-		provinceHandler:    handlers.NewProvinceHandler(service.provinceService),
-		districtHandler:    handlers.NewDistrictHandler(service.districtService),
-		subDistrictHandler: handlers.NewSubDistrictHandler(service.subDistrictService),
+		userHandler:        handlerInternal.NewUserHandler(service.userService),
+		authHandler:        handlerInternal.NewAuthHandler(service.authService),
+		provinceHandler:    handlerInternal.NewProvinceHandler(service.provinceService),
+		districtHandler:    handlerInternal.NewDistrictHandler(service.districtService),
+		subDistrictHandler: handlerInternal.NewSubDistrictHandler(service.subDistrictService),
 	}
 }

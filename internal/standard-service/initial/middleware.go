@@ -2,19 +2,19 @@ package initial
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/internal/standard-service/middlewares"
-	middlewareConfig "github.com/wisaitas/standard-golang/internal/standard-service/middlewares/configs"
+	middlewareInternal "github.com/wisaitas/standard-golang/internal/standard-service/middleware"
+	middlewareConfig "github.com/wisaitas/standard-golang/internal/standard-service/middleware/configs"
 )
 
 type middleware struct {
-	AuthMiddleware middlewares.AuthMiddleware
-	UserMiddleware middlewares.UserMiddleware
+	AuthMiddleware middlewareInternal.AuthMiddleware
+	UserMiddleware middlewareInternal.UserMiddleware
 }
 
-func newMiddleware(util *util) *middleware {
+func newMiddleware(lib *lib) *middleware {
 	return &middleware{
-		AuthMiddleware: middlewares.NewAuthMiddleware(util.redisUtil, util.jwtUtil),
-		UserMiddleware: middlewares.NewUserMiddleware(util.redisUtil, util.jwtUtil),
+		AuthMiddleware: middlewareInternal.NewAuthMiddleware(lib.redis, lib.jwt),
+		UserMiddleware: middlewareInternal.NewUserMiddleware(lib.redis, lib.jwt),
 	}
 }
 
