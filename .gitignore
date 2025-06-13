@@ -3,3 +3,5 @@
 docs.go
 swagger.json
 swagger.yaml
+coverage.out
+coverage.html
