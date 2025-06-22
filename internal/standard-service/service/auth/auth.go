@@ -9,40 +9,47 @@ import (
 	"strings"
 	"time"
 
+	contextPkg "github.com/wisaitas/share-pkg/auth/context"
+	"github.com/wisaitas/share-pkg/auth/jwt"
+	"github.com/wisaitas/share-pkg/cache/redis"
+	bcryptPkg "github.com/wisaitas/share-pkg/crypto/bcrypt"
+	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
+	transactionmanager "github.com/wisaitas/share-pkg/db/transaction-manager"
+	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/constant"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/pkg"
 	"golang.org/x/crypto/bcrypt"
+
 	"gorm.io/gorm"
 )
 
 type AuthService interface {
 	Login(req request.LoginRequest) (resp response.LoginResponse, statusCode int, err error)
 	Register(req request.RegisterRequest) (resp response.RegisterResponse, statusCode int, err error)
-	Logout(userContext pkg.UserContext) (statusCode int, err error)
-	RefreshToken(userContext pkg.UserContext) (resp response.LoginResponse, statusCode int, err error)
+	Logout(userContext contextPkg.UserContext) (statusCode int, err error)
+	RefreshToken(userContext contextPkg.UserContext) (resp response.LoginResponse, statusCode int, err error)
 }
 
 type authService struct {
 	userRepository        repository.UserRepository
 	userHistoryRepository repository.UserHistoryRepository
-	redis                 pkg.Redis
-	bcrypt                pkg.Bcrypt
-	jwt                   pkg.JWT
-	transactionManager    pkg.TransactionManager
+	redis                 redis.Redis
+	bcrypt                bcryptPkg.Bcrypt
+	jwt                   jwt.Jwt
+	transactionManager    transactionmanager.TransactionManager
 }
 
 func NewAuthService(
 	userRepository repository.UserRepository,
 	userHistoryRepository repository.UserHistoryRepository,
-	redis pkg.Redis,
-	bcrypt pkg.Bcrypt,
-	jwt pkg.JWT,
-	transactionManager pkg.TransactionManager,
+	redis redis.Redis,
+	bcrypt bcryptPkg.Bcrypt,
+	jwt jwt.Jwt,
+	transactionManager transactionmanager.TransactionManager,
 ) AuthService {
 	return &authService{
 		userRepository:        userRepository,
@@ -57,16 +64,16 @@ func NewAuthService(
 func (r *authService) Login(req request.LoginRequest) (resp response.LoginResponse, statusCode int, err error) {
 	user := entity.User{}
 
-	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", req.Username), nil); err != nil {
+	if err := r.userRepository.GetBy(&user, repositoryPkg.NewCondition("username = ?", req.Username), nil); err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return resp, http.StatusNotFound, pkg.Error(err)
+			return resp, http.StatusNotFound, utils.Error(err)
 		}
 
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := r.bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return resp, http.StatusUnauthorized, pkg.Error(err)
+		return resp, http.StatusUnauthorized, utils.Error(err)
 	}
 
 	timeNow := time.Now()
@@ -74,21 +81,21 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 	refreshTokenExp := timeNow.Add(time.Hour * 24)
 
 	tokenData := map[string]interface{}{
-		"user_id": user.ID,
+		"user_id": user.Id,
 	}
 
 	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	sessionData := pkg.UserContext{
-		UserID:       user.ID,
+	sessionData := contextPkg.UserContext{
+		UserID:       user.Id,
 		Username:     user.Username,
 		Email:        user.Email,
 		FirstName:    user.FirstName,
@@ -100,15 +107,15 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 
 	sessionDataJSON, err := json.Marshal(sessionData)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.Id), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.Id), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp.EntityToResponse(accessToken, refreshToken), http.StatusOK, nil
@@ -119,7 +126,7 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 
 	hashedPassword, err := r.bcrypt.GenerateFromPassword(user.Password, bcrypt.DefaultCost)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	user.Password = string(hashedPassword)
@@ -149,30 +156,30 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 		return nil
 	}); err != nil {
 		if strings.Contains(err.Error(), "unique constraint") {
-			return resp, http.StatusBadRequest, pkg.Error(errors.New("username already exists"))
+			return resp, http.StatusBadRequest, utils.Error(errors.New("username already exists"))
 		}
 
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 	return resp.EntityToResponse(user), http.StatusCreated, nil
 }
 
-func (r *authService) Logout(userContext pkg.UserContext) (statusCode int, err error) {
+func (r *authService) Logout(userContext contextPkg.UserContext) (statusCode int, err error) {
 	if err := r.redis.Del(context.Background(), fmt.Sprintf("access_token:%s", userContext.UserID)); err != nil {
-		return http.StatusInternalServerError, pkg.Error(err)
+		return http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := r.redis.Del(context.Background(), fmt.Sprintf("refresh_token:%s", userContext.UserID)); err != nil {
-		return http.StatusInternalServerError, pkg.Error(err)
+		return http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return http.StatusOK, nil
 }
 
-func (r *authService) RefreshToken(userContext pkg.UserContext) (resp response.LoginResponse, statusCode int, err error) {
+func (r *authService) RefreshToken(userContext contextPkg.UserContext) (resp response.LoginResponse, statusCode int, err error) {
 	user := entity.User{}
-	if err := r.userRepository.GetBy(&user, pkg.NewCondition("username = ?", userContext.Username), nil); err != nil {
-		return resp, http.StatusNotFound, pkg.Error(err)
+	if err := r.userRepository.GetBy(&user, repositoryPkg.NewCondition("username = ?", userContext.Username), nil); err != nil {
+		return resp, http.StatusNotFound, utils.Error(err)
 	}
 
 	timeNow := time.Now()
@@ -180,12 +187,12 @@ func (r *authService) RefreshToken(userContext pkg.UserContext) (resp response.L
 	refreshTokenExp := timeNow.Add(time.Hour * 24)
 
 	tokenData := map[string]interface{}{
-		"user_id": user.ID,
+		"user_id": user.Id,
 	}
 
 	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
@@ -193,8 +200,8 @@ func (r *authService) RefreshToken(userContext pkg.UserContext) (resp response.L
 		return resp, http.StatusInternalServerError, err
 	}
 
-	sessionData := pkg.UserContext{
-		UserID:       user.ID,
+	sessionData := contextPkg.UserContext{
+		UserID:       user.Id,
 		Username:     user.Username,
 		Email:        user.Email,
 		FirstName:    user.FirstName,
@@ -206,15 +213,15 @@ func (r *authService) RefreshToken(userContext pkg.UserContext) (resp response.L
 
 	sessionDataJSON, err := json.Marshal(sessionData)
 	if err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.ID), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("access_token:%s", user.Id), string(sessionDataJSON), accessTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.ID), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+	if err := r.redis.Set(context.Background(), fmt.Sprintf("refresh_token:%s", user.Id), string(sessionDataJSON), refreshTokenExp.Sub(timeNow)); err != nil {
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp.EntityToResponse(accessToken, refreshToken), http.StatusOK, nil

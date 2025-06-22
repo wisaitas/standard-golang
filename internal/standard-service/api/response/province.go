@@ -1,18 +1,18 @@
 package response
 
 import (
+	"github.com/wisaitas/share-pkg/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type ProvinceResponse struct {
-	pkg.BaseResponse
+	response.EntityResponse
 	NameTH string `json:"name_th"`
 	NameEN string `json:"name_en"`
 }
 
 func (r *ProvinceResponse) EntityToResponse(entity entity.Province) ProvinceResponse {
-	r.BaseResponse.EntityToResponse(entity.BaseEntity)
+	r.EntityResponse = entity.EntityToResponse()
 	r.NameTH = entity.NameTH
 	r.NameEN = entity.NameEN
 

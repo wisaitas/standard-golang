@@ -2,8 +2,9 @@ package validate
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/share-pkg/response"
+	"github.com/wisaitas/share-pkg/validator"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/query"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type DistrictValidate interface {
@@ -11,11 +12,11 @@ type DistrictValidate interface {
 }
 
 type districtValidate struct {
-	validator pkg.Validator
+	validator validator.Validator
 }
 
 func NewDistrictValidate(
-	validator pkg.Validator,
+	validator validator.Validator,
 ) DistrictValidate {
 	return &districtValidate{
 		validator: validator,
@@ -26,8 +27,8 @@ func (v *districtValidate) GetDistricts(c *fiber.Ctx) error {
 	query := query.DistrictQuery{}
 
 	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: err.Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 

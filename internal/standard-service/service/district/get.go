@@ -8,11 +8,13 @@ import (
 	"time"
 
 	redisLib "github.com/redis/go-redis/v9"
+	redisPkg "github.com/wisaitas/share-pkg/cache/redis"
+	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/query"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Get interface {
@@ -21,12 +23,12 @@ type Get interface {
 
 type get struct {
 	districtRepository repository.DistrictRepository
-	redisUtil          pkg.Redis
+	redisUtil          redisPkg.Redis
 }
 
 func NewGet(
 	districtRepository repository.DistrictRepository,
-	redisUtil pkg.Redis,
+	redisUtil redisPkg.Redis,
 ) Get {
 	return &get{
 		districtRepository: districtRepository,
@@ -41,19 +43,19 @@ func (r *get) GetDistricts(query query.DistrictQuery) (resp []response.DistrictR
 
 	cache, err := r.redisUtil.Get(context.Background(), cacheKey)
 	if err != nil && err != redisLib.Nil {
-		return nil, http.StatusInternalServerError, pkg.Error(err)
+		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if cache != "" {
 		if err := json.Unmarshal([]byte(cache), &resp); err != nil {
-			return nil, http.StatusInternalServerError, pkg.Error(err)
+			return nil, http.StatusInternalServerError, utils.Error(err)
 		}
 
 		return resp, http.StatusOK, nil
 	}
 
-	if err := r.districtRepository.GetAll(&districts, &query.PaginationQuery, pkg.NewCondition("province_id = ?", query.ProvinceID), nil); err != nil {
-		return nil, http.StatusInternalServerError, pkg.Error(err)
+	if err := r.districtRepository.GetAll(&districts, &query.PaginationQuery, repositoryPkg.NewCondition("province_id = ?", query.ProvinceID), nil); err != nil {
+		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	for _, district := range districts {
@@ -63,11 +65,11 @@ func (r *get) GetDistricts(query query.DistrictQuery) (resp []response.DistrictR
 
 	respJson, err := json.Marshal(resp)
 	if err != nil {
-		return nil, http.StatusInternalServerError, pkg.Error(err)
+		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
-		return nil, http.StatusInternalServerError, pkg.Error(err)
+		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp, http.StatusOK, nil

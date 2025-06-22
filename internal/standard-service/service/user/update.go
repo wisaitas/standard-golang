@@ -3,13 +3,16 @@ package user
 import (
 	"net/http"
 
+	redisPkg "github.com/wisaitas/share-pkg/cache/redis"
+	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
+	transactionmanager "github.com/wisaitas/share-pkg/db/transaction-manager"
+	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/param"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/constant"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/pkg"
 	"gorm.io/gorm"
 )
 
@@ -20,15 +23,15 @@ type Update interface {
 type update struct {
 	userRepository        repository.UserRepository
 	userHistoryRepository repository.UserHistoryRepository
-	redis                 pkg.Redis
-	transactionManager    pkg.TransactionManager
+	redis                 redisPkg.Redis
+	transactionManager    transactionmanager.TransactionManager
 }
 
 func NewUpdate(
 	userRepository repository.UserRepository,
 	userHistoryRepository repository.UserHistoryRepository,
-	redis pkg.Redis,
-	transactionManager pkg.TransactionManager,
+	redis redisPkg.Redis,
+	transactionManager transactionmanager.TransactionManager,
 ) Update {
 	return &update{
 		userRepository:        userRepository,
@@ -41,14 +44,14 @@ func NewUpdate(
 func (r *update) UpdateUser(param param.UserParam, request request.UpdateUserRequest) (resp response.UpdateUserResponse, statusCode int, err error) {
 	user := entity.User{}
 
-	relations := []pkg.Relation{
+	relations := []repositoryPkg.Relation{
 		{
 			Query: "Addresses",
 		},
 	}
 
-	if err := r.userRepository.GetBy(&user, pkg.NewCondition("id = ?", param.ID), &relations); err != nil {
-		return resp, http.StatusNotFound, pkg.Error(err)
+	if err := r.userRepository.GetBy(&user, repositoryPkg.NewCondition("id = ?", param.ID), &relations); err != nil {
+		return resp, http.StatusNotFound, utils.Error(err)
 	}
 
 	if err := r.transactionManager.ExecuteInTransaction(func(tx *gorm.DB) error {
@@ -91,7 +94,7 @@ func (r *update) UpdateUser(param param.UserParam, request request.UpdateUserReq
 
 		return nil
 	}); err != nil {
-		return resp, http.StatusInternalServerError, pkg.Error(err)
+		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
 	return resp.EntityToResponse(user), http.StatusOK, nil

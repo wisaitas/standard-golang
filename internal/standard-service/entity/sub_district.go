@@ -2,11 +2,11 @@ package entity
 
 import (
 	"github.com/google/uuid"
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/entity"
 )
 
 type SubDistrict struct {
-	pkg.BaseEntity
+	entity.Entity
 
 	NameTH     string `gorm:"column:name_th;"`
 	NameEN     string `gorm:"column:name_en;"`

@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/share-pkg/auth/jwt"
+	"github.com/wisaitas/share-pkg/cache/redis"
+	"github.com/wisaitas/share-pkg/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/env"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type UserMiddleware interface {
@@ -11,11 +13,11 @@ type UserMiddleware interface {
 }
 
 type userMiddleware struct {
-	redis pkg.Redis
-	jwt   pkg.JWT
+	redis redis.Redis
+	jwt   jwt.Jwt
 }
 
-func NewUserMiddleware(redis pkg.Redis, jwt pkg.JWT) UserMiddleware {
+func NewUserMiddleware(redis redis.Redis, jwt jwt.Jwt) UserMiddleware {
 	return &userMiddleware{
 		redis: redis,
 		jwt:   jwt,
@@ -24,8 +26,8 @@ func NewUserMiddleware(redis pkg.Redis, jwt pkg.JWT) UserMiddleware {
 
 func (r *userMiddleware) UpdateUser(c *fiber.Ctx) error {
 	if err := r.jwt.AuthAccessToken(c, r.redis, r.jwt, env.Environment.Server.JwtSecret); err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(pkg.ErrorResponse{
-			Message: err.Error(),
+		return c.Status(fiber.StatusUnauthorized).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 

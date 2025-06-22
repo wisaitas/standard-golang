@@ -1,8 +1,8 @@
 package user
 
 import (
+	redisPkg "github.com/wisaitas/share-pkg/cache/redis"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type Delete interface {
@@ -10,12 +10,12 @@ type Delete interface {
 
 type delete struct {
 	userRepository repository.UserRepository
-	redisUtil      pkg.Redis
+	redisUtil      redisPkg.Redis
 }
 
 func NewDelete(
 	userRepository repository.UserRepository,
-	redisUtil pkg.Redis,
+	redisUtil redisPkg.Redis,
 ) Delete {
 	return &delete{
 		userRepository: userRepository,

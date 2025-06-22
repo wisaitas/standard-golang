@@ -12,12 +12,12 @@ type validate struct {
 	subDistrictValidate validateInternal.SubDistrictValidate
 }
 
-func newValidate(lib *lib) *validate {
+func newValidate(sharePkg *sharePkg) *validate {
 	return &validate{
-		userValidate:        validateInternal.NewUserValidate(lib.validator),
-		authValidate:        validateInternal.NewAuthValidate(lib.validator),
-		provinceValidate:    validateInternal.NewProvinceValidate(lib.validator),
-		districtValidate:    validateInternal.NewDistrictValidate(lib.validator),
-		subDistrictValidate: validateInternal.NewSubDistrictValidate(lib.validator),
+		userValidate:        validateInternal.NewUserValidate(sharePkg.validator),
+		authValidate:        validateInternal.NewAuthValidate(sharePkg.validator),
+		provinceValidate:    validateInternal.NewProvinceValidate(sharePkg.validator),
+		districtValidate:    validateInternal.NewDistrictValidate(sharePkg.validator),
+		subDistrictValidate: validateInternal.NewSubDistrictValidate(sharePkg.validator),
 	}
 }

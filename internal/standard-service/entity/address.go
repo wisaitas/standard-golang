@@ -2,11 +2,11 @@ package entity
 
 import (
 	"github.com/google/uuid"
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/entity"
 )
 
 type Address struct {
-	pkg.BaseEntity
+	entity.Entity
 
 	Address *string `gorm:"column:address;"`
 

@@ -4,9 +4,10 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/share-pkg/response"
+	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/query"
 	districtService "github.com/wisaitas/standard-golang/internal/standard-service/service/district"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type DistrictHandler interface {
@@ -28,19 +29,19 @@ func NewDistrictHandler(
 func (r *districtHandler) GetDistricts(c *fiber.Ctx) error {
 	query, ok := c.Locals("query").(query.DistrictQuery)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get queries")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get queries")),
 		})
 	}
 
 	districts, statusCode, err := r.districtService.GetDistricts(query)
 	if err != nil {
-		return c.Status(statusCode).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(statusCode).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
-	return c.Status(statusCode).JSON(pkg.SuccessResponse{
+	return c.Status(statusCode).JSON(response.ApiResponse[any]{
 		Message: "Districts fetched successfully",
 		Data:    districts,
 	})

@@ -3,18 +3,18 @@ package response
 import (
 	"time"
 
+	"github.com/wisaitas/share-pkg/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type CreateUserResponse struct {
-	pkg.BaseResponse
+	response.EntityResponse
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
 
 func (r *CreateUserResponse) EntityToResponse(entity entity.User) CreateUserResponse {
-	r.BaseResponse.EntityToResponse(entity.BaseEntity)
+	r.EntityResponse = entity.EntityToResponse()
 	r.Username = entity.Username
 	r.Email = entity.Email
 
@@ -22,7 +22,7 @@ func (r *CreateUserResponse) EntityToResponse(entity entity.User) CreateUserResp
 }
 
 type GetUsersResponse struct {
-	pkg.BaseResponse
+	response.EntityResponse
 	Username  string            `json:"username"`
 	Email     string            `json:"email"`
 	FirstName string            `json:"first_name"`
@@ -32,7 +32,7 @@ type GetUsersResponse struct {
 }
 
 func (r *GetUsersResponse) EntityToResponse(entity entity.User) GetUsersResponse {
-	r.BaseResponse.EntityToResponse(entity.BaseEntity)
+	r.EntityResponse = entity.EntityToResponse()
 	r.Username = entity.Username
 	r.Email = entity.Email
 	r.FirstName = entity.FirstName
@@ -52,7 +52,7 @@ func (r *GetUsersResponse) EntityToResponse(entity entity.User) GetUsersResponse
 }
 
 type UpdateUserResponse struct {
-	pkg.BaseResponse
+	response.EntityResponse
 	Username  string            `json:"username"`
 	Email     string            `json:"email"`
 	FirstName string            `json:"first_name"`
@@ -62,7 +62,7 @@ type UpdateUserResponse struct {
 }
 
 func (r *UpdateUserResponse) EntityToResponse(entity entity.User) UpdateUserResponse {
-	r.BaseResponse.EntityToResponse(entity.BaseEntity)
+	r.EntityResponse = entity.EntityToResponse()
 	r.Username = entity.Username
 	r.Email = entity.Email
 	r.FirstName = entity.FirstName

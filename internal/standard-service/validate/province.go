@@ -2,7 +2,9 @@ package validate
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/share-pkg/response"
+	"github.com/wisaitas/share-pkg/validator"
 )
 
 type ProvinceValidate interface {
@@ -10,11 +12,11 @@ type ProvinceValidate interface {
 }
 
 type provinceValidate struct {
-	validator pkg.Validator
+	validator validator.Validator
 }
 
 func NewProvinceValidate(
-	validator pkg.Validator,
+	validator validator.Validator,
 ) ProvinceValidate {
 	return &provinceValidate{
 		validator: validator,
@@ -22,11 +24,11 @@ func NewProvinceValidate(
 }
 
 func (v *provinceValidate) GetProvinces(c *fiber.Ctx) error {
-	query := pkg.PaginationQuery{}
+	query := repository.PaginationQuery{}
 
 	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: err.Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 

@@ -3,11 +3,11 @@ package entity
 import (
 	"time"
 
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/entity"
 )
 
 type UserHistory struct {
-	pkg.BaseEntity
+	entity.Entity
 
 	Action       string    `gorm:"column:action;"`
 	OldVersion   int       `gorm:"column:old_version;"`

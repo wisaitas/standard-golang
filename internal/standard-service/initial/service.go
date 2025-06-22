@@ -16,30 +16,30 @@ type service struct {
 	subDistrictService subDistrictService.SubDistrictService
 }
 
-func newService(repo *repository, lib *lib) *service {
+func newService(repo *repository, sharePkg *sharePkg) *service {
 	return &service{
 		userService: userService.NewUserService(
-			userService.NewGet(repo.userRepository, lib.redis),
-			userService.NewPost(repo.userRepository, lib.redis),
-			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, lib.redis, lib.txManagerFactory),
-			userService.NewDelete(repo.userRepository, lib.redis),
+			userService.NewGet(repo.userRepository, sharePkg.redis),
+			userService.NewPost(repo.userRepository, sharePkg.redis),
+			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, sharePkg.redis, sharePkg.transactionManager),
+			userService.NewDelete(repo.userRepository, sharePkg.redis),
 		),
 		authService: authService.NewAuthService(
 			repo.userRepository,
 			repo.userHistoryRepository,
-			lib.redis,
-			lib.bcrypt,
-			lib.jwt,
-			lib.txManagerFactory,
+			sharePkg.redis,
+			sharePkg.bcrypt,
+			sharePkg.jwt,
+			sharePkg.transactionManager,
 		),
 		provinceService: provinceService.NewProvinceService(
-			provinceService.NewGet(repo.provinceRepository, lib.redis),
+			provinceService.NewGet(repo.provinceRepository, sharePkg.redis),
 		),
 		districtService: districtService.NewDistrictService(
-			districtService.NewGet(repo.districtRepository, lib.redis),
+			districtService.NewGet(repo.districtRepository, sharePkg.redis),
 		),
 		subDistrictService: subDistrictService.NewSubDistrictService(
-			subDistrictService.NewGet(repo.subDistrictRepository, lib.redis),
+			subDistrictService.NewGet(repo.subDistrictRepository, sharePkg.redis),
 		),
 	}
 }

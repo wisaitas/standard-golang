@@ -1,23 +1,23 @@
 package repository
 
 import (
+	"github.com/wisaitas/share-pkg/db/repository"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	"github.com/wisaitas/standard-golang/pkg"
 	"gorm.io/gorm"
 )
 
 type UserHistoryRepository interface {
-	pkg.BaseRepository[entity.UserHistory]
+	repository.BaseRepository[entity.UserHistory]
 }
 
 type userHistoryRepository struct {
-	pkg.BaseRepository[entity.UserHistory]
+	repository.BaseRepository[entity.UserHistory]
 	db *gorm.DB
 }
 
 func NewUserHistoryRepository(
 	db *gorm.DB,
-	baseRepository pkg.BaseRepository[entity.UserHistory],
+	baseRepository repository.BaseRepository[entity.UserHistory],
 ) UserHistoryRepository {
 	return &userHistoryRepository{
 		BaseRepository: baseRepository,

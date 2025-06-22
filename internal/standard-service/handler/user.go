@@ -3,13 +3,15 @@ package handler
 import (
 	"errors"
 
+	responsePkg "github.com/wisaitas/share-pkg/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/param"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
-	"github.com/wisaitas/standard-golang/internal/standard-service/service/user"
-	"github.com/wisaitas/standard-golang/pkg"
+	userService "github.com/wisaitas/standard-golang/internal/standard-service/service/user"
 
 	"github.com/gofiber/fiber/v2"
+	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/share-pkg/utils"
 )
 
 type UserHandler interface {
@@ -19,11 +21,11 @@ type UserHandler interface {
 }
 
 type userHandler struct {
-	userService user.UserService
+	userService userService.UserService
 }
 
 func NewUserHandler(
-	userService user.UserService,
+	userService userService.UserService,
 ) UserHandler {
 	return &userHandler{
 		userService: userService,
@@ -31,17 +33,17 @@ func NewUserHandler(
 }
 
 func (r *userHandler) GetUsers(c *fiber.Ctx) error {
-	query, ok := c.Locals("query").(pkg.PaginationQuery)
+	query, ok := c.Locals("query").(repositoryPkg.PaginationQuery)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get queries")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(responsePkg.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get queries")),
 		})
 	}
 
 	users, statusCode, err := r.userService.GetUsers(query)
 	if err != nil {
-		return c.Status(statusCode).JSON(pkg.ErrorResponse{
-			Message: err.Error(),
+		return c.Status(statusCode).JSON(responsePkg.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
@@ -49,7 +51,7 @@ func (r *userHandler) GetUsers(c *fiber.Ctx) error {
 		users = []response.GetUsersResponse{}
 	}
 
-	return c.Status(statusCode).JSON(pkg.SuccessResponse{
+	return c.Status(statusCode).JSON(responsePkg.ApiResponse[[]response.GetUsersResponse]{
 		Message: "users fetched successfully",
 		Data:    users,
 	})
@@ -58,19 +60,19 @@ func (r *userHandler) GetUsers(c *fiber.Ctx) error {
 func (r *userHandler) CreateUser(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(request.CreateUserRequest)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get request")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(responsePkg.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get request")),
 		})
 	}
 
 	user, statusCode, err := r.userService.CreateUser(req)
 	if err != nil {
-		return c.Status(statusCode).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(statusCode).JSON(responsePkg.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
-	return c.Status(statusCode).JSON(pkg.SuccessResponse{
+	return c.Status(statusCode).JSON(responsePkg.ApiResponse[response.CreateUserResponse]{
 		Message: "user created successfully",
 		Data:    user,
 	})
@@ -79,26 +81,26 @@ func (r *userHandler) CreateUser(c *fiber.Ctx) error {
 func (r *userHandler) UpdateUser(c *fiber.Ctx) error {
 	req, ok := c.Locals("req").(request.UpdateUserRequest)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get request")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(responsePkg.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get request")),
 		})
 	}
 
 	param, ok := c.Locals("params").(param.UserParam)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get params")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(responsePkg.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get params")),
 		})
 	}
 
 	resp, statusCode, err := r.userService.UpdateUser(param, req)
 	if err != nil {
-		return c.Status(statusCode).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(statusCode).JSON(responsePkg.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
-	return c.Status(statusCode).JSON(pkg.SuccessResponse{
+	return c.Status(statusCode).JSON(responsePkg.ApiResponse[response.UpdateUserResponse]{
 		Message: "user updated successfully",
 		Data:    resp,
 	})

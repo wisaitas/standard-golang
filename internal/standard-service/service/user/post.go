@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	redisPkg "github.com/wisaitas/share-pkg/cache/redis"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
-	"github.com/wisaitas/standard-golang/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,12 +18,12 @@ type Post interface {
 
 type post struct {
 	userRepository repository.UserRepository
-	redisUtil      pkg.Redis
+	redisUtil      redisPkg.Redis
 }
 
 func NewPost(
 	userRepository repository.UserRepository,
-	redisUtil pkg.Redis,
+	redisUtil redisPkg.Redis,
 ) Post {
 	return &post{
 		userRepository: userRepository,

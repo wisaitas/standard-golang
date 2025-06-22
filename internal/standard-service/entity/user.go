@@ -3,11 +3,11 @@ package entity
 import (
 	"time"
 
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/entity"
 )
 
 type User struct {
-	pkg.BaseEntity
+	entity.Entity
 
 	Username  string    `gorm:"column:username;"`
 	FirstName string    `gorm:"column:first_name;"`

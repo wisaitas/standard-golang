@@ -11,10 +11,10 @@ type middleware struct {
 	UserMiddleware middlewareInternal.UserMiddleware
 }
 
-func newMiddleware(lib *lib) *middleware {
+func newMiddleware(sharePkg *sharePkg) *middleware {
 	return &middleware{
-		AuthMiddleware: middlewareInternal.NewAuthMiddleware(lib.redis, lib.jwt),
-		UserMiddleware: middlewareInternal.NewUserMiddleware(lib.redis, lib.jwt),
+		AuthMiddleware: middlewareInternal.NewAuthMiddleware(sharePkg.redis, sharePkg.jwt),
+		UserMiddleware: middlewareInternal.NewUserMiddleware(sharePkg.redis, sharePkg.jwt),
 	}
 }
 

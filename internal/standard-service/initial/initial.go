@@ -8,13 +8,13 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/env"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 func init() {
-	if err := pkg.ReadConfig(&env.Environment); err != nil {
-		log.Fatalf("error reading config: %v\n", pkg.Error(err))
+	if err := utils.ReadConfig(&env.Environment); err != nil {
+		log.Fatalf("error reading config: %v\n", utils.Error(err))
 	}
 }
 
@@ -25,13 +25,13 @@ func InitializeApp() {
 
 	setupMiddleware(app)
 
-	lib := newLib(clientConfig)
+	sharePkg := newSharePkg(clientConfig)
 
 	repository := newRepository(clientConfig)
-	service := newService(repository, lib)
+	service := newService(repository, sharePkg)
 	handler := newHandler(service)
-	validate := newValidate(lib)
-	middleware := newMiddleware(lib)
+	validate := newValidate(sharePkg)
+	middleware := newMiddleware(sharePkg)
 
 	newRoute(app, handler, validate, middleware)
 
@@ -41,7 +41,7 @@ func InitializeApp() {
 func run(app *fiber.App, clientConfig *clientConfig) {
 	go func() {
 		if err := app.Listen(fmt.Sprintf(":%d", env.Environment.Server.Port)); err != nil {
-			log.Fatalf("error starting server: %v\n", pkg.Error(err))
+			log.Fatalf("error starting server: %v\n", utils.Error(err))
 		}
 	}()
 
@@ -56,19 +56,19 @@ func run(app *fiber.App, clientConfig *clientConfig) {
 func close(app *fiber.App, clientConfig *clientConfig) {
 	sqlDB, err := clientConfig.DB.DB()
 	if err != nil {
-		log.Fatalf("error getting database: %v\n", pkg.Error(err))
+		log.Fatalf("error getting database: %v\n", utils.Error(err))
 	}
 
 	if err := sqlDB.Close(); err != nil {
-		log.Fatalf("error closing database: %v\n", pkg.Error(err))
+		log.Fatalf("error closing database: %v\n", utils.Error(err))
 	}
 
 	if err := clientConfig.Redis.Close(); err != nil {
-		log.Fatalf("error closing redis: %v\n", pkg.Error(err))
+		log.Fatalf("error closing redis: %v\n", utils.Error(err))
 	}
 
 	if err := app.Shutdown(); err != nil {
-		log.Fatalf("error shutting down app: %v\n", pkg.Error(err))
+		log.Fatalf("error shutting down app: %v\n", utils.Error(err))
 	}
 
 	log.Println("gracefully shutdown")

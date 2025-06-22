@@ -2,10 +2,10 @@ package query
 
 import (
 	"github.com/google/uuid"
-	"github.com/wisaitas/standard-golang/pkg"
+	"github.com/wisaitas/share-pkg/db/repository"
 )
 
 type SubDistrictQuery struct {
-	pkg.PaginationQuery
+	repository.PaginationQuery
 	DistrictID uuid.UUID `query:"district_id"`
 }

@@ -1,9 +1,11 @@
 package validate
 
 import (
+	"github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/share-pkg/response"
+	"github.com/wisaitas/share-pkg/validator"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/param"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
-	"github.com/wisaitas/standard-golang/pkg"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,11 +17,11 @@ type UserValidate interface {
 }
 
 type userValidate struct {
-	validator pkg.Validator
+	validator validator.Validator
 }
 
 func NewUserValidate(
-	validator pkg.Validator,
+	validator validator.Validator,
 ) UserValidate {
 	return &userValidate{
 		validator: validator,
@@ -30,8 +32,8 @@ func (v *userValidate) CreateUser(c *fiber.Ctx) error {
 	req := request.CreateUserRequest{}
 
 	if err := v.validator.ValidateCommonJSONBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: err.Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
@@ -40,11 +42,11 @@ func (v *userValidate) CreateUser(c *fiber.Ctx) error {
 }
 
 func (v *userValidate) GetUsers(c *fiber.Ctx) error {
-	query := pkg.PaginationQuery{}
+	query := repository.PaginationQuery{}
 
 	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
@@ -58,14 +60,14 @@ func (v *userValidate) UpdateUser(c *fiber.Ctx) error {
 	params := param.UserParam{}
 
 	if err := v.validator.ValidateCommonParam(c, &params); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
 	if err := v.validator.ValidateCommonJSONBody(c, &req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 

@@ -3,8 +3,8 @@ package response
 import (
 	"time"
 
+	"github.com/wisaitas/share-pkg/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type LoginResponse struct {
@@ -20,7 +20,7 @@ func (r *LoginResponse) EntityToResponse(accessToken, refreshToken string) Login
 }
 
 type RegisterResponse struct {
-	pkg.BaseResponse
+	response.EntityResponse
 	Username  string            `json:"username"`
 	FirstName string            `json:"first_name"`
 	LastName  string            `json:"last_name"`
@@ -30,7 +30,7 @@ type RegisterResponse struct {
 }
 
 func (r *RegisterResponse) EntityToResponse(entity entity.User) RegisterResponse {
-	r.BaseResponse.EntityToResponse(entity.BaseEntity)
+	r.EntityResponse = entity.EntityToResponse()
 	r.Username = entity.Username
 	r.FirstName = entity.FirstName
 	r.LastName = entity.LastName

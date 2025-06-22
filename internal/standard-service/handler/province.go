@@ -4,8 +4,10 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/share-pkg/response"
+	"github.com/wisaitas/share-pkg/utils"
 	provinceService "github.com/wisaitas/standard-golang/internal/standard-service/service/province"
-	"github.com/wisaitas/standard-golang/pkg"
 )
 
 type ProvinceHandler interface {
@@ -25,21 +27,21 @@ func NewProvinceHandler(
 }
 
 func (r *provinceHandler) GetProvinces(c *fiber.Ctx) error {
-	query, ok := c.Locals("query").(pkg.PaginationQuery)
+	query, ok := c.Locals("query").(repositoryPkg.PaginationQuery)
 	if !ok {
-		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(errors.New("failed to get queries")).Error(),
+		return c.Status(fiber.StatusBadRequest).JSON(response.ApiResponse[any]{
+			Error: utils.Error(errors.New("failed to get queries")),
 		})
 	}
 
 	provinces, statusCode, err := r.provinceService.GetProvinces(query)
 	if err != nil {
-		return c.Status(statusCode).JSON(pkg.ErrorResponse{
-			Message: pkg.Error(err).Error(),
+		return c.Status(statusCode).JSON(response.ApiResponse[any]{
+			Error: err,
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(pkg.SuccessResponse{
+	return c.Status(fiber.StatusOK).JSON(response.ApiResponse[any]{
 		Message: "Provinces fetched successfully",
 		Data:    provinces,
 	})
