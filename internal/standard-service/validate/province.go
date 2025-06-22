@@ -24,7 +24,7 @@ func NewProvinceValidate(
 func (v *provinceValidate) GetProvinces(c *fiber.Ctx) error {
 	query := pkg.PaginationQuery{}
 
-	if err := v.validator.ValidateCommonQuery(c, &query); err != nil {
+	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})

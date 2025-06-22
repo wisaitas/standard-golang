@@ -29,7 +29,7 @@ func NewUserValidate(
 func (v *userValidate) CreateUser(c *fiber.Ctx) error {
 	req := request.CreateUserRequest{}
 
-	if err := v.validator.ValidateCommonRequestJSONBody(c, &req); err != nil {
+	if err := v.validator.ValidateCommonJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -42,7 +42,7 @@ func (v *userValidate) CreateUser(c *fiber.Ctx) error {
 func (v *userValidate) GetUsers(c *fiber.Ctx) error {
 	query := pkg.PaginationQuery{}
 
-	if err := v.validator.ValidateCommonQuery(c, &query); err != nil {
+	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})
@@ -57,13 +57,13 @@ func (v *userValidate) UpdateUser(c *fiber.Ctx) error {
 	req := request.UpdateUserRequest{}
 	params := param.UserParam{}
 
-	if err := v.validator.ValidateCommonRequestParam(c, &params); err != nil {
+	if err := v.validator.ValidateCommonParam(c, &params); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})
 	}
 
-	if err := v.validator.ValidateCommonRequestJSONBody(c, &req); err != nil {
+	if err := v.validator.ValidateCommonJSONBody(c, &req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: pkg.Error(err).Error(),
 		})

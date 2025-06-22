@@ -25,7 +25,7 @@ func NewDistrictValidate(
 func (v *districtValidate) GetDistricts(c *fiber.Ctx) error {
 	query := query.DistrictQuery{}
 
-	if err := v.validator.ValidateCommonQuery(c, &query); err != nil {
+	if err := v.validator.ValidateCommonQueryParam(c, &query); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(pkg.ErrorResponse{
 			Message: err.Error(),
 		})
