@@ -5,3 +5,4 @@ swagger.json
 swagger.yaml
 coverage.out
 coverage.html
+.mockery.yml

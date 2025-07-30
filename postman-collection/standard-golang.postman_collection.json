@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"t@t.com\",\r\n    \"username\": \"johndoe\",\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"birth_date\": \"1999-08-08T00:00:00+07:00\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\",\r\n    \"addresses\": [\r\n        {\r\n            \"province_id\": \"098caf62-a4df-4df3-b795-5afd51198944\",\r\n            \"district_id\": \"ba90e0a4-5871-46f1-9e31-ccb8785e4daf\",\r\n            \"sub_district_id\": \"6356dcde-b7f1-4d0a-bace-3dfe23594117\",\r\n            \"address\": \"เทส address\"\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"email\": \"t@t.com\",\r\n    \"username\": \"johndoe\",\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"birth_date\": \"1999-08-08T00:00:00+07:00\",\r\n    \"password\": \"12345678\",\r\n    \"confirm_password\": \"12345678\",\r\n    \"addresses\": [\r\n        {\r\n            \"province_id\": \"098caf62-a4df-4df3-b795-5afd51198944\",\r\n            \"district_id\": \"ba90e0a4-5871-46f1-9e31-ccb8785e4daf\",\r\n            \"sub_district_id\": \"6356dcde-b7f1-4d0a-bace-3dfe23594117\",\r\n            \"address\": \"เทส address\"\r\n        },\r\n        {\r\n            \"province_id\": \"098caf62-a4df-4df3-b795-5afd51198944\",\r\n            \"district_id\": \"ba90e0a4-5871-46f1-9e31-ccb8785e4daf\",\r\n            \"sub_district_id\": \"6356dcde-b7f1-4d0a-bace-3dfe23594117\",\r\n            \"address\": \"เทส address\"\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,11 +114,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/refresh-token",
+							"raw": "{{url}}/auth/refresh-token",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
+								"auth",
 								"refresh-token"
 							]
 						}
@@ -183,14 +184,6 @@
 							],
 							"query": [
 								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "page_size",
-									"value": "10"
-								},
-								{
 									"key": "sort",
 									"value": "id",
 									"disabled": true
@@ -199,6 +192,14 @@
 									"key": "order",
 									"value": "asc",
 									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "page_size",
+									"value": "10"
 								}
 							]
 						}
@@ -230,13 +231,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/users/94e53aa4-c385-4eb2-9444-33b461bc6e45",
+							"raw": "{{url}}/users/d9ad0761-c98e-460e-b70e-bb3abeb6e280",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"users",
-								"94e53aa4-c385-4eb2-9444-33b461bc6e45"
+								"d9ad0761-c98e-460e-b70e-bb3abeb6e280"
 							]
 						}
 					},
