@@ -13,6 +13,4 @@ type SubDistrict struct {
 	PostalCode string `gorm:"column:postal_code;"`
 
 	DistrictID uuid.UUID `gorm:"column:district_id;"`
-
-	District *District `gorm:"foreignKey:DistrictID;references:ID"`
 }

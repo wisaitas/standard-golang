@@ -12,6 +12,4 @@ type District struct {
 	NameEN string `gorm:"column:name_en;"`
 
 	ProvinceID uuid.UUID `gorm:"column:province_id;"`
-
-	Province *Province `gorm:"foreignKey:ProvinceID;references:ID"`
 }

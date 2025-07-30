@@ -14,8 +14,3 @@ CREATE TABLE IF NOT EXISTS addresses (
     sub_district_id uuid NOT NULL,
     user_id uuid NOT NULL
 );
-
-ALTER TABLE addresses ADD CONSTRAINT fk_addresses_provinces FOREIGN KEY (province_id) REFERENCES provinces(id);
-ALTER TABLE addresses ADD CONSTRAINT fk_addresses_districts FOREIGN KEY (district_id) REFERENCES districts(id);
-ALTER TABLE addresses ADD CONSTRAINT fk_addresses_sub_districts FOREIGN KEY (sub_district_id) REFERENCES sub_districts(id);
-ALTER TABLE addresses ADD CONSTRAINT fk_addresses_users FOREIGN KEY (user_id) REFERENCES users(id);

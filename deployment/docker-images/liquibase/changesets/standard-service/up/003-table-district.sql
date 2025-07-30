@@ -12,5 +12,3 @@ CREATE TABLE IF NOT EXISTS districts (
     name_en varchar(100) NOT NULL,
     province_id uuid NOT NULL
 );
-
-ALTER TABLE districts ADD CONSTRAINT fk_districts_provinces FOREIGN KEY (province_id) REFERENCES provinces(id);

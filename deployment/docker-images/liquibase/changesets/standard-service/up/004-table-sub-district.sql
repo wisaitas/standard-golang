@@ -13,5 +13,3 @@ CREATE TABLE IF NOT EXISTS sub_districts (
     district_id uuid NOT NULL,
     postal_code varchar(10) NOT NULL
 );
-
-ALTER TABLE sub_districts ADD CONSTRAINT fk_sub_districts_districts FOREIGN KEY (district_id) REFERENCES districts(id);
