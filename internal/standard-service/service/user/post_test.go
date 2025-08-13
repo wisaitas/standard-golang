@@ -1,98 +1,70 @@
 package user_test
 
-// import (
-// 	"errors"
-// 	"net/http"
+import (
+	"net/http"
+	"testing"
 
-// 	"github.com/stretchr/testify/mock"
-// 	"github.com/stretchr/testify/suite"
-// 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
-// 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-// 	mockPkg "github.com/wisaitas/standard-golang/internal/standard-service/mock/pkg"
-// 	mockRepo "github.com/wisaitas/standard-golang/internal/standard-service/mock/repository"
-// 	"github.com/wisaitas/standard-golang/internal/standard-service/service/user"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+	redisPkg "github.com/wisaitas/share-pkg/cache/redis"
+	"github.com/wisaitas/share-pkg/db/repository"
+	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
+	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
+	"github.com/wisaitas/standard-golang/internal/standard-service/service/user"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
 
-// 	"testing"
-// )
+type postTestSuite struct {
+	suite.Suite
+	mockUserRepo *repository.MockBaseRepository[entity.User]
+	mockRedis    *redisPkg.MockRedis
+	service      user.Post
+	mockDB       *gorm.DB
+}
 
-// type createUserTestSuite struct {
-// 	suite.Suite
-// 	mockRepo   *mockRepo.MockUserRepository
-// 	mockBcrypt *mockPkg.MockBcrypt
-// 	mockRedis  *mockPkg.MockRedis
-// 	service    user.Post
-// }
+func (s *postTestSuite) SetupTest() {
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
+	s.Require().NoError(err)
+	s.mockDB = db
 
-// func (s *createUserTestSuite) SetupTest() {
-// 	s.mockRepo = new(mockRepo.MockUserRepository)
-// 	s.mockBcrypt = new(mockPkg.MockBcrypt)
-// 	s.mockRedis = new(mockPkg.MockRedis)
-// 	s.service = user.NewPost(s.mockRepo, s.mockRedis)
-// }
+	s.mockUserRepo = new(repository.MockBaseRepository[entity.User])
+	s.mockRedis = redisPkg.NewMockRedis()
 
-// func (s *createUserTestSuite) TestCreateUserSuccess() {
+	s.service = user.NewPost(
+		s.mockUserRepo,
+		s.mockRedis,
+	)
+}
 
-// 	s.mockRepo.On("Create", mock.MatchedBy(func(u *entity.User) bool {
-// 		return u.Username == "testuser" && u.Email == "test@example.com"
-// 	})).Return(nil)
+func (s *postTestSuite) TestCreateUserSuccess() {
+	createUserRequest := request.CreateUserRequest{
+		Username:        "testuser",
+		Email:           "test@example.com",
+		Password:        "password123",
+		ConfirmPassword: "password123",
+	}
 
-// 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
-// 		Username:        "testuser",
-// 		Email:           "test@example.com",
-// 		Password:        "password123",
-// 		ConfirmPassword: "password123",
-// 	})
+	s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
+		user := args.Get(0).(*entity.User)
 
-// 	s.Require().NoError(err)
-// 	s.Require().Equal(http.StatusCreated, status)
-// }
+		user.Id = uuid.New()
+	})
 
-// func (s *createUserTestSuite) TestCreateUserUsernameExists() {
-// 	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("ERROR: duplicate key value violates unique constraint"))
+	resp, statusCode, err := s.service.CreateUser(createUserRequest)
 
-// 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
-// 		Username:        "existinguser",
-// 		Email:           "test@example.com",
-// 		Password:        "password123",
-// 		ConfirmPassword: "password123",
-// 	})
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusCreated, statusCode)
+	s.Require().Equal("testuser", resp.Username)
+	s.Require().Equal("test@example.com", resp.Email)
+	s.Require().NotEmpty(resp.Id)
 
-// 	s.Require().Error(err)
-// 	s.Require().Equal(http.StatusBadRequest, status)
-// }
+	s.mockUserRepo.AssertExpectations(s.T())
+}
 
-// func (s *createUserTestSuite) TestCreateUserInternalServerError() {
-// 	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(errors.New("database error"))
-
-// 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
-// 		Username:        "testuser",
-// 		Email:           "test@example.com",
-// 		Password:        "password123",
-// 		ConfirmPassword: "password123",
-// 	})
-
-// 	s.Require().Error(err)
-// 	s.Require().Equal(http.StatusInternalServerError, status)
-// }
-
-// func (s *createUserTestSuite) TestCreateUserHashError() {
-// 	s.mockRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil)
-
-// 	longPassword := string(make([]byte, 73))
-
-// 	_, status, err := s.service.CreateUser(request.CreateUserRequest{
-// 		Username:        "testuser",
-// 		Email:           "test@example.com",
-// 		Password:        longPassword,
-// 		ConfirmPassword: longPassword,
-// 	})
-
-// 	s.Require().Error(err)
-// 	s.Require().Equal(http.StatusInternalServerError, status)
-// 	s.mockRepo.AssertNotCalled(s.T(), "Create")
-
-// }
-
-// func TestCreateUser(t *testing.T) {
-// 	suite.Run(t, new(createUserTestSuite))
-// }
+func TestPostTestSuite(t *testing.T) {
+	suite.Run(t, new(postTestSuite))
+}

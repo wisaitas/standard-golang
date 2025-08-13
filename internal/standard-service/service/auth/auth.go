@@ -3,10 +3,8 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	contextPkg "github.com/wisaitas/share-pkg/auth/context"
@@ -14,7 +12,6 @@ import (
 	"github.com/wisaitas/share-pkg/cache/redis"
 	bcryptPkg "github.com/wisaitas/share-pkg/crypto/bcrypt"
 	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
-	transactionmanager "github.com/wisaitas/share-pkg/db/transaction-manager"
 	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
@@ -40,7 +37,6 @@ type authService struct {
 	redis                 redis.Redis
 	bcrypt                bcryptPkg.Bcrypt
 	jwt                   jwt.Jwt
-	transactionManager    transactionmanager.TransactionManager
 }
 
 func NewAuthService(
@@ -49,7 +45,6 @@ func NewAuthService(
 	redis redis.Redis,
 	bcrypt bcryptPkg.Bcrypt,
 	jwt jwt.Jwt,
-	transactionManager transactionmanager.TransactionManager,
 ) AuthService {
 	return &authService{
 		userRepository:        userRepository,
@@ -57,7 +52,6 @@ func NewAuthService(
 		redis:                 redis,
 		bcrypt:                bcrypt,
 		jwt:                   jwt,
-		transactionManager:    transactionManager,
 	}
 }
 
@@ -131,36 +125,35 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 
 	user.Password = string(hashedPassword)
 
-	if err := r.transactionManager.ExecuteInTransaction(func(tx *gorm.DB) error {
-		txUserRepository := r.userRepository.WithTx(tx)
-		txUserHistoryRepository := r.userHistoryRepository.WithTx(tx)
+	tx := r.userRepository.GetDB().Begin()
 
-		if err := txUserRepository.Create(&user); err != nil {
-			return err
-		}
+	txUserRepository := r.userRepository.WithTx(tx)
+	txUserHistoryRepository := r.userHistoryRepository.WithTx(tx)
 
-		userHistory := entity.UserHistory{
-			Action:       constant.Action.Create,
-			OldFirstName: user.FirstName,
-			OldLastName:  user.LastName,
-			OldBirthDate: user.BirthDate,
-			OldPassword:  user.Password,
-			OldEmail:     user.Email,
-			OldVersion:   user.Version,
-		}
-
-		if err := txUserHistoryRepository.Create(&userHistory); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		if strings.Contains(err.Error(), "unique constraint") {
-			return resp, http.StatusBadRequest, utils.Error(errors.New("username already exists"))
-		}
-
+	if err := txUserRepository.Create(&user); err != nil {
+		tx.Rollback()
 		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
+
+	userHistory := entity.UserHistory{
+		Action:       constant.Action.Create,
+		OldFirstName: user.FirstName,
+		OldLastName:  user.LastName,
+		OldBirthDate: user.BirthDate,
+		OldPassword:  user.Password,
+		OldEmail:     user.Email,
+		OldVersion:   user.Version,
+	}
+
+	if err := txUserHistoryRepository.Create(&userHistory); err != nil {
+		tx.Rollback()
+		return resp, http.StatusInternalServerError, utils.Error(err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return resp, http.StatusInternalServerError, utils.Error(err)
+	}
+
 	return resp.EntityToResponse(user), http.StatusCreated, nil
 }
 
