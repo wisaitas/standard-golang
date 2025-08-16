@@ -21,12 +21,11 @@ func newService(repo *repository, sharePkg *sharePkg) *service {
 		userService: userService.NewUserService(
 			userService.NewGet(repo.userRepository, sharePkg.redis),
 			userService.NewPost(repo.userRepository, sharePkg.redis),
-			userService.NewUpdate(repo.userRepository, repo.userHistoryRepository, sharePkg.redis),
+			userService.NewUpdate(repo.userRepository, sharePkg.redis),
 			userService.NewDelete(repo.userRepository, sharePkg.redis),
 		),
 		authService: authService.NewAuthService(
 			repo.userRepository,
-			repo.userHistoryRepository,
 			sharePkg.redis,
 			sharePkg.bcrypt,
 			sharePkg.jwt,

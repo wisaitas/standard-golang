@@ -15,7 +15,6 @@ import (
 	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
-	"github.com/wisaitas/standard-golang/internal/standard-service/constant"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
@@ -32,26 +31,23 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepository        repository.UserRepository
-	userHistoryRepository repository.UserHistoryRepository
-	redis                 redis.Redis
-	bcrypt                bcryptPkg.Bcrypt
-	jwt                   jwt.Jwt
+	userRepository repository.UserRepository
+	redis          redis.Redis
+	bcrypt         bcryptPkg.Bcrypt
+	jwt            jwt.Jwt
 }
 
 func NewAuthService(
 	userRepository repository.UserRepository,
-	userHistoryRepository repository.UserHistoryRepository,
 	redis redis.Redis,
 	bcrypt bcryptPkg.Bcrypt,
 	jwt jwt.Jwt,
 ) AuthService {
 	return &authService{
-		userRepository:        userRepository,
-		userHistoryRepository: userHistoryRepository,
-		redis:                 redis,
-		bcrypt:                bcrypt,
-		jwt:                   jwt,
+		userRepository: userRepository,
+		redis:          redis,
+		bcrypt:         bcrypt,
+		jwt:            jwt,
 	}
 }
 
@@ -125,32 +121,7 @@ func (r *authService) Register(req request.RegisterRequest) (resp response.Regis
 
 	user.Password = string(hashedPassword)
 
-	tx := r.userRepository.GetDB().Begin()
-
-	txUserRepository := r.userRepository.WithTx(tx)
-	txUserHistoryRepository := r.userHistoryRepository.WithTx(tx)
-
-	if err := txUserRepository.Create(&user); err != nil {
-		tx.Rollback()
-		return resp, http.StatusInternalServerError, utils.Error(err)
-	}
-
-	userHistory := entity.UserHistory{
-		Action:       constant.Action.Create,
-		OldFirstName: user.FirstName,
-		OldLastName:  user.LastName,
-		OldBirthDate: user.BirthDate,
-		OldPassword:  user.Password,
-		OldEmail:     user.Email,
-		OldVersion:   user.Version,
-	}
-
-	if err := txUserHistoryRepository.Create(&userHistory); err != nil {
-		tx.Rollback()
-		return resp, http.StatusInternalServerError, utils.Error(err)
-	}
-
-	if err := tx.Commit().Error; err != nil {
+	if err := r.userRepository.Create(&user); err != nil {
 		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 

@@ -4,31 +4,31 @@ databaseChangeLog:
       author: seed-data
       changes:
         - sqlFile:
-            path: changesets/standard-service/up/007-seed-provinces.sql
+            path: changesets/standard-service/002-seed-data/up/seed-provinces.sql
             stripComments: true
       rollback:
         - sqlFile:
-            path: changesets/standard-service/down/007-seed-provinces.sql
+            path: changesets/standard-service/002-seed-data/down/seed-provinces.sql
             stripComments: true
   - changeSet:
       id: 2
       author: seed-data
       changes:
         - sqlFile:
-            path: changesets/standard-service/up/008-seed-districts.sql
+            path: changesets/standard-service/002-seed-data/up/seed-districts.sql
             stripComments: true
       rollback:
         - sqlFile:
-            path: changesets/standard-service/down/008-seed-districts.sql
+            path: changesets/standard-service/002-seed-data/down/seed-districts.sql
             stripComments: true
   - changeSet:
       id: 3
       author: seed-data
       changes:
         - sqlFile:
-            path: changesets/standard-service/up/009-seed-sub-districts.sql
+            path: changesets/standard-service/002-seed-data/up/seed-sub-districts.sql
             stripComments: true
       rollback:
         - sqlFile:
-            path: changesets/standard-service/down/009-seed-sub-districts.sql
+            path: changesets/standard-service/002-seed-data/down/seed-sub-districts.sql
             stripComments: true

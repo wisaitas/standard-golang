@@ -16,37 +16,25 @@ import (
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/service/auth"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 type authTestSuite struct {
 	suite.Suite
-	mockUserRepo        *repository.MockBaseRepository[entity.User]
-	mockUserHistoryRepo *repository.MockBaseRepository[entity.UserHistory]
-	mockRedis           *redisPkg.MockRedis
-	mockBcrypt          *bcryptPkg.MockBcrypt
-	mockJWT             *jwtPkg.MockJwt
-	service             auth.AuthService
-	mockDB              *gorm.DB
+	mockUserRepo *repository.MockBaseRepository[entity.User]
+	mockRedis    *redisPkg.MockRedis
+	mockBcrypt   *bcryptPkg.MockBcrypt
+	mockJWT      *jwtPkg.MockJwt
+	service      auth.AuthService
 }
 
 func (s *authTestSuite) SetupTest() {
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
-	s.Require().NoError(err)
-	s.mockDB = db
-
 	s.mockUserRepo = new(repository.MockBaseRepository[entity.User])
-	s.mockUserHistoryRepo = new(repository.MockBaseRepository[entity.UserHistory])
 	s.mockRedis = redisPkg.NewMockRedis()
 	s.mockBcrypt = bcryptPkg.NewMockBcrypt()
 	s.mockJWT = jwtPkg.NewMockJwt()
 
 	s.service = auth.NewAuthService(
 		s.mockUserRepo,
-		s.mockUserHistoryRepo,
 		s.mockRedis,
 		s.mockBcrypt,
 		s.mockJWT,
@@ -82,19 +70,10 @@ func (s *authTestSuite) TestRegisterSuccess() {
 
 	s.mockBcrypt.On("GenerateFromPassword", "password123", bcrypt.DefaultCost).Return(hashedPassword, nil)
 
-	s.mockUserRepo.On("GetDB").Return(s.mockDB)
-
-	mockTxUserRepo := new(repository.MockBaseRepository[entity.User])
-	mockTxUserHistoryRepo := new(repository.MockBaseRepository[entity.UserHistory])
-
-	s.mockUserRepo.On("WithTx", mock.AnythingOfType("*gorm.DB")).Return(mockTxUserRepo)
-	s.mockUserHistoryRepo.On("WithTx", mock.AnythingOfType("*gorm.DB")).Return(mockTxUserHistoryRepo)
-
-	mockTxUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
+	s.mockUserRepo.On("Create", mock.AnythingOfType("*entity.User")).Return(nil).Run(func(args mock.Arguments) {
 		user := args.Get(0).(*entity.User)
 		user.Id = uuid.New()
 	})
-	mockTxUserHistoryRepo.On("Create", mock.AnythingOfType("*entity.UserHistory")).Return(nil)
 
 	resp, statusCode, err := s.service.Register(registerRequest)
 
@@ -113,9 +92,6 @@ func (s *authTestSuite) TestRegisterSuccess() {
 
 	s.mockBcrypt.AssertExpectations(s.T())
 	s.mockUserRepo.AssertExpectations(s.T())
-	s.mockUserHistoryRepo.AssertExpectations(s.T())
-	mockTxUserRepo.AssertExpectations(s.T())
-	mockTxUserHistoryRepo.AssertExpectations(s.T())
 }
 
 func TestAuthTestSuite(t *testing.T) {

@@ -12,8 +12,6 @@ import (
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
 	"github.com/wisaitas/standard-golang/internal/standard-service/service/user"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 type postTestSuite struct {
@@ -21,16 +19,9 @@ type postTestSuite struct {
 	mockUserRepo *repository.MockBaseRepository[entity.User]
 	mockRedis    *redisPkg.MockRedis
 	service      user.Post
-	mockDB       *gorm.DB
 }
 
 func (s *postTestSuite) SetupTest() {
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
-	s.Require().NoError(err)
-	s.mockDB = db
-
 	s.mockUserRepo = new(repository.MockBaseRepository[entity.User])
 	s.mockRedis = redisPkg.NewMockRedis()
 

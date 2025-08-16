@@ -8,7 +8,6 @@ import (
 
 type repository struct {
 	userRepository        repositoryInternal.UserRepository
-	userHistoryRepository repositoryInternal.UserHistoryRepository
 	provinceRepository    repositoryInternal.ProvinceRepository
 	districtRepository    repositoryInternal.DistrictRepository
 	subDistrictRepository repositoryInternal.SubDistrictRepository
@@ -19,10 +18,6 @@ func newRepository(clientConfig *clientConfig) *repository {
 		userRepository: repositoryInternal.NewUserRepository(
 			clientConfig.DB,
 			repositoryPkg.NewBaseRepository[entity.User](clientConfig.DB),
-		),
-		userHistoryRepository: repositoryInternal.NewUserHistoryRepository(
-			clientConfig.DB,
-			repositoryPkg.NewBaseRepository[entity.UserHistory](clientConfig.DB),
 		),
 		provinceRepository: repositoryInternal.NewProvinceRepository(
 			clientConfig.DB,
