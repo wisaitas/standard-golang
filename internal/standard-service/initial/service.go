@@ -4,7 +4,7 @@ import (
 	authService "github.com/wisaitas/standard-golang/internal/standard-service/service/auth"
 	districtService "github.com/wisaitas/standard-golang/internal/standard-service/service/district"
 	provinceService "github.com/wisaitas/standard-golang/internal/standard-service/service/province"
-	subDistrictService "github.com/wisaitas/standard-golang/internal/standard-service/service/sub-district"
+	subDistrictService "github.com/wisaitas/standard-golang/internal/standard-service/service/subdistrict"
 	userService "github.com/wisaitas/standard-golang/internal/standard-service/service/user"
 )
 

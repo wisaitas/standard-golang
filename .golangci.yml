@@ -1,0 +1,35 @@
+version: "2"
+run:
+  tests: true
+linters:
+  enable:
+    - gocritic
+    - gocyclo
+    - revive
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+    staticcheck:
+      checks:
+        - all
+        - -QF1008
+        - -ST1000
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

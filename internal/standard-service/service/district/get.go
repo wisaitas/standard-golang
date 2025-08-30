@@ -63,12 +63,12 @@ func (r *get) GetDistricts(query query.DistrictQuery) (resp []response.DistrictR
 		resp = append(resp, respDistrict.EntityToResponse(district))
 	}
 
-	respJson, err := json.Marshal(resp)
+	respJSON, err := json.Marshal(resp)
 	if err != nil {
 		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
+	if err := r.redisUtil.Set(context.Background(), cacheKey, respJSON, 10*time.Second); err != nil {
 		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 

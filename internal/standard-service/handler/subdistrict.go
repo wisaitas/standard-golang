@@ -8,7 +8,7 @@ import (
 	"github.com/wisaitas/share-pkg/utils"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/query"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
-	subDistrictService "github.com/wisaitas/standard-golang/internal/standard-service/service/sub-district"
+	subDistrictService "github.com/wisaitas/standard-golang/internal/standard-service/service/subdistrict"
 )
 
 type SubDistrictHandler interface {

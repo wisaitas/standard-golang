@@ -13,7 +13,7 @@ func Recovery() fiber.Handler {
 	return recover.New(recover.Config{
 		EnableStackTrace: true,
 		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
-			c.Status(fiber.StatusInternalServerError).JSON(response.ApiResponse[any]{
+			_ = c.Status(fiber.StatusInternalServerError).JSON(response.ApiResponse[any]{
 				Error: utils.Error(errors.New("internal server error")),
 			})
 		},

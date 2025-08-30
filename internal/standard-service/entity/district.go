@@ -2,11 +2,11 @@ package entity
 
 import (
 	"github.com/google/uuid"
-	"github.com/wisaitas/share-pkg/db/entity"
+	entitySharePackage "github.com/wisaitas/share-pkg/db/entity"
 )
 
 type District struct {
-	entity.Entity
+	entitySharePackage.Entity
 
 	NameTH string `gorm:"column:name_th;"`
 	NameEN string `gorm:"column:name_en;"`

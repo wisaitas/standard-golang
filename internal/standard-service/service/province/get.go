@@ -62,12 +62,12 @@ func (r *get) GetProvinces(query repositoryPkg.PaginationQuery) (resp []response
 		resp = append(resp, respProvince.EntityToResponse(province))
 	}
 
-	respJson, err := json.Marshal(resp)
+	respJSON, err := json.Marshal(resp)
 	if err != nil {
 		return []response.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
+	if err := r.redisUtil.Set(context.Background(), cacheKey, respJSON, 10*time.Second); err != nil {
 		return []response.ProvinceResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 

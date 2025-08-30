@@ -3,7 +3,7 @@ package initial
 import (
 	"github.com/gofiber/fiber/v2"
 	middlewareInternal "github.com/wisaitas/standard-golang/internal/standard-service/middleware"
-	middlewareConfig "github.com/wisaitas/standard-golang/internal/standard-service/middleware/configs"
+	middlewareConfig "github.com/wisaitas/standard-golang/internal/standard-service/middleware/config"
 )
 
 type middleware struct {

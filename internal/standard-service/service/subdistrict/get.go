@@ -1,4 +1,4 @@
-package sub_district
+package subdistrict
 
 import (
 	"context"
@@ -63,12 +63,12 @@ func (r *get) GetSubDistricts(query query.SubDistrictQuery) (resp []response.Sub
 		resp = append(resp, respSubDistrict.EntityToResponse(subDistrict))
 	}
 
-	respJson, err := json.Marshal(resp)
+	respJSON, err := json.Marshal(resp)
 	if err != nil {
 		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
+	if err := r.redisUtil.Set(context.Background(), cacheKey, respJSON, 10*time.Second); err != nil {
 		return nil, http.StatusInternalServerError, utils.Error(err)
 	}
 

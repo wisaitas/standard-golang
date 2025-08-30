@@ -62,12 +62,12 @@ func (r *get) GetUsers(query repositoryPkg.PaginationQuery) (resp []response.Get
 		resp = append(resp, respGetUser.EntityToResponse(user))
 	}
 
-	respJson, err := json.Marshal(resp)
+	respJSON, err := json.Marshal(resp)
 	if err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	if err := r.redisUtil.Set(context.Background(), cacheKey, respJson, 10*time.Second); err != nil {
+	if err := r.redisUtil.Set(context.Background(), cacheKey, respJSON, 10*time.Second); err != nil {
 		return []response.GetUsersResponse{}, http.StatusInternalServerError, utils.Error(err)
 	}
 

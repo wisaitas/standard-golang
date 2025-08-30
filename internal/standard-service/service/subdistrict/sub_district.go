@@ -1,4 +1,4 @@
-package sub_district
+package subdistrict
 
 type SubDistrictService interface {
 	Get

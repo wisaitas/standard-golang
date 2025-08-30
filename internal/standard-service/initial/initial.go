@@ -50,10 +50,10 @@ func run(app *fiber.App, clientConfig *clientConfig) {
 
 	<-gracefulShutdown
 
-	close(app, clientConfig)
+	cleanup(app, clientConfig)
 }
 
-func close(app *fiber.App, clientConfig *clientConfig) {
+func cleanup(app *fiber.App, clientConfig *clientConfig) {
 	sqlDB, err := clientConfig.DB.DB()
 	if err != nil {
 		log.Fatalf("error getting database: %v\n", utils.Error(err))
