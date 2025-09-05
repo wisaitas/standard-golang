@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/wisaitas/standard-golang/internal/standard-service/env"
+	standardservice "github.com/wisaitas/standard-golang/internal/standard-service"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,17 +19,17 @@ type clientConfig struct {
 
 func newClientConfig() *clientConfig {
 	db := connectPostgresDatabase(
-		env.Environment.Database.Host,
-		env.Environment.Database.Port,
-		env.Environment.Database.User,
-		env.Environment.Database.Password,
-		env.Environment.Database.Name,
+		standardservice.ENV.Database.Host,
+		standardservice.ENV.Database.Port,
+		standardservice.ENV.Database.User,
+		standardservice.ENV.Database.Password,
+		standardservice.ENV.Database.Name,
 	)
 
 	redis := ConnectRedis(
-		env.Environment.Redis.Host,
-		env.Environment.Redis.Port,
-		env.Environment.Redis.Password,
+		standardservice.ENV.Redis.Host,
+		standardservice.ENV.Redis.Port,
+		standardservice.ENV.Redis.Password,
 	)
 
 	return &clientConfig{
@@ -60,6 +60,8 @@ func connectPostgresDatabase(
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
+
+	log.Println("database connected successfully")
 
 	return db
 }

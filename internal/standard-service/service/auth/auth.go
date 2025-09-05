@@ -13,10 +13,10 @@ import (
 	bcryptPkg "github.com/wisaitas/share-pkg/crypto/bcrypt"
 	repositoryPkg "github.com/wisaitas/share-pkg/db/repository"
 	"github.com/wisaitas/share-pkg/utils"
+	standardservice "github.com/wisaitas/standard-golang/internal/standard-service"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/request"
 	"github.com/wisaitas/standard-golang/internal/standard-service/api/response"
 	"github.com/wisaitas/standard-golang/internal/standard-service/entity"
-	"github.com/wisaitas/standard-golang/internal/standard-service/env"
 	"github.com/wisaitas/standard-golang/internal/standard-service/repository"
 	"golang.org/x/crypto/bcrypt"
 
@@ -74,12 +74,12 @@ func (r *authService) Login(req request.LoginRequest) (resp response.LoginRespon
 		"user_id": user.Id,
 	}
 
-	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
+	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), standardservice.ENV.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
+	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), standardservice.ENV.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
@@ -154,12 +154,12 @@ func (r *authService) RefreshToken(userContext contextPkg.UserContext) (resp res
 		"user_id": user.Id,
 	}
 
-	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), env.Environment.Server.JwtSecret)
+	accessToken, err := r.jwt.GenerateToken(tokenData, accessTokenExp.Unix(), standardservice.ENV.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, utils.Error(err)
 	}
 
-	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), env.Environment.Server.JwtSecret)
+	refreshToken, err := r.jwt.GenerateToken(tokenData, refreshTokenExp.Unix(), standardservice.ENV.Server.JwtSecret)
 	if err != nil {
 		return resp, http.StatusInternalServerError, err
 	}

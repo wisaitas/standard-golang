@@ -1,13 +1,12 @@
-package env
+package standardservice
 
-var Environment struct {
+var ENV struct {
 	Server   `mapstructure:"server"`
 	Database `mapstructure:"database"`
 	Redis    `mapstructure:"redis"`
 }
 
 type Server struct {
-	Env         string `mapstructure:"env" defaultValue:"dev"`
 	Port        int    `mapstructure:"port" defaultValue:"8000"`
 	MaxFileSize int64  `mapstructure:"max_file_size" defaultValue:"5"`
 	JwtSecret   string `mapstructure:"jwt_secret" defaultValue:"secret"`

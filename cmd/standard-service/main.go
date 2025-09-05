@@ -5,5 +5,9 @@ import (
 )
 
 func main() {
-	initial.InitializeApp()
+	app := initial.InitializeApp()
+
+	app.Run()
+
+	app.Cleanup()
 }
